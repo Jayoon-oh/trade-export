@@ -20,4 +20,6 @@ public class Stock {
     private Items items;
 
     private Integer quantity;
+
+    private Integer reservedQuantity;
 }

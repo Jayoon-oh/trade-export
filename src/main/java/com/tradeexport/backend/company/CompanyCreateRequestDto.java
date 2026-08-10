@@ -1,29 +1,34 @@
 package com.tradeexport.backend.company;
 
-import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
-@Entity
 @Getter
 @Setter
-@NoArgsConstructor
-public class Company {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+public class CompanyCreateRequestDto {
+    @NotBlank
     private String companyName;
+
+    @NotBlank
     private String address;
+
+    @NotBlank
     private String country;
-    private String registrationNumber;
+
+    @NotBlank
     private String nameOfOwner;
+
+    private String registrationNumber;
     private LocalDateTime partnerDate;
     private String category;
     private String deliveryMethod;
+
+    @NotBlank
     private String role;
+
     private String logoPath;
     private String signaturePath;
 }
