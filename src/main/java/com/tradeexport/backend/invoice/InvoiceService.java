@@ -22,7 +22,7 @@ public class InvoiceService {
     final private OrdersItemsRepository ordersItemsRepository;
     final private InvoiceItemsRepository invoiceItemsRepository;
 
-    public void createInvoice(Long ordersId, InvoiceCreateRequestDto dto) {
+    private Invoice createInvoice(Long ordersId, InvoiceCreateRequestDto dto) {
         Orders orders = ordersRepository.findById(ordersId)
                 .orElseThrow(() -> new IllegalArgumentException("오더 없음"));
 
@@ -54,5 +54,20 @@ public class InvoiceService {
             invoiceItems.setAmount(oi.getAmount());
             invoiceItemsRepository.save(invoiceItems);
         }
+        return invoice;
     }
+
+    public Invoice issueInvoice(Long ordersId, InvoiceCreateRequestDto dto) {
+        List<Invoice> existingInvoice = invoiceRepository.findByOrdersId(ordersId);
+
+        boolean hasActiveInvoice = existingInvoice.stream()
+                .anyMatch(invoice -> !invoice.getStatus().equals("CANCELLED"));
+
+        if (hasActiveInvoice) {
+            throw new IllegalStateException("이미 유효한 인보이스가 존재합니다");
+        }
+
+        return createInvoice(ordersId, dto);
+    }
+
 }

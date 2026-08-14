@@ -6,6 +6,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -13,7 +15,7 @@ public class ItemsService {
     private final ItemsRepository itemsRepository;
     private final StockRepository stockRepository;
 
-    public void registerItems(ItemsCreateRequestDto dto) {
+    public Items registerItems(ItemsCreateRequestDto dto) {
         Items items = new Items();
         items.setProductName(dto.getProductName());
         items.setPrice(dto.getPrice());
@@ -30,5 +32,26 @@ public class ItemsService {
 
         stockRepository.save(stock);
 
+        return items;
+    }
+
+    public List<Items> getItems(String productName) {
+        if (productName == null) {
+            return itemsRepository.findAll();
+        }
+        return  itemsRepository.findByProductNameContaining(productName);
+    }
+
+    // update items
+    public Items updateItems(Long id, ItemsCreateRequestDto dto) {
+        Items items = itemsRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("아이템 없음"));
+
+        items.setProductName(dto.getProductName());
+        items.setPrice(dto.getPrice());
+        items.setSetQty(dto.getSetQty());
+        items.setStandardWeight(dto.getStandardWeight());
+
+        return itemsRepository.save(items);
     }
 }

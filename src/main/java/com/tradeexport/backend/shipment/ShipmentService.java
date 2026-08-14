@@ -18,7 +18,7 @@ public class ShipmentService {
     final private OrdersRepository ordersRepository;
     final private CompanyRepository companyRepository;
 
-    public void registerShipment(ShipmentCreateRequestDto dto) {
+    public Shipment registerShipment(ShipmentCreateRequestDto dto) {
         Orders orders = ordersRepository.findById(dto.getOrdersId())
                 .orElseThrow(()-> new IllegalArgumentException("오더 없음"));
 
@@ -35,5 +35,7 @@ public class ShipmentService {
         shipment.setUpdatedAt(LocalDateTime.now());
 
         shipmentRepository.save(shipment);
+
+        return shipment;
     }
 }

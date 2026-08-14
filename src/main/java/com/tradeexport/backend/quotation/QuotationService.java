@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Transactional
 @Service
@@ -20,7 +21,7 @@ public class QuotationService {
     private final CompanyRepository companyRepository;
     private final ItemsRepository itemsRepository;
 
-    public void registerQuotation(QuotationCreateRequestDto quotationDto) {
+    public Quotation registerQuotation(QuotationCreateRequestDto quotationDto) {
         Company company = companyRepository.findById(quotationDto.getCompanyId())
                 .orElseThrow(()-> new IllegalArgumentException("거래처 없음"));
 
@@ -46,5 +47,47 @@ public class QuotationService {
 
         quotationItemsRepository.save(quotationItems);
         }
+        return quotation;
+    }
+
+    public List<Quotation> getQuotations(Long buyerId) {
+        if (buyerId != null) {
+            return quotationRepository.findByCompanyId(buyerId);
+        }
+        return quotationRepository.findAll();
+    }
+
+    public QuotationDetailResponseDto getQuotationDetail(Long id) {
+        Quotation quotation = quotationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("견적 없음"));
+
+        List<QuotationItems> items = quotationItemsRepository.findByQuotationId(id);
+
+        QuotationDetailResponseDto dto = new QuotationDetailResponseDto();
+        dto.setQuotation(quotation);
+        dto.setItems(items);
+        return dto;
+    }
+
+    public Quotation updateQuotation(Long id, QuotationCreateRequestDto dto) {
+        Quotation quotation = quotationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("견적 없음"));
+
+        quotation.setCurrency(dto.getCurrency());
+        quotation.setIncoterms(dto.getIncoterms());
+        quotation.setPaymentTerm(dto.getPaymentTerm());
+        quotation.setComment(dto.getComment());
+
+        return quotationRepository.save(quotation);
+    }
+
+    public void deleteQuotation(Long id) {
+        Quotation quotation = quotationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("견적 없음"));
+
+        List<QuotationItems> items = quotationItemsRepository.findByQuotationId(id);
+        quotationItemsRepository.deleteAll(items);
+
+        quotationRepository.delete(quotation);
     }
 }

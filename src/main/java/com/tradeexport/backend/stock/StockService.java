@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Transactional
 @Service
@@ -42,5 +44,9 @@ public class StockService {
         stock.setQuantity(stock.getQuantity() - quantity);
 
         stockRepository.save(stock);
+    }
+
+    public List<Stock> searchByProductName(String productName) {
+        return stockRepository.findByProductNameContaining(productName);
     }
 }

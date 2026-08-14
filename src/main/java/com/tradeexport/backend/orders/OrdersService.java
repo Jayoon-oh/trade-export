@@ -83,19 +83,6 @@ public class OrdersService {
         ordersRepository.save(orders);
     }
 
-    public void issueInvoice(Long ordersId, InvoiceCreateRequestDto dto) {
-        List<Invoice> existingInvoice = invoiceRepository.findByOrdersId(ordersId);
-
-        boolean hasActiveInvoice = existingInvoice.stream()
-                .anyMatch(invoice -> !invoice.getStatus().equals("CANCELLED"));
-
-        if (hasActiveInvoice) {
-            throw new IllegalStateException("이미 유효한 인보이스가 존재합니다");
-        }
-
-        invoiceService.createInvoice(ordersId, dto);
-    }
-
     public void cancelOrders(Long ordersId) {
         Orders orders = ordersRepository.findById(ordersId)
                 .orElseThrow(()->new IllegalArgumentException("오더 없음"));

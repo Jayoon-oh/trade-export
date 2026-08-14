@@ -24,7 +24,7 @@ public class PackingListService {
     final private ItemsRepository itemsRepository;
     final private StockService stockService;
 
-    public void createPackingList(PackingListCreateRequestDto dto) {
+    public PackingList createPackingList(PackingListCreateRequestDto dto) {
         Shipment shipment = shipmentRepository.findById(dto.getShipmentId())
                 .orElseThrow(() ->new IllegalArgumentException("등록된 선적 없음"));
 
@@ -64,6 +64,6 @@ public class PackingListService {
 
         packingList.setTotalAmount(totalAmount);
         packingList.setTotalWeight(totalWeight);
-        packingListRepository.save(packingList);
+        return packingListRepository.save(packingList);
     }
 }

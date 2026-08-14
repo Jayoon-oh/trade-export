@@ -15,7 +15,7 @@ public class PaymentService {
     final private PaymentRepository paymentRepository;
     final private InvoiceRepository invoiceRepository;
 
-    public void createPayment(PaymentCreateRequestDto dto) {
+    public Payment createPayment(PaymentCreateRequestDto dto) {
         Invoice invoice = invoiceRepository.findById(dto.getInvoiceId())
                 .orElseThrow(()-> new IllegalArgumentException("거래처 없음"));
 
@@ -28,6 +28,6 @@ public class PaymentService {
         payment.setCreatedAt(LocalDateTime.now());
         payment.setUpdatedAt(LocalDateTime.now());
 
-        paymentRepository.save(payment);
+        return paymentRepository.save(payment);
     }
 }
