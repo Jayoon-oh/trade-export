@@ -46,6 +46,17 @@ public class StockService {
         stockRepository.save(stock);
     }
 
+    // 4. update packing list -> delete items -> increase actual stock
+    public void increaseStock(Long itemsId, Integer quantity) {
+        Stock stock = stockRepository.findByItemsId(itemsId)
+                .orElseThrow(() -> new IllegalArgumentException("재고 정보 없음"));
+
+        stock.setReservedQuantity(stock.getReservedQuantity() + quantity);
+        stock.setQuantity(stock.getQuantity() + quantity);
+
+        stockRepository.save(stock);
+    }
+
     public List<Stock> searchByProductName(String productName) {
         return stockRepository.findByProductNameContaining(productName);
     }

@@ -30,7 +30,8 @@ public class Shipment {
 
     private BigDecimal fee;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private ShipmentStatus status;
 
     private LocalDateTime shipmentDate;
 

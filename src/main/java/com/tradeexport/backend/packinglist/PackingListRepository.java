@@ -7,7 +7,8 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface PackingListRepository extends JpaRepository<PackingList, Long> {
-    @Query("SELECT p FROM PackingList p WHERE p.shipment.orders.buyer.id = :buyerId")
-    List<PackingList> findByBuyerId(@Param("buyerId") Long buyerId);
-
+    // return list of packing-list
+    @Query("SELECT p FROM PackingList p WHERE " +
+            "(:buyerId IS NULL OR p.shipment.orders.buyer.id = :buyerId)")
+    List<PackingList> findByFilters(@Param("buyerId") Long buyerId);
 }

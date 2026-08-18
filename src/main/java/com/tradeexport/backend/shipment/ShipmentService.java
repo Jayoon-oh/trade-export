@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Transactional
 @Service
@@ -29,7 +30,7 @@ public class ShipmentService {
         shipment.setOrders(orders);
         shipment.setForwarder(forwarder);
         shipment.setFee(dto.getFee());
-        shipment.setStatus("PLANNED");
+        shipment.setStatus(ShipmentStatus.PLANNED);
         shipment.setShipmentDate(dto.getShipmentDate());
         shipment.setCreatedAt(LocalDateTime.now());
         shipment.setUpdatedAt(LocalDateTime.now());
@@ -38,4 +39,29 @@ public class ShipmentService {
 
         return shipment;
     }
+
+    public List<ShipmentResponseDto> getShipments(Long buyerId, Long forwarderId, ShipmentStatus status) {
+        return shipmentRepository.findByFilters(buyerId, forwarderId, status)
+                .stream()
+                .map(ShipmentResponseDto::from)
+                .toList();
+    }
+
+    public ShipmentResponseDto getShipment(Long id) {
+        Shipment shipment = shipmentRepository.findById(id)
+                .orElseThrow(()-> new IllegalArgumentException("선적 없음"));
+        return ShipmentResponseDto.from(shipment);
+    }
+
+    public ShipmentResponseDto updateShipment(Long id, ShipmentStatus status) {
+        Shipment shipment = shipmentRepository.findById(id)
+                .orElseThrow(()-> new IllegalArgumentException("선적 없음"));
+
+        shipment.setStatus(status);
+        Shipment saved = shipmentRepository.save(shipment);
+
+        return ShipmentResponseDto.from(saved);
+    }
+
+
 }
