@@ -62,6 +62,4 @@ public class ShipmentService {
 
         return ShipmentResponseDto.from(saved);
     }
-
-
 }
