@@ -17,10 +17,8 @@ public class PackingListCreateRequestDto {
     @NotNull
     private LocalDateTime packingDate;
 
-    @NotNull
     private BigDecimal totalAmount;
 
-    @NotNull
     private BigDecimal totalWeight;
 
     private String comment;

@@ -57,7 +57,15 @@ public class StockService {
         stockRepository.save(stock);
     }
 
-    public List<Stock> searchByProductName(String productName) {
-        return stockRepository.findByProductNameContaining(productName);
+    public List<StockResponseDto> searchByProductName(String productName) {
+        List<Stock> stocks;
+        if (productName == null) {
+            stocks = stockRepository.findAll();
+        } else {
+            stocks = stockRepository.findByProductNameContaining(productName);
+        }
+        return stocks.stream()
+                .map(StockResponseDto::from)
+                .toList();
     }
 }

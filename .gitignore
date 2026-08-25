@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+src/main/resources/application-secret.properties
+
+# 환경 변수 설정 파일 (React용)
+.env
+.env.local

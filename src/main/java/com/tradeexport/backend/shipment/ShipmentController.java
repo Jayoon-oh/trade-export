@@ -34,7 +34,7 @@ public class ShipmentController {
         return ResponseEntity.ok(shipmentService.getShipment(id));
     }
 
-    @PatchMapping("/{id}/status}")
+    @PatchMapping("/{id}/status")
     public ResponseEntity<ShipmentResponseDto> updateShipment(@PathVariable Long id, @RequestParam ShipmentStatus status) {
         return  ResponseEntity.ok(shipmentService.updateShipment(id,status));
     }

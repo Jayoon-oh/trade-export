@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Packing List</title>
+    <style>
+        body { font-family: 'NanumGothic', sans-serif; font-size: 12px; }
+        .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #333; padding: 6px 8px; text-align: left; }
+        th { background-color: #f0f0f0; }
+        .total { text-align: right; font-weight: bold; margin-top: 10px; }
+        .info-table td { border: none; padding: 2px 8px 2px 0; }
+    </style>
+</head>
+<body>
+<h1>PACKING LIST</h1>
+
+<div class="header">
+    <div>
+        <p><strong>Ship From:</strong> <span th:text="${sellerName}">회사명</span></p>
+        <p th:text="${sellerAddress}">주소</p>
+    </div>
+    <div>
+        <p><strong>Ship To:</strong> <span th:text="${buyerName}">회사명</span></p>
+        <p th:text="${buyerAddress}">주소</p>
+    </div>
+</div>
+
+<table class="info-table">
+    <tr>
+        <td><strong>P/L No:</strong></td>
+        <td th:text="${packingListNumber}">PL-000001</td>
+        <td><strong>Date:</strong></td>
+        <td th:text="${packingListDate}">2026-08-19</td>
+    </tr>
+    <tr>
+        <td><strong>Total Weight:</strong></td>
+        <td th:text="${totalWeight}">0</td>
+    </tr>
+</table>
+
+<table>
+    <thead>
+    <tr>
+        <th>Item</th>
+        <th>Quantity</th>
+        <th>Actual Weight</th>
+        <th>Amount</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="item : ${items}">
+        <td th:text="${item.itemName}">품목명</td>
+        <td th:text="${item.quantity}">1</td>
+        <td th:text="${item.actualWeight}">0</td>
+        <td th:text="${item.amount}">0</td>
+    </tr>
+    </tbody>
+</table>
+
+<p class="total">
+    Total Amount: <span th:text="${totalAmount}">0</span>
+</p>
+</body>
+</html>

@@ -18,7 +18,6 @@ public class OrdersCreateRequestDto {
 
     private Long quotationId;
 
-    @NotNull
     private BigDecimal amount;
 
     @NotNull

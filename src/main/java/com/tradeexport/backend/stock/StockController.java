@@ -20,8 +20,8 @@ public class StockController {
     private final StockService stockService;
 
     @GetMapping
-    public ResponseEntity<List<Stock>> checkStock(@RequestParam String productName) {
-        List<Stock> saved = stockService.searchByProductName(productName);
+    public ResponseEntity<List<StockResponseDto>> checkStock(@RequestParam(required = false) String productName) {
+        List<StockResponseDto> saved = stockService.searchByProductName(productName);
         return ResponseEntity.ok(saved);
     }
 }

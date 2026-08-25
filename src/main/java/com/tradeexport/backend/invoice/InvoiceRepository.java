@@ -9,4 +9,5 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
     // count sequence number for createInvoice
     long countByInvoiceNumberStartingWith(String prefix);
+
 }

@@ -2,8 +2,7 @@ package com.tradeexport.backend.packinglist;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,5 +35,18 @@ public class PackingListController {
     public ResponseEntity<PackingListResponse> updatePackingList(@PathVariable Long id, @Valid @RequestBody PackingListCreateRequestDto dto) {
         PackingListResponse packingListResponse = packingListService.updatePackingList(id, dto);
         return ResponseEntity.ok(packingListResponse);
+    }
+
+    @PostMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> generatePackingListPdf(@PathVariable Long id) {
+        byte[] pdfBytes = packingListService.generatePackingListPdf(id);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(ContentDisposition.attachment().filename("packing-list.pdf").build());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(pdfBytes);
     }
 }

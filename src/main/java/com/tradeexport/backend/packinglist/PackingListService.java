@@ -1,7 +1,10 @@
 package com.tradeexport.backend.packinglist;
 
+import com.tradeexport.backend.company.Company;
+import com.tradeexport.backend.company.CompanyRepository;
 import com.tradeexport.backend.items.Items;
 import com.tradeexport.backend.items.ItemsRepository;
+import com.tradeexport.backend.pdf.PdfService;
 import com.tradeexport.backend.shipment.Shipment;
 import com.tradeexport.backend.shipment.ShipmentRepository;
 import com.tradeexport.backend.stock.StockService;
@@ -11,7 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -22,6 +27,8 @@ public class PackingListService {
     final private ShipmentRepository shipmentRepository;
     final private ItemsRepository itemsRepository;
     final private StockService stockService;
+    final private CompanyRepository companyRepository;
+    final private PdfService pdfService;
 
     public PackingList createPackingList(PackingListCreateRequestDto dto) {
         Shipment shipment = shipmentRepository.findById(dto.getShipmentId())
@@ -130,5 +137,69 @@ public class PackingListService {
             PackingList saved = packingListRepository.save(packingList);
 
             return PackingListResponse.from(saved);
+    }
+
+    public PackingListPdfDataDto getPackingListPdfData(Long packingListId) {
+        PackingList packingList = packingListRepository.findById(packingListId)
+                .orElseThrow(()-> new IllegalArgumentException("패킹리스트 없음"));
+
+        Company seller = companyRepository.findByRole("SELLER").get(0);
+
+        Company buyer = packingList.getShipment().getOrders().getBuyer();
+
+        List<PackingListItems> packingListItems = packingListItemsRepository.findByPackingListId(packingListId);
+
+        List<PackingListItemLineDto> itemLines = packingListItems.stream()
+                .map(item -> new PackingListItemLineDto(
+                        item.getItems().getProductName(),
+                        item.getActualWeight(),
+                        item.getAmount(),
+                        item.getQuantity()
+                ))
+                .toList();
+
+        String packingListNumber = "PL-" + String.format("%06d", packingList.getId());
+
+        return new PackingListPdfDataDto(
+                packingListNumber,
+                packingList.getPackingDate(),
+                packingList.getTotalAmount(),
+                packingList.getTotalWeight(),
+
+                seller.getCompanyName(),
+                seller.getAddress(),
+                seller.getRegistrationNumber(),
+                seller.getNameOfOwner(),
+                seller.getLogoPath(),
+                seller.getSignaturePath(),
+
+                buyer.getCompanyName(),
+                buyer.getAddress(),
+                buyer.getRegistrationNumber(),
+
+                itemLines
+        );
+    }
+
+    public byte[] generatePackingListPdf(Long packingListId) {
+        PackingListPdfDataDto dto = getPackingListPdfData(packingListId);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("sellerName", dto.sellerName());
+        data.put("sellerAddress", dto.sellerAddress());
+        data.put("sellerRegistrationNumber", dto.sellerRegistrationNumber());
+        data.put("sellerOwnerName", dto.sellerOwnerName());
+        data.put("sellerLogoPath", dto.sellerLogoPath());
+        data.put("sellerSignaturePath", dto.sellerSignaturePath());
+        data.put("buyerName", dto.buyerName());
+        data.put("buyerAddress", dto.buyerAddress());
+        data.put("buyerRegistrationNumber", dto.buyerRegistrationNumber());
+        data.put("packingListNumber", dto.packingListNumber());
+        data.put("packingListDate", dto.packingListDate());
+        data.put("totalAmount", dto.totalAmount());
+        data.put("totalWeight", dto.totalWeight());
+        data.put("items", dto.items());
+
+        return pdfService.generatePdf("pdf/packing-list", data);
     }
 }

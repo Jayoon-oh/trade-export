@@ -26,7 +26,10 @@ public class Invoice {
     private String invoiceNumber;
 
     private LocalDateTime invoiceDate;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    private InvoiceStatus status;
+
     private BigDecimal totalAmount;
     private BigDecimal exchangeRate;
     private String currency;
