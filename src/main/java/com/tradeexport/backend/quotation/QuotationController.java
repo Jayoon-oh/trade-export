@@ -22,8 +22,8 @@ public class QuotationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Quotation>> getQuotations(@RequestParam(required = false) Long buyerId) {
-        List<Quotation> quotations = quotationService.getQuotations(buyerId);
+    public ResponseEntity<List<QuotationResponseDto>> getQuotations(@RequestParam(required = false) Long buyerId) {
+        List<QuotationResponseDto> quotations = quotationService.getQuotations(buyerId);
         return ResponseEntity.ok(quotations);
     }
 
@@ -33,8 +33,8 @@ public class QuotationController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Quotation> updateQuotation(@PathVariable Long id, @Valid @RequestBody QuotationCreateRequestDto dto) {
-        Quotation updated = quotationService.updateQuotation(id, dto);
+    public ResponseEntity<QuotationResponseDto> updateQuotation(@PathVariable Long id, @Valid @RequestBody QuotationCreateRequestDto dto) {
+        QuotationResponseDto updated = quotationService.updateQuotation(id, dto);
         return ResponseEntity.ok(updated);
     }
 

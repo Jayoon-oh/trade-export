@@ -18,11 +18,13 @@ public record OrdersResponseDto(
         String paymentTerm
 ) {
     public static OrdersResponseDto from(Orders orders) {
+        Long quotationId = orders.getQuotation() != null ? orders.getQuotation().getId() : null;
+
         return new OrdersResponseDto(
                 orders.getId(),
                 orders.getBuyer().getId(),
                 orders.getBuyer().getCompanyName(),
-                orders.getQuotation().getId(),
+                quotationId,
                 orders.getAmount(),
                 orders.getOrdersDate(),
                 orders.getComment(),

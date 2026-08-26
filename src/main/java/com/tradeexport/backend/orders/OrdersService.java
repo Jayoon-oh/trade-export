@@ -109,10 +109,13 @@ public class OrdersService {
                 .toList();
     }
 
-    public OrdersResponseDto getOrder(Long id) {
+    public OrdersDetailResponseDto getOrderDetail(Long id) {
         Orders orders = ordersRepository.findById(id)
-                .orElseThrow(()-> new IllegalArgumentException("오더 없음"));
-        return OrdersResponseDto.from(orders);
+                .orElseThrow(() -> new IllegalArgumentException("오더 없음"));
+
+        List<OrdersItems> items = ordersItemsRepository.findByOrdersId(id);
+
+        return OrdersDetailResponseDto.from(orders, items);
     }
 
     public OrdersResponseDto updateOrder(Long id, OrdersCreateRequestDto dto) {

@@ -41,8 +41,8 @@ public class OrdersController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrdersResponseDto> getOrder(@PathVariable Long id) {
-        return ResponseEntity.ok(ordersService.getOrder(id));
+    public ResponseEntity<OrdersDetailResponseDto> getOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(ordersService.getOrderDetail(id));
     }
 
     @DeleteMapping("/{id}")

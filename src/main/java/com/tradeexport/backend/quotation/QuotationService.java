@@ -50,11 +50,16 @@ public class QuotationService {
         return quotation;
     }
 
-    public List<Quotation> getQuotations(Long buyerId) {
+    public List<QuotationResponseDto> getQuotations(Long buyerId) {
+        List<Quotation> quotations;
         if (buyerId != null) {
-            return quotationRepository.findByCompanyId(buyerId);
+            quotations = quotationRepository.findByCompanyId(buyerId);
+        } else {
+            quotations = quotationRepository.findAll();
         }
-        return quotationRepository.findAll();
+        return quotations.stream()
+                .map(QuotationResponseDto::from)
+                .toList();
     }
 
     public QuotationDetailResponseDto getQuotationDetail(Long id) {
@@ -63,13 +68,10 @@ public class QuotationService {
 
         List<QuotationItems> items = quotationItemsRepository.findByQuotationId(id);
 
-        QuotationDetailResponseDto dto = new QuotationDetailResponseDto();
-        dto.setQuotation(quotation);
-        dto.setItems(items);
-        return dto;
+        return QuotationDetailResponseDto.from(quotation, items);
     }
 
-    public Quotation updateQuotation(Long id, QuotationCreateRequestDto dto) {
+    public QuotationResponseDto updateQuotation(Long id, QuotationCreateRequestDto dto) {
         Quotation quotation = quotationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("견적 없음"));
 
@@ -78,7 +80,8 @@ public class QuotationService {
         quotation.setPaymentTerm(dto.getPaymentTerm());
         quotation.setComment(dto.getComment());
 
-        return quotationRepository.save(quotation);
+        Quotation saved = quotationRepository.save(quotation);
+        return QuotationResponseDto.from(saved);
     }
 
     public void deleteQuotation(Long id) {
