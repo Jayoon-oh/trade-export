@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Invoice</title>
+    <style>
+        body { font-family: 'NanumGothic', sans-serif; font-size: 12px; }
+        .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .logo { width: 120px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #333; padding: 6px 8px; text-align: left; }
+        th { background-color: #f0f0f0; }
+        .total { text-align: right; font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
+<body>
+<h1>COMMERCIAL INVOICE</h1>
+
+<div class="header">
+    <div>
+        <p><strong>Seller:</strong> <span th:text="${sellerName}">회사명</span></p>
+        <p th:text="${sellerAddress}">주소</p>
+    </div>
+    <div>
+        <p><strong>Buyer:</strong> <span th:text="${buyerName}">회사명</span></p>
+        <p th:text="${buyerAddress}">주소</p>
+    </div>
+</div>
+
+<p><strong>Invoice No:</strong> <span th:text="${invoiceNumber}">INV-2026-001</span></p>
+<p><strong>Date:</strong> <span th:text="${invoiceDate}">2026-08-19</span></p>
+
+<table>
+    <thead>
+    <tr>
+        <th>Item</th>
+        <th>Quantity</th>
+        <th>Unit Price</th>
+        <th>Amount</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="item : ${items}">
+        <td th:text="${item.itemName}">품목명</td>
+        <td th:text="${item.quantity}">1</td>
+        <td th:text="${item.unitPrice}">0</td>
+        <td th:text="${item.amount}">0</td>
+    </tr>
+    </tbody>
+</table>
+
+<p class="total">
+    Total: <span th:text="${totalAmount}">0</span> <span th:text="${currency}">USD</span>
+</p>
+</body>
+</html>
