@@ -1,10 +1,13 @@
-import type { Orders, OrdersCreateRequest, OrdersDetailResponse, OrdersItemLine, OrdersItemRequest } from "../../types/orders";
+import type { Orders, OrdersCreateRequest, OrdersItemRequest } from "../../types/orders";
+import { getInvoiceList, issueInvoice, cancelInvoice, handleGenerateInvoice } from "../../api/invoiceApi";
 import { getCompanyList } from "../../api/companyApi";
 import { getItemsList } from "../../api/itemsApi";
 import { getOrdersList, deleteOrders, getOrder, registerOrders, updateOrders } from "../../api/ordersApi";
 import { useState, useEffect } from "react";
 import type { Items } from "../../types/items";
 import type { Company } from "../../types/company";
+import type { InvoiceResponse } from "../../types/invoice";
+import InvoiceHistoryModal from "./components/InvoiceHistoryModal";
 
 function OrdersPage() {
     const [ordersList, setOrdersList] = useState<Orders[]>([]);
@@ -31,6 +34,11 @@ function OrdersPage() {
     const paymentTerms = ['TT'];
     const incotermsList = ['FOB', 'CIF', 'CFR', 'EXW', 'DAP'];
     const currencies = ['USD', 'KRW', 'EUR', 'JPY', 'CNY'];
+
+    // Invoice
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+    const [invoiceHistory, setInvoiceHistory] = useState<InvoiceResponse[]>([]);
+    const [historyOrderId, setHistoryOrderId] = useState<number | null>(null);
 
     useEffect(() => {
         fetchCompanies();
@@ -115,6 +123,34 @@ function OrdersPage() {
         });
     };
 
+    const handleIssueInvoice = async (orderId: number) => {
+        const rateInput = prompt('환율을 입력하세요');
+        if (!rateInput) return;
+
+        const invoiceId = await issueInvoice(orderId, { exchangeRate: Number(rateInput) });
+        await handleGenerateInvoice(invoiceId);
+    }
+
+    const handleViewHistory = async (orderId: number) => {
+        const data = await getInvoiceList(orderId);
+        setInvoiceHistory(data);
+        setHistoryOrderId(orderId);
+        setIsHistoryOpen(true);
+    }
+
+    const handleCloseHistory = () => {
+        setIsHistoryOpen(false);
+        setInvoiceHistory([]);
+    }
+
+    const handleCancelInvoice = async (invoiceId: number) => {
+        await cancelInvoice(invoiceId);
+        if (historyOrderId) {
+            const data = await getInvoiceList(historyOrderId);
+            setInvoiceHistory(data);
+        }
+    }
+
     return (
         <div>
             <h1>오더 조회</h1>
@@ -146,7 +182,12 @@ function OrdersPage() {
                             <td>{orders.ordersDate}</td>
                             <td>
                                 <button onClick={() => handleEdit(orders.id)}>수정</button>
-                                <button onClick={() => handleDelete(orders.id)}>삭제</button>
+                                {!orders.hasInvoice && (
+                                    <button onClick={() => handleDelete(orders.id)}>삭제</button>
+                                )
+                                }
+                                <button onClick={() => handleIssueInvoice(orders.id)}>인보이스 발행</button>
+                                <button onClick={() => handleViewHistory(orders.id)}>발행 이력</button>
                             </td>
                         </tr>
                     ))}
@@ -234,6 +275,13 @@ function OrdersPage() {
                     수정 취소
                 </button>
             )}
+            <InvoiceHistoryModal
+                isOpen={isHistoryOpen}
+                history={invoiceHistory}
+                onClose={handleCloseHistory}
+                onCancel={handleCancelInvoice}
+                onDownload={handleGenerateInvoice}
+            />
         </div>
     );
 }

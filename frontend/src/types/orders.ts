@@ -11,6 +11,7 @@ export interface Orders {
     currency: string;
     incoterms: string;
     paymentTerm: string;
+    hasInvoice: boolean;
 }
 
 export interface OrdersItemLine {
