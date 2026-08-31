@@ -4,6 +4,7 @@ import QuotationPage from './pages/QuotationPage/QuotationPage'
 import OrdersPage from './pages/OrderPage/OrdersPage'
 import ShipmentPage from './pages/ShipmentPage/ShipmentPage'
 import PackingListPage from './pages/PackingListPage/PackingListPage'
+import PaymentPage from './pages/PaymentPage/PaymentPage'
 function App() {
 
   return (
@@ -13,7 +14,8 @@ function App() {
       {/* < CompanyPage /> */}
       {/* <OrdersPage /> */}
       {/* <ShipmentPage /> */}
-      <PackingListPage />
+      {/* <PackingListPage /> */}
+      <PaymentPage />
     </div>
   )
 }

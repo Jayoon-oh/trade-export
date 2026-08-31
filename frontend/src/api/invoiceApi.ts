@@ -1,5 +1,5 @@
 import api from './axiosInstance';
-import type { InvoiceCreateRequest, InvoiceResponse } from "../types/invoice";
+import type { InvoiceCreateRequest, InvoiceResponse, InvoiceStatus } from "../types/invoice";
 
 
 export const generateInvoicePdf = async (invoiceId: number): Promise<Blob> => {
@@ -34,3 +34,10 @@ export const cancelInvoice = async (invoiceId: number): Promise<InvoiceResponse>
     const response = await api.patch<InvoiceResponse>(`/orders/${invoiceId}/cancel`);
     return response.data;
 };
+
+export const getInvoicesByStatus = async (status: InvoiceStatus): Promise<InvoiceResponse[]> => {
+    const response = await api.get<InvoiceResponse[]>(`/invoices`, {
+        params: { status },
+    });
+    return response.data;
+}
