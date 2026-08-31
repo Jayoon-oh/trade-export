@@ -3,10 +3,8 @@ import { getOrdersList } from "../../api/ordersApi";
 import { getCompanyList } from "../../api/companyApi";
 import type { Company } from "../../types/company";
 import type { Orders } from "../../types/orders";
-import type { Items } from "../../types/items";
 import type { Shipment, ShipmentCreateRequest, ShipmentStatus } from "../../types/shipment";
 import { useState, useEffect } from "react";
-import { getItemsList } from "../../api/itemsApi";
 
 function ShipmentPage() {
     const [ordersList, setOrdersList] = useState<Orders[]>([]);

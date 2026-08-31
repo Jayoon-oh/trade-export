@@ -3,9 +3,12 @@ import type { PaymentStatus, PaymentCreateRequest, PaymentResponse, InvoiceBalan
 import { useEffect, useState } from "react";
 import { getInvoicesByStatus } from "../../api/invoiceApi";
 import type { InvoiceResponse } from "../../types/invoice";
+import type { Company } from "../../types/company";
+import { getCompanyList } from "../../api/companyApi";
 
 function PaymentPage() {
     const [paymentList, setPaymentList] = useState<PaymentResponse[]>([]);
+    const [companies, setCompanies] = useState<Company[]>([]);
     const [buyerId, setBuyerId] = useState(0);
     const [status, setStatus] = useState<PaymentStatus>();
     const [form, setForm] = useState<PaymentCreateRequest>({
@@ -18,6 +21,7 @@ function PaymentPage() {
 
     useEffect(() => {
         fetchInvoiceListByStatus();
+        fetchCompanies();
     }, []);
 
     useEffect(() => {
@@ -32,6 +36,11 @@ function PaymentPage() {
     const fetchInvoiceListByStatus = async () => {
         const data = await getInvoicesByStatus('ISSUED');
         setInvoiceList(data);
+    }
+
+    const fetchCompanies = async () => {
+        const data = await getCompanyList();
+        setCompanies(data);
     }
 
     const handleSubmit = async () => {
@@ -75,6 +84,15 @@ function PaymentPage() {
 
             {/* filter */}
             <div>
+                <select value={buyerId} onChange={(e) => setBuyerId(Number(e.target.value))}>
+                    <option value={0}>전체 바이어</option>
+                    {companies
+                        .filter((c) => c.role === 'BUYER')
+                        .map((c) => (
+                            <option key={c.id} value={c.id}>{c.companyName}</option>
+                        ))}
+                </select>
+
                 <select value={status ?? ''} onChange={(e) => setStatus(e.target.value as PaymentStatus || undefined)} >
                     <option value=''>전체 상태</option>
                     <option value='PENDING'>PENDING</option>

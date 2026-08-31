@@ -128,7 +128,14 @@ function PackingListPage() {
     return (
         <div>
             <h1>패킹리스트 등록</h1>
-
+            <select value={buyerId} onChange={(e) => setBuyerId(Number(e.target.value))}>
+                <option value={0}>전체 바이어</option>
+                {companies
+                    .filter((c) => c.role === 'BUYER')
+                    .map((c) => (
+                        <option key={c.id} value={c.id}>{c.companyName}</option>
+                    ))}
+            </select>
             <button onClick={fetchPackingLists}>검색</button>
             <table>
                 <thead>
