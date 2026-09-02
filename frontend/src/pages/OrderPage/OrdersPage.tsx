@@ -154,118 +154,138 @@ function OrdersPage() {
     }
 
     return (
-        <div>
-            <h1>오더 조회</h1>
-            <select value={buyerId} onChange={(e) => setBuyerId(Number(e.target.value))}>
-                <option value={0}>전체</option>
-                {companies.map((c) => (
-                    <option key={c.id} value={c.id}>{c.companyName}</option>
-                ))}
-            </select>
+        <div className="max-w-4xl mx-auto p-6">
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">오더 조회</h1>
 
-            <table>
+            <div className="mb-8">
+                <EntitySelect
+                    value={buyerId}
+                    onChange={setBuyerId}
+                    options={companies.map(c => ({ id: c.id, label: c.companyName }))}
+                    placeholder="전체"
+                />
+            </div>
+
+            {/* Table */}
+            <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>바이어명</th>
-                        <th>금액</th>
-                        <th>통화</th>
-                        <th>주문일</th>
-                        <th></th>
+                    <tr className="bg-gray-100 text-left text-sm text-gray-600">
+                        <th className="px-4 py-3">ID</th>
+                        <th className="px-4 py-3">바이어명</th>
+                        <th className="px-4 py-3">금액</th>
+                        <th className="px-4 py-3">통화</th>
+                        <th className="px-4 py-3">주문일</th>
+                        <th className="px-4 py-3"></th>
                     </tr>
                 </thead>
                 <tbody>
                     {ordersList.map((orders) => (
-                        <tr key={orders.id}>
-                            <td>{orders.id}</td>
-                            <td>{orders.buyerName}</td>
-                            <td>{orders.amount}</td>
-                            <td>{orders.currency}</td>
-                            <td>{orders.ordersDate}</td>
-                            <td>
-                                <button onClick={() => handleEdit(orders.id)}>수정</button>
+                        <tr key={orders.id} className="border-t border-gray-200 hover:bg-gray-50">
+                            <td className="px-4 py-3">{orders.id}</td>
+                            <td className="px-4 py-3">{orders.buyerName}</td>
+                            <td className="px-4 py-3">{orders.amount}</td>
+                            <td className="px-4 py-3">{orders.currency}</td>
+                            <td className="px-4 py-3">{orders.ordersDate}</td>
+                            <td className="px-4 py-3 flex gap-2 flex-wrap">
+                                <button onClick={() => handleEdit(orders.id)} className="text-blue-900 hover:underline">수정</button>
                                 {!orders.hasInvoice && (
-                                    <button onClick={() => handleDelete(orders.id)}>삭제</button>
-                                )
-                                }
-                                <button onClick={() => handleIssueInvoice(orders.id)}>인보이스 발행</button>
-                                <button onClick={() => handleViewHistory(orders.id)}>발행 이력</button>
+                                    <button onClick={() => handleDelete(orders.id)} className="text-red-600 hover:underline">삭제</button>
+                                )}
+                                <button onClick={() => handleIssueInvoice(orders.id)} className="text-green-700 hover:underline">인보이스 발행</button>
+                                <button onClick={() => handleViewHistory(orders.id)} className="text-gray-600 hover:underline">발행 이력</button>
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
 
-            <h2>오더 등록</h2>
-            <EntitySelect
-                value={form.buyerId}
-                onChange={(id) => setForm({ ...form, buyerId: id })}
-                options={companies.map(c => ({ id: c.id, label: c.companyName }))}
-                placeholder="바이어 선택"
-                disabled={editingId != null}
-            />
-            <input
-                type="date"
-                value={form.ordersDate}
-                onChange={(e) => setForm({ ...form, ordersDate: e.target.value })}
-            />
-            <select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
-                <option value="">통화 선택</option>
-                {currencies.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <select value={form.incoterms} onChange={(e) => setForm({ ...form, incoterms: e.target.value })}>
-                <option value="">인코텀즈 선택</option>
-                {incotermsList.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <select value={form.paymentTerm} onChange={(e) => setForm({ ...form, paymentTerm: e.target.value })}>
-                <option value="">결제조건 선택</option>
-                {paymentTerms.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <input
-                value={form.comment}
-                onChange={(e) => setForm({ ...form, comment: e.target.value })}
-                placeholder="코멘트"
-            />
+            {/* Registration section*/}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">오더 등록</h2>
 
-            <h3>품목 추가</h3>
-            <ItemPicker
-                itemsId={currentItem.itemsId}
-                quantity={currentItem.quantity}
-                itemsList={itemsList.map(item => ({ id: item.id, label: item.productName }))}
-                onChangeItem={(id) => setCurrentItem({ ...currentItem, itemsId: id })}
-                onChangeQuantity={(qty) => setCurrentItem({ ...currentItem, quantity: qty })}
-            />
-            <button onClick={handleAddItem}>품목 추가</button>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                    <EntitySelect
+                        value={form.buyerId}
+                        onChange={(id) => setForm({ ...form, buyerId: id })}
+                        options={companies.map(c => ({ id: c.id, label: c.companyName }))}
+                        placeholder="바이어 선택"
+                        disabled={editingId != null}
+                    />
+                    <input
+                        type="date"
+                        value={form.ordersDate}
+                        onChange={(e) => setForm({ ...form, ordersDate: e.target.value })}
+                        className="border border-gray-300 rounded px-3 py-2"
+                    />
+                    <select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} className="border border-gray-300 rounded px-3 py-2">
+                        <option value="">통화 선택</option>
+                        {currencies.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <select value={form.incoterms} onChange={(e) => setForm({ ...form, incoterms: e.target.value })} className="border border-gray-300 rounded px-3 py-2">
+                        <option value="">인코텀즈 선택</option>
+                        {incotermsList.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <select value={form.paymentTerm} onChange={(e) => setForm({ ...form, paymentTerm: e.target.value })} className="border border-gray-300 rounded px-3 py-2">
+                        <option value="">결제조건 선택</option>
+                        {paymentTerms.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                </div>
+                <input
+                    value={form.comment}
+                    onChange={(e) => setForm({ ...form, comment: e.target.value })}
+                    placeholder="코멘트"
+                    className="border border-gray-300 rounded px-3 py-2 w-full mb-4"
+                />
 
-            <ul>
-                {form.items.map((item, index) => (
-                    <li key={index}>
-                        품목ID: {item.itemsId}, 수량: {item.quantity}
-                        <button onClick={() => handleRemoveItem(index)}>삭제</button>
-                    </li>
-                ))}
-            </ul>
+                {/* Add itmes */}
+                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-3">품목 추가</h3>
+                    <div className="flex gap-2 mb-3">
+                        <ItemPicker
+                            itemsId={currentItem.itemsId}
+                            quantity={currentItem.quantity}
+                            itemsList={itemsList.map(item => ({ id: item.id, label: item.productName }))}
+                            onChangeItem={(id) => setCurrentItem({ ...currentItem, itemsId: id })}
+                            onChangeQuantity={(qty) => setCurrentItem({ ...currentItem, quantity: qty })}
+                        />
+                        <button onClick={handleAddItem} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">품목 추가</button>
+                    </div>
 
-            <button onClick={handleSubmit}>{editingId ? '수정하기' : '등록하기'}</button>
+                    <ul className="space-y-1">
+                        {form.items.map((item, index) => (
+                            <li key={index} className="flex justify-between items-center bg-white border border-gray-200 rounded px-3 py-2 text-sm">
+                                <span>품목ID: {item.itemsId}, 수량: {item.quantity}</span>
+                                <button onClick={() => handleRemoveItem(index)} className="text-red-600 hover:underline">삭제</button>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
 
-            {editingId && (
-                <button onClick={() => {
-                    setEditingId(null);
-                    setForm({
-                        buyerId: 0,
-                        quotationId: 0,
-                        amount: 0,
-                        ordersDate: '',
-                        comment: '',
-                        currency: '',
-                        incoterms: '',
-                        paymentTerm: '',
-                        items: []
-                    });
-                }}>
-                    수정 취소
-                </button>
-            )}
+                <div className="flex gap-2">
+                    <button onClick={handleSubmit} className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">
+                        {editingId ? '수정하기' : '등록하기'}
+                    </button>
+                    {editingId && (
+                        <button onClick={() => {
+                            setEditingId(null);
+                            setForm({
+                                buyerId: 0,
+                                quotationId: 0,
+                                amount: 0,
+                                ordersDate: '',
+                                comment: '',
+                                currency: '',
+                                incoterms: '',
+                                paymentTerm: '',
+                                items: []
+                            });
+                        }} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+                            수정 취소
+                        </button>
+                    )}
+                </div>
+            </div>
+
             <InvoiceHistoryModal
                 isOpen={isHistoryOpen}
                 history={invoiceHistory}
@@ -273,7 +293,7 @@ function OrdersPage() {
                 onCancel={handleCancelInvoice}
                 onDownload={handleGenerateInvoice}
             />
-        </div>
+        </div >
     );
 }
 

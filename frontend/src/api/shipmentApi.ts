@@ -19,7 +19,9 @@ export const getShipment = async (id: number): Promise<Shipment> => {
 };
 
 export const updateShipmentStatus = async (id: number, status: ShipmentStatus): Promise<Shipment> => {
-    const response = await api.patch<Shipment>(`/shipments/${id}/status`, status);
+    const response = await api.patch<Shipment>(`/shipments/${id}/status`, status, {
+        headers: { 'Content-Type': 'application/json' }
+    });
     return response.data;
 };
 

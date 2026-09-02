@@ -81,11 +81,11 @@ function PaymentPage() {
     };
 
     return (
-        <div>
-            <h1>결제 관리</h1>
+        <div className="max-w-4xl mx-auto p-6">
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">결제 관리</h1>
 
             {/* filter */}
-            <div>
+            <div className="flex gap-2 mb-8">
                 <EntitySelect
                     value={buyerId}
                     onChange={setBuyerId}
@@ -101,70 +101,82 @@ function PaymentPage() {
             </div>
 
             {/* list */}
-            <table>
+            <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>인보이스번호</th>
-                        <th>바이어</th>
-                        <th>금액</th>
-                        <th>결제일</th>
-                        <th>상태</th>
-                        <th>등록일</th>
-                        <th>수정일</th>
+                    <tr className="bg-gray-100 text-left text-sm text-gray-600">
+                        <th className="px-4 py-3">ID</th>
+                        <th className="px-4 py-3">인보이스번호</th>
+                        <th className="px-4 py-3">바이어</th>
+                        <th className="px-4 py-3">금액</th>
+                        <th className="px-4 py-3">결제일</th>
+                        <th className="px-4 py-3">상태</th>
+                        <th className="px-4 py-3">등록일</th>
+                        <th className="px-4 py-3">수정일</th>
                     </tr>
                 </thead>
                 <tbody>
                     {paymentList.map((p) => (
-                        <tr key={p.id}>
-                            <td>{p.id}</td>
-                            <td>{p.invoiceNumber}</td>
-                            <td>{p.buyerName}</td>
-                            <td>{p.amount}</td>
-                            <td>{p.paymentDate}</td>
-                            <td>
+                        <tr key={p.id} className="border-t border-gray-200 hover:bg-gray-50">
+                            <td className="px-4 py-3">{p.id}</td>
+                            <td className="px-4 py-3">{p.invoiceNumber}</td>
+                            <td className="px-4 py-3">{p.buyerName}</td>
+                            <td className="px-4 py-3">{p.amount}</td>
+                            <td className="px-4 py-3">{p.paymentDate}</td>
+                            <td className="px-4 py-3">
                                 <StatusSelect
                                     value={p.status}
                                     onChange={(s) => handleStatusChange(p.id, p.invoiceId, s as PaymentStatus)}
                                     options={['PENDING', 'COMPLETED', 'CANCELLED']}
                                 />
                             </td>
-                            <td>{p.createdAt}</td>
-                            <td>{p.updatedAt}</td>
+                            <td className="px-4 py-3">{p.createdAt}</td>
+                            <td className="px-4 py-3">{p.updatedAt}</td>
                         </tr>
                     ))}
                 </tbody>
             </table>
 
             {/* register form */}
-            <h2>결제 등록</h2>
-            <EntitySelect
-                value={form.invoiceId}
-                onChange={handleInvoiceSelect}
-                options={invoiceList.map(inv => ({ id: inv.id, label: inv.invoiceNumber }))}
-                placeholder="인보이스 선택"
-            />
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">결제 등록</h2>
 
-            {balance && (
-                <p>
-                    인보이스 총액: {balance.totalAmount} / 결제완료: {balance.totalPaid} / 잔액: {balance.remaining}
-                </p>
-            )}
+                <div className="mb-4">
+                    <EntitySelect
+                        value={form.invoiceId}
+                        onChange={handleInvoiceSelect}
+                        options={invoiceList.map(inv => ({ id: inv.id, label: inv.invoiceNumber }))}
+                        placeholder="인보이스 선택"
+                    />
+                </div>
 
-            <input type="number"
-                placeholder="결제 금액"
-                value={form.amount === 0 ? '' : form.amount}
-                onChange={(e) => setForm({ ...form, amount: Number(e.target.value) })}
-            />
+                {balance && (
+                    <div className="bg-blue-50 border border-blue-200 rounded px-4 py-3 mb-4 text-sm text-gray-700">
+                        인보이스 총액: <span className="font-semibold">{balance.totalAmount}</span>
+                        {' / '}결제완료: <span className="font-semibold text-green-600">{balance.totalPaid}</span>
+                        {' / '}잔액: <span className="font-semibold text-red-600">{balance.remaining}</span>
+                    </div>
+                )}
 
-            <input
-                type='date'
-                value={form.paymentDate}
-                onChange={(e) => setForm({ ...form, paymentDate: e.target.value })}
-            />
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                    <input type="number"
+                        placeholder="결제 금액"
+                        value={form.amount === 0 ? '' : form.amount}
+                        onChange={(e) => setForm({ ...form, amount: Number(e.target.value) })}
+                        className="border border-gray-300 rounded px-3 py-2"
+                    />
+                    <input
+                        type='date'
+                        value={form.paymentDate}
+                        onChange={(e) => setForm({ ...form, paymentDate: e.target.value })}
+                        className="border border-gray-300 rounded px-3 py-2"
+                    />
+                </div>
 
-            <button onClick={handleSubmit}>등록</button>
-        </div >
+                <button onClick={handleSubmit} className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">
+                    등록
+                </button>
+            </div >
+        </div>
     )
 }
 

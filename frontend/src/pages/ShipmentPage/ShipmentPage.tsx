@@ -1,4 +1,4 @@
-import { getShipment, createShipment, getShipmentsList, updateShipmentStatus, updateShipment } from "../../api/shipment";
+import { getShipment, createShipment, getShipmentsList, updateShipmentStatus, updateShipment } from "../../api/shipmentApi";
 import { getOrdersList } from "../../api/ordersApi";
 import { getCompanyList } from "../../api/companyApi";
 import type { Company } from "../../types/company";
@@ -83,11 +83,11 @@ function ShipmentPage() {
     };
 
     return (
-        <div>
-            <h2>배송 관리</h2>
+        <div className="max-w-4xl mx-auto p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">배송 관리</h2>
 
             {/* filter */}
-            <div>
+            <div className="flex gap-2 mb-8">
                 <EntitySelect
                     value={buyerId}
                     onChange={setBuyerId}
@@ -108,41 +108,40 @@ function ShipmentPage() {
                     options={['PLANNED', 'SHIPPED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED']}
                     placeholder="전체 상태"
                 />
-
             </div>
 
             {/* list */}
-            <table>
+            <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>오더 ID</th>
-                        <th>바이어</th>
-                        <th>포워더</th>
-                        <th>운임</th>
-                        <th>상태</th>
-                        <th>선적일</th>
-                        <th></th>
+                    <tr className="bg-gray-100 text-left text-sm text-gray-600">
+                        <th className="px-4 py-3">ID</th>
+                        <th className="px-4 py-3">오더 ID</th>
+                        <th className="px-4 py-3">바이어</th>
+                        <th className="px-4 py-3">포워더</th>
+                        <th className="px-4 py-3">운임</th>
+                        <th className="px-4 py-3">상태</th>
+                        <th className="px-4 py-3">선적일</th>
+                        <th className="px-4 py-3"></th>
                     </tr>
                 </thead>
                 <tbody>
                     {shipmentList.map((s) => (
-                        <tr key={s.id}>
-                            <td>{s.id}</td>
-                            <td>{s.ordersId}</td>
-                            <td>{s.buyerName}</td>
-                            <td>{s.forwarderName}</td>
-                            <td>{s.fee}</td>
-                            <td>
+                        <tr key={s.id} className="border-t border-gray-200 hover:bg-gray-50">
+                            <td className="px-4 py-3">{s.id}</td>
+                            <td className="px-4 py-3">{s.ordersId}</td>
+                            <td className="px-4 py-3">{s.buyerName}</td>
+                            <td className="px-4 py-3">{s.forwarderName}</td>
+                            <td className="px-4 py-3">{s.fee}</td>
+                            <td className="px-4 py-3">
                                 <StatusSelect
                                     value={s.status}
                                     onChange={(status) => handleStatusChange(s.id, status as ShipmentStatus)}
                                     options={['PLANNED', 'SHIPPED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED']}
                                 />
                             </td>
-                            <td>{s.shipmentDate}</td>
-                            <td>
-                                <button onClick={() => handleEdit(s.id)}>수정</button>
+                            <td className="px-4 py-3">{s.shipmentDate}</td>
+                            <td className="px-4 py-3">
+                                <button onClick={() => handleEdit(s.id)} className="text-blue-900 hover:underline">수정</button>
                             </td>
                         </tr>
                     ))}
@@ -150,38 +149,50 @@ function ShipmentPage() {
             </table>
 
             {/* Form of create & update */}
-            <div>
-                <h3>{editingId ? '배송 수정' : '배송 등록'}</h3>
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">{editingId ? '배송 수정' : '배송 등록'}</h3>
 
-                <EntitySelect
-                    value={form.ordersId}
-                    onChange={(id) => setForm({ ...form, ordersId: id })}
-                    options={ordersList.map(o => ({ id: o.id, label: `#${o.id} - ${o.buyerName}` }))}
-                    placeholder="오더 선택"
-                />
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                    <EntitySelect
+                        value={form.ordersId}
+                        onChange={(id) => setForm({ ...form, ordersId: id })}
+                        options={ordersList.map(o => ({ id: o.id, label: `#${o.id} - ${o.buyerName}` }))}
+                        placeholder="오더 선택"
+                    />
 
-                <EntitySelect
-                    value={form.forwarderId}
-                    onChange={(id) => setForm({ ...form, forwarderId: id })}
-                    options={companies.filter(c => c.role === 'FORWARDER').map(c => ({ id: c.id, label: c.companyName }))}
-                    placeholder="포워더 선택"
-                />
+                    <EntitySelect
+                        value={form.forwarderId}
+                        onChange={(id) => setForm({ ...form, forwarderId: id })}
+                        options={companies.filter(c => c.role === 'FORWARDER').map(c => ({ id: c.id, label: c.companyName }))}
+                        placeholder="포워더 선택"
+                    />
 
-                <input
-                    type='number'
-                    placeholder='운임비'
-                    value={form.fee === 0 ? '' : form.fee}
-                    onChange={(e) => setForm({ ...form, fee: Number(e.target.value) })}
-                />
+                    <input
+                        type='number'
+                        placeholder='운임비'
+                        value={form.fee === 0 ? '' : form.fee}
+                        onChange={(e) => setForm({ ...form, fee: Number(e.target.value) })}
+                        className="border border-gray-300 rounded px-3 py-2"
+                    />
 
-                <input
-                    type='date'
-                    value={form.shipmentDate}
-                    onChange={(e) => setForm({ ...form, shipmentDate: e.target.value })}
-                />
+                    <input
+                        type='date'
+                        value={form.shipmentDate}
+                        onChange={(e) => setForm({ ...form, shipmentDate: e.target.value })}
+                        className="border border-gray-300 rounded px-3 py-2"
+                    />
+                </div>
 
-                <button onClick={handleSubmit}>{editingId ? '수정 완료' : '등록'}</button>
-                {editingId && <button onClick={() => setEditingId(null)}>취소</button>}
+                <div className="flex gap-2">
+                    <button onClick={handleSubmit} className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">
+                        {editingId ? '수정 완료' : '등록'}
+                    </button>
+                    {editingId && (
+                        <button onClick={() => setEditingId(null)} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+                            취소
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );

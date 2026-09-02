@@ -6,7 +6,7 @@ import { getItemsList } from "../../api/itemsApi";
 import { useState, useEffect } from "react"
 import type { PackingListCreateRequest, PackingListItemRequest, PackingListResponse } from "../../types/packingList";
 import type { Shipment } from "../../types/shipment";
-import { getShipmentsList } from "../../api/shipment";
+import { getShipmentsList } from "../../api/shipmentApi";
 import EntitySelect from "../../components/EntitySelect";
 import ItemPicker from "../../components/itemPicker";
 
@@ -128,109 +128,134 @@ function PackingListPage() {
     };
 
     return (
-        <div>
-            <h1>패킹리스트 등록</h1>
-            <EntitySelect
-                value={buyerId}
-                onChange={setBuyerId}
-                options={companies.filter(c => c.role === 'BUYER').map(c => ({ id: c.id, label: c.companyName }))}
-                placeholder="전체 바이어"
-            />
-            <button onClick={fetchPackingLists}>검색</button>
-            <table>
+        <div className="max-w-4xl mx-auto p-6">
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">패킹리스트 등록</h1>
+
+            <div className="flex gap-2 mb-8">
+                <EntitySelect
+                    value={buyerId}
+                    onChange={setBuyerId}
+                    options={companies.filter(c => c.role === 'BUYER').map(c => ({ id: c.id, label: c.companyName }))}
+                    placeholder="전체 바이어"
+                />
+                <button onClick={fetchPackingLists} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+                    검색
+                </button>
+            </div>
+
+            {/* Table */}
+            <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>회사명</th>
-                        <th>운송사</th>
-                        <th>포장날짜</th>
-                        <th>총수량</th>
-                        <th>총무게</th>
-                        <th>등록날짜</th>
-                        <th>수정날짜</th>
+                    <tr className="bg-gray-100 text-left text-sm text-gray-600">
+                        <th className="px-4 py-3">ID</th>
+                        <th className="px-4 py-3">회사명</th>
+                        <th className="px-4 py-3">운송사</th>
+                        <th className="px-4 py-3">포장날짜</th>
+                        <th className="px-4 py-3">총수량</th>
+                        <th className="px-4 py-3">총무게</th>
+                        <th className="px-4 py-3">등록날짜</th>
+                        <th className="px-4 py-3">수정날짜</th>
+                        <th className="px-4 py-3"></th>
                     </tr>
                 </thead>
                 <tbody>
                     {packingList.map((packingList) => (
-                        <tr key={packingList.id}>
-                            <td>{packingList.id}</td>
-                            <td>{packingList.buyerName}</td>
-                            <td>{packingList.forwarderName}</td>
-                            <td>{packingList.packingDate}</td>
-                            <td>{packingList.totalAmount}</td>
-                            <td>{packingList.totalWeight}</td>
-                            <td>{packingList.createdAt}</td>
-                            <td>{packingList.updatedAt}</td>
-                            <td>
-                                <button onClick={() => handleEdit(packingList.id)}>수정</button>
-                                <button onClick={() => handleDelete(packingList.id)}>삭제</button>
-                                <button onClick={() => handleGeneratePackingList(packingList.id)}>패킹리스트 다운로드</button>
+                        <tr key={packingList.id} className="border-t border-gray-200 hover:bg-gray-50">
+                            <td className="px-4 py-3">{packingList.id}</td>
+                            <td className="px-4 py-3">{packingList.buyerName}</td>
+                            <td className="px-4 py-3">{packingList.forwarderName}</td>
+                            <td className="px-4 py-3">{packingList.packingDate}</td>
+                            <td className="px-4 py-3">{packingList.totalAmount}</td>
+                            <td className="px-4 py-3">{packingList.totalWeight}</td>
+                            <td className="px-4 py-3">{packingList.createdAt}</td>
+                            <td className="px-4 py-3">{packingList.updatedAt}</td>
+                            <td className="px-4 py-3 flex gap-2 flex-wrap">
+                                <button onClick={() => handleEdit(packingList.id)} className="text-blue-900 hover:underline">수정</button>
+                                <button onClick={() => handleDelete(packingList.id)} className="text-red-600 hover:underline">삭제</button>
+                                <button onClick={() => handleGeneratePackingList(packingList.id)} className="text-gray-600 hover:underline">다운로드</button>
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
 
-            <h2>패킹리스트 등록</h2>
-            <EntitySelect
-                value={form.shipmentId}
-                onChange={(id) => setForm({ ...form, shipmentId: id })}
-                options={shipmentList.map(s => ({ id: s.id, label: `#${s.id} - ${s.buyerName}` }))}
-                placeholder="선적 선택"
-            />
-            <input
-                type="date"
-                value={form.packingDate}
-                onChange={(e) => setForm({ ...form, packingDate: e.target.value })}
-                placeholder="포장일"
-            />
-            <input
-                value={form.comment}
-                onChange={(e) => setForm({ ...form, comment: e.target.value })}
-                placeholder="특이사항"
-            />
+            {/* Packing list */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">패킹리스트 등록</h2>
 
-            <h3>품목 추가</h3>
-            <ItemPicker
-                itemsId={currentItem.itemsId}
-                quantity={currentItem.quantity}
-                itemsList={itemsList.map(item => ({ id: item.id, label: item.productName }))}
-                onChangeItem={(id) => setCurrentItem({ ...currentItem, itemsId: id })}
-                onChangeQuantity={(qty) => setCurrentItem({ ...currentItem, quantity: qty })}
-            />
-            <input
-                type="number"
-                value={currentItem.actualWeight || ''}
-                onChange={(e) => setCurrentItem({ ...currentItem, actualWeight: Number(e.target.value) })}
-                placeholder="실측 중량"
-            />
-            <button onClick={handleAddItem}>품목 추가</button>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                    <EntitySelect
+                        value={form.shipmentId}
+                        onChange={(id) => setForm({ ...form, shipmentId: id })}
+                        options={shipmentList.map(s => ({ id: s.id, label: `#${s.id} - ${s.buyerName}` }))}
+                        placeholder="선적 선택"
+                    />
+                    <input
+                        type="date"
+                        value={form.packingDate}
+                        onChange={(e) => setForm({ ...form, packingDate: e.target.value })}
+                        className="border border-gray-300 rounded px-3 py-2"
+                    />
+                </div>
+                <input
+                    value={form.comment}
+                    onChange={(e) => setForm({ ...form, comment: e.target.value })}
+                    placeholder="특이사항"
+                    className="border border-gray-300 rounded px-3 py-2 w-full mb-4"
+                />
 
-            <ul>
-                {form.items.map((item, index) => (
-                    <li key={index}>
-                        품목ID: {item.itemsId}, 수량: {item.quantity}, 실측중량: {item.actualWeight}
-                        <button onClick={() => handleRemoveItem(index)}>삭제</button>
-                    </li>
-                ))}
-            </ul>
-            <button onClick={handleSubmit}>{editingId ? '수정하기' : '등록하기'}</button>
+                {/* Add items */}
+                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-3">품목 추가</h3>
+                    <div className="flex gap-2 mb-3">
+                        <ItemPicker
+                            itemsId={currentItem.itemsId}
+                            quantity={currentItem.quantity}
+                            itemsList={itemsList.map(item => ({ id: item.id, label: item.productName }))}
+                            onChangeItem={(id) => setCurrentItem({ ...currentItem, itemsId: id })}
+                            onChangeQuantity={(qty) => setCurrentItem({ ...currentItem, quantity: qty })}
+                        />
+                        <input
+                            type="number"
+                            value={currentItem.actualWeight || ''}
+                            onChange={(e) => setCurrentItem({ ...currentItem, actualWeight: Number(e.target.value) })}
+                            placeholder="실측 중량"
+                            className="border border-gray-300 rounded px-3 py-2"
+                        />
+                        <button onClick={handleAddItem} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">품목 추가</button>
+                    </div>
 
-            {editingId && (
-                <button onClick={() => {
-                    setEditingId(null);
-                    setForm({
-                        shipmentId: 0,
-                        packingDate: '',
-                        totalAmount: 0,
-                        totalWeight: 0,
-                        comment: '',
-                        items: []
-                    });
-                }}>
-                    수정 취소
-                </button>
-            )}
+                    <ul className="space-y-1">
+                        {form.items.map((item, index) => (
+                            <li key={index} className="flex justify-between items-center bg-white border border-gray-200 rounded px-3 py-2 text-sm">
+                                <span>품목ID: {item.itemsId}, 수량: {item.quantity}, 실측중량: {item.actualWeight}</span>
+                                <button onClick={() => handleRemoveItem(index)} className="text-red-600 hover:underline">삭제</button>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                <div className="flex gap-2">
+                    <button onClick={handleSubmit} className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">
+                        {editingId ? '수정하기' : '등록하기'}
+                    </button>
+                    {editingId && (
+                        <button onClick={() => {
+                            setEditingId(null);
+                            setForm({
+                                shipmentId: 0,
+                                packingDate: '',
+                                totalAmount: 0,
+                                totalWeight: 0,
+                                comment: '',
+                                items: []
+                            });
+                        }} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+                            수정 취소
+                        </button>
+                    )}
+                </div>
+            </div>
         </div>
     )
 }
