@@ -5,6 +5,8 @@ import type { Quotation, QuotationCreateRequest, QuotationDetailResponse, Quotat
 import type { Items } from "../../types/items";
 import type { Company } from "../../types/company";
 import { useState, useEffect } from "react";
+import EntitySelect from "../../components/EntitySelect";
+import ItemPicker from "../../components/itemPicker";
 
 function QuotationPage() {
     const [quotationList, setQuotationList] = useState<Quotation[]>([]);
@@ -108,12 +110,12 @@ function QuotationPage() {
     return (
         <div>
             <h1>견적 조회</h1>
-            <select value={buyerId} onChange={(e) => setBuyerId(Number(e.target.value))}>
-                <option value={0}>전체</option>
-                {companies.map((c) => (
-                    <option key={c.id} value={c.id}>{c.companyName}</option>
-                ))}
-            </select>
+            <EntitySelect
+                value={buyerId}
+                onChange={setBuyerId}
+                options={companies.map(c => ({ id: c.id, label: c.companyName }))}
+                placeholder="전체"
+            />
 
             <table>
                 <thead>
@@ -145,13 +147,14 @@ function QuotationPage() {
             </table>
 
             <h2>견적 등록</h2>
-            <select value={form.companyId} onChange={(e) => setForm({ ...form, companyId: Number(e.target.value) })}
-                disabled={editingId != null}>
-                <option value={0}>바이어 선택</option>
-                {companies.map((c) => (
-                    <option key={c.id} value={c.id}>{c.companyName}</option>
-                ))}
-            </select>
+            <EntitySelect
+                value={form.companyId}
+                onChange={(id) => setForm({ ...form, companyId: id })}
+                options={companies.map(c => ({ id: c.id, label: c.companyName }))}
+                placeholder="바이어 선택"
+                disabled={editingId != null}
+            />
+
             <select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
                 <option value="">통화 선택</option>
                 {currencies.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -171,17 +174,12 @@ function QuotationPage() {
             />
 
             <h3>품목 추가</h3>
-            <select value={currentItem.itemsId} onChange={(e) => setCurrentItem({ ...currentItem, itemsId: Number(e.target.value) })}>
-                <option value={0}>품목 선택</option>
-                {itemsList.map((item) => (
-                    <option key={item.id} value={item.id}>{item.productName}</option>
-                ))}
-            </select>
-            <input
-                type="number"
-                value={currentItem.quantity}
-                onChange={(e) => setCurrentItem({ ...currentItem, quantity: Number(e.target.value) })}
-                placeholder="수량"
+            <ItemPicker
+                itemsId={currentItem.itemsId}
+                quantity={currentItem.quantity}
+                itemsList={itemsList.map(i => ({ id: i.id, label: i.productName }))}
+                onChangeItem={(id) => setCurrentItem({ ...currentItem, itemsId: id })}
+                onChangeQuantity={(qty) => setCurrentItem({ ...currentItem, quantity: qty })}
             />
             <button onClick={handleAddItem}>품목 추가</button>
 

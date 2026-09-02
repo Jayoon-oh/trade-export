@@ -5,6 +5,8 @@ import { getInvoicesByStatus } from "../../api/invoiceApi";
 import type { InvoiceResponse } from "../../types/invoice";
 import type { Company } from "../../types/company";
 import { getCompanyList } from "../../api/companyApi";
+import EntitySelect from "../../components/EntitySelect";
+import StatusSelect from "../../components/StatusSelect";
 
 function PaymentPage() {
     const [paymentList, setPaymentList] = useState<PaymentResponse[]>([]);
@@ -84,21 +86,18 @@ function PaymentPage() {
 
             {/* filter */}
             <div>
-                <select value={buyerId} onChange={(e) => setBuyerId(Number(e.target.value))}>
-                    <option value={0}>전체 바이어</option>
-                    {companies
-                        .filter((c) => c.role === 'BUYER')
-                        .map((c) => (
-                            <option key={c.id} value={c.id}>{c.companyName}</option>
-                        ))}
-                </select>
-
-                <select value={status ?? ''} onChange={(e) => setStatus(e.target.value as PaymentStatus || undefined)} >
-                    <option value=''>전체 상태</option>
-                    <option value='PENDING'>PENDING</option>
-                    <option value='COMPLETED'>COMPLETED</option>
-                    <option value='CANCELLED'>CANCELLED</option>
-                </select>
+                <EntitySelect
+                    value={buyerId}
+                    onChange={setBuyerId}
+                    options={companies.filter(c => c.role === 'BUYER').map(c => ({ id: c.id, label: c.companyName }))}
+                    placeholder="전체 바이어"
+                />
+                <StatusSelect
+                    value={status ?? ''}
+                    onChange={(s) => setStatus(s as PaymentStatus || undefined)}
+                    options={['PENDING', 'COMPLETED', 'CANCELLED']}
+                    placeholder="전체 상태"
+                />
             </div>
 
             {/* list */}
@@ -124,14 +123,11 @@ function PaymentPage() {
                             <td>{p.amount}</td>
                             <td>{p.paymentDate}</td>
                             <td>
-                                <select
+                                <StatusSelect
                                     value={p.status}
-                                    onChange={(e) => handleStatusChange(p.id, p.invoiceId, e.target.value as PaymentStatus)}
-                                >
-                                    <option value='PENDING'>PENDING</option>
-                                    <option value='COMPLETED'>COMPLETED</option>
-                                    <option value='CANCELLED'>CANCELLED</option>
-                                </select>
+                                    onChange={(s) => handleStatusChange(p.id, p.invoiceId, s as PaymentStatus)}
+                                    options={['PENDING', 'COMPLETED', 'CANCELLED']}
+                                />
                             </td>
                             <td>{p.createdAt}</td>
                             <td>{p.updatedAt}</td>
@@ -142,16 +138,12 @@ function PaymentPage() {
 
             {/* register form */}
             <h2>결제 등록</h2>
-            <select
+            <EntitySelect
                 value={form.invoiceId}
-                onChange={(e) => handleInvoiceSelect(Number(e.target.value))}
-            >
-                <option value={0}>인보이스 선택</option>
-                {invoiceList.map((inv) => (
-                    <option key={inv.id} value={inv.id}>{inv.invoiceNumber}</option>
-                ))
-                }
-            </select>
+                onChange={handleInvoiceSelect}
+                options={invoiceList.map(inv => ({ id: inv.id, label: inv.invoiceNumber }))}
+                placeholder="인보이스 선택"
+            />
 
             {balance && (
                 <p>

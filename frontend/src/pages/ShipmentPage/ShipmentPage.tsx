@@ -5,6 +5,8 @@ import type { Company } from "../../types/company";
 import type { Orders } from "../../types/orders";
 import type { Shipment, ShipmentCreateRequest, ShipmentStatus } from "../../types/shipment";
 import { useState, useEffect } from "react";
+import EntitySelect from "../../components/EntitySelect";
+import StatusSelect from "../../components/StatusSelect";
 
 function ShipmentPage() {
     const [ordersList, setOrdersList] = useState<Orders[]>([]);
@@ -86,32 +88,27 @@ function ShipmentPage() {
 
             {/* filter */}
             <div>
-                <select value={buyerId} onChange={(e) => setBuyerId(Number(e.target.value))}>
-                    <option value={0}>전체 바이어</option>
-                    {companies
-                        .filter((c) => c.role === 'BUYER')
-                        .map((c) => (
-                            <option key={c.id} value={c.id}>{c.companyName}</option>
-                        ))}
-                </select>
+                <EntitySelect
+                    value={buyerId}
+                    onChange={setBuyerId}
+                    options={companies.filter(c => c.role === 'BUYER').map(c => ({ id: c.id, label: c.companyName }))}
+                    placeholder="전체 바이어"
+                />
 
-                <select value={forwarderId} onChange={(e) => setForwarderId(Number(e.target.value))}>
-                    <option value={0}>전체 포워더</option>
-                    {companies
-                        .filter((c) => c.role === 'FORWARDER')
-                        .map((c) => (
-                            <option key={c.id} value={c.id}>{c.companyName}</option>
-                        ))}
-                </select>
+                <EntitySelect
+                    value={forwarderId}
+                    onChange={setForwarderId}
+                    options={companies.filter(c => c.role === 'FORWARDER').map(c => ({ id: c.id, label: c.companyName }))}
+                    placeholder="전체 포워더"
+                />
 
-                <select value={shipmentStatus ?? ''} onChange={(e) => setShipmentStatus(e.target.value as ShipmentStatus || undefined)}>
-                    <option value=''>전체 상태</option>
-                    <option value='PLANNED'>PLANNED</option>
-                    <option value='SHIPPED'>SHIPPED</option>
-                    <option value='IN_TRANSIT'>IN_TRANSIT</option>
-                    <option value='DELIVERED'>DELIVERED</option>
-                    <option value='CANCELLED'>CANCELLED</option>
-                </select>
+                <StatusSelect
+                    value={shipmentStatus ?? ''}
+                    onChange={(status) => setShipmentStatus(status as ShipmentStatus || undefined)}
+                    options={['PLANNED', 'SHIPPED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED']}
+                    placeholder="전체 상태"
+                />
+
             </div>
 
             {/* list */}
@@ -137,16 +134,11 @@ function ShipmentPage() {
                             <td>{s.forwarderName}</td>
                             <td>{s.fee}</td>
                             <td>
-                                <select
+                                <StatusSelect
                                     value={s.status}
-                                    onChange={(e) => handleStatusChange(s.id, e.target.value as ShipmentStatus)}
-                                >
-                                    <option value='PLANNED'>PLANNED</option>
-                                    <option value='SHIPPED'>SHIPPED</option>
-                                    <option value='IN_TRANSIT'>IN_TRANSIT</option>
-                                    <option value='DELIVERED'>DELIVERED</option>
-                                    <option value='CANCELLED'>CANCELLED</option>
-                                </select>
+                                    onChange={(status) => handleStatusChange(s.id, status as ShipmentStatus)}
+                                    options={['PLANNED', 'SHIPPED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED']}
+                                />
                             </td>
                             <td>{s.shipmentDate}</td>
                             <td>
@@ -161,21 +153,19 @@ function ShipmentPage() {
             <div>
                 <h3>{editingId ? '배송 수정' : '배송 등록'}</h3>
 
-                <select value={form.ordersId} onChange={(e) => setForm({ ...form, ordersId: Number(e.target.value) })}>
-                    <option value={0}>오더 선택</option>
-                    {ordersList.map((o) => (
-                        <option key={o.id} value={o.id}>#{o.id} - {o.buyerName}</option>
-                    ))}
-                </select>
+                <EntitySelect
+                    value={form.ordersId}
+                    onChange={(id) => setForm({ ...form, ordersId: id })}
+                    options={ordersList.map(o => ({ id: o.id, label: `#${o.id} - ${o.buyerName}` }))}
+                    placeholder="오더 선택"
+                />
 
-                <select value={form.forwarderId} onChange={(e) => setForm({ ...form, forwarderId: Number(e.target.value) })}>
-                    <option value={0}>포워더 선택</option>
-                    {companies
-                        .filter((c) => c.role === 'FORWARDER')
-                        .map((c) => (
-                            <option key={c.id} value={c.id}>{c.companyName}</option>
-                        ))}
-                </select>
+                <EntitySelect
+                    value={form.forwarderId}
+                    onChange={(id) => setForm({ ...form, forwarderId: id })}
+                    options={companies.filter(c => c.role === 'FORWARDER').map(c => ({ id: c.id, label: c.companyName }))}
+                    placeholder="포워더 선택"
+                />
 
                 <input
                     type='number'

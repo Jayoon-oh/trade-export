@@ -8,6 +8,8 @@ import type { Items } from "../../types/items";
 import type { Company } from "../../types/company";
 import type { InvoiceResponse } from "../../types/invoice";
 import InvoiceHistoryModal from "./components/InvoiceHistoryModal";
+import EntitySelect from "../../components/EntitySelect";
+import ItemPicker from "../../components/itemPicker";
 
 function OrdersPage() {
     const [ordersList, setOrdersList] = useState<Orders[]>([]);
@@ -195,16 +197,13 @@ function OrdersPage() {
             </table>
 
             <h2>오더 등록</h2>
-            <select
+            <EntitySelect
                 value={form.buyerId}
-                onChange={(e) => setForm({ ...form, buyerId: Number(e.target.value) })}
+                onChange={(id) => setForm({ ...form, buyerId: id })}
+                options={companies.map(c => ({ id: c.id, label: c.companyName }))}
+                placeholder="바이어 선택"
                 disabled={editingId != null}
-            >
-                <option value={0}>바이어 선택</option>
-                {companies.map((c) => (
-                    <option key={c.id} value={c.id}>{c.companyName}</option>
-                ))}
-            </select>
+            />
             <input
                 type="date"
                 value={form.ordersDate}
@@ -229,20 +228,12 @@ function OrdersPage() {
             />
 
             <h3>품목 추가</h3>
-            <select
-                value={currentItem.itemsId}
-                onChange={(e) => setCurrentItem({ ...currentItem, itemsId: Number(e.target.value) })}
-            >
-                <option value={0}>품목 선택</option>
-                {itemsList.map((item) => (
-                    <option key={item.id} value={item.id}>{item.productName}</option>
-                ))}
-            </select>
-            <input
-                type="number"
-                value={currentItem.quantity || ''}
-                onChange={(e) => setCurrentItem({ ...currentItem, quantity: Number(e.target.value) })}
-                placeholder="수량"
+            <ItemPicker
+                itemsId={currentItem.itemsId}
+                quantity={currentItem.quantity}
+                itemsList={itemsList.map(item => ({ id: item.id, label: item.productName }))}
+                onChangeItem={(id) => setCurrentItem({ ...currentItem, itemsId: id })}
+                onChangeQuantity={(qty) => setCurrentItem({ ...currentItem, quantity: qty })}
             />
             <button onClick={handleAddItem}>품목 추가</button>
 

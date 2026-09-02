@@ -7,6 +7,8 @@ import { useState, useEffect } from "react"
 import type { PackingListCreateRequest, PackingListItemRequest, PackingListResponse } from "../../types/packingList";
 import type { Shipment } from "../../types/shipment";
 import { getShipmentsList } from "../../api/shipment";
+import EntitySelect from "../../components/EntitySelect";
+import ItemPicker from "../../components/itemPicker";
 
 function PackingListPage() {
     const [packingList, setPackingList] = useState<PackingListResponse[]>([]);
@@ -128,14 +130,12 @@ function PackingListPage() {
     return (
         <div>
             <h1>패킹리스트 등록</h1>
-            <select value={buyerId} onChange={(e) => setBuyerId(Number(e.target.value))}>
-                <option value={0}>전체 바이어</option>
-                {companies
-                    .filter((c) => c.role === 'BUYER')
-                    .map((c) => (
-                        <option key={c.id} value={c.id}>{c.companyName}</option>
-                    ))}
-            </select>
+            <EntitySelect
+                value={buyerId}
+                onChange={setBuyerId}
+                options={companies.filter(c => c.role === 'BUYER').map(c => ({ id: c.id, label: c.companyName }))}
+                placeholder="전체 바이어"
+            />
             <button onClick={fetchPackingLists}>검색</button>
             <table>
                 <thead>
@@ -172,15 +172,12 @@ function PackingListPage() {
             </table>
 
             <h2>패킹리스트 등록</h2>
-            <select
+            <EntitySelect
                 value={form.shipmentId}
-                onChange={(e) => setForm({ ...form, shipmentId: Number(e.target.value) })}
-            >
-                <option value={0}>선적 선택</option>
-                {shipmentList.map((s) => (
-                    <option key={s.id} value={s.id}>#{s.id} - {s.buyerName}</option>
-                ))}
-            </select>
+                onChange={(id) => setForm({ ...form, shipmentId: id })}
+                options={shipmentList.map(s => ({ id: s.id, label: `#${s.id} - ${s.buyerName}` }))}
+                placeholder="선적 선택"
+            />
             <input
                 type="date"
                 value={form.packingDate}
@@ -194,20 +191,12 @@ function PackingListPage() {
             />
 
             <h3>품목 추가</h3>
-            <select
-                value={currentItem.itemsId}
-                onChange={(e) => setCurrentItem({ ...currentItem, itemsId: Number(e.target.value) })}
-            >
-                <option value={0}>품목 선택</option>
-                {itemsList.map((item) => (
-                    <option key={item.id} value={item.id}>{item.productName}</option>
-                ))}
-            </select>
-            <input
-                type="number"
-                value={currentItem.quantity || ''}
-                onChange={(e) => setCurrentItem({ ...currentItem, quantity: Number(e.target.value) })}
-                placeholder="수량"
+            <ItemPicker
+                itemsId={currentItem.itemsId}
+                quantity={currentItem.quantity}
+                itemsList={itemsList.map(item => ({ id: item.id, label: item.productName }))}
+                onChangeItem={(id) => setCurrentItem({ ...currentItem, itemsId: id })}
+                onChangeQuantity={(qty) => setCurrentItem({ ...currentItem, quantity: qty })}
             />
             <input
                 type="number"
