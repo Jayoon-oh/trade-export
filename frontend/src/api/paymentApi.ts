@@ -1,14 +1,14 @@
 import api from "./axiosInstance";
-import type { PaymentResponse, PaymentCreateRequest, PaymentStatus, InvoiceBalance } from "../types/payment";
+import type { PaymentResponse, PaymentCreateRequest, PaymentStatus, InvoiceBalance, PagedPayments } from "../types/payment";
 
 export const createPayment = async (dto: PaymentCreateRequest): Promise<number> => {
     const response = await api.post<number>(`/payments`, dto);
     return response.data;
 }
 
-export const getPayments = async (buyerId?: number, status?: PaymentStatus): Promise<PaymentResponse[]> => {
-    const response = await api.get<PaymentResponse[]>('/payments', {
-        params: { buyerId, status },
+export const getPayments = async (buyerId?: number, status?: string, page: number = 0, size: number = 10): Promise<PagedPayments> => {
+    const response = await api.get<PagedPayments>('/payments', {
+        params: { buyerId, status, page, size },
     });
     return response.data;
 };

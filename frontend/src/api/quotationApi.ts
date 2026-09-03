@@ -1,5 +1,6 @@
 import api from './axiosInstance';
 import type {
+    PagedQuotations,
     Quotation,
     QuotationCreateRequest,
     QuotationDetailResponse
@@ -10,12 +11,13 @@ export const createQuotation = async (dto: QuotationCreateRequest): Promise<numb
     return response.data;
 };
 
-export const getQuotationList = async (buyerId?: number): Promise<Quotation[]> => {
-    const response = await api.get<Quotation[]>('/quotations', {
-        params: { buyerId },
+export const getQuotationList = async (buyerId?: number, page: number = 0, size: number = 10): Promise<PagedQuotations> => {
+    const response = await api.get<PagedQuotations>('/quotations', {
+        params: { buyerId, page, size },
     });
     return response.data;
 };
+
 
 export const getQuotation = async (id: number): Promise<QuotationDetailResponse> => {
     const response = await api.get<QuotationDetailResponse>(`/quotations/${id}`);

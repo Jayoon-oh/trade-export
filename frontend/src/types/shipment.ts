@@ -14,6 +14,14 @@ export interface Shipment {
     updatedAt: string;
 }
 
+export interface PagedShipments {
+    content: Shipment[];
+    totalPages: number;
+    totalElements: number;
+    number: number;
+    size: number;
+}
+
 export interface ShipmentCreateRequest {
     ordersId: number;
     forwarderId: number;

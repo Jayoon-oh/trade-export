@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import { getStockList } from '../../api/stockApi';
 import type { Stock } from '../../types/stock';
 import type { ItemsCreateRequest } from '../../types/items';
-import { createItems } from '../../api/itemsApi';
+import { createItems, updateItems, getItemsList } from '../../api/itemsApi';
 
 function StockPage() {
     const [stockList, setStockList] = useState<Stock[]>([]);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+
     const [form, setForm] = useState<ItemsCreateRequest>({
         productName: '',
         price: 0,
@@ -16,11 +19,12 @@ function StockPage() {
 
     useEffect(() => {
         fetchStock();
-    }, []);
+    }, [currentPage]);
 
     const fetchStock = async () => {
-        const data = await getStockList(searchTerm || undefined);
-        setStockList(data);
+        const data = await getStockList(searchTerm || undefined, currentPage);
+        setStockList(data.content);
+        setTotalPages(data.totalPages);
     };
 
     const handleCreate = async () => {
@@ -31,7 +35,7 @@ function StockPage() {
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
+        <div className="max-w-6xl mx-auto p-10">
             <h1 className="text-2xl font-bold text-gray-800 mb-6">재고 조회</h1>
 
             {/* Search section */}
@@ -47,6 +51,46 @@ function StockPage() {
                     className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
                 >
                     검색
+                </button>
+            </div>
+
+            {/* Table */}
+            <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden">
+                <thead>
+                    <tr className="bg-gray-100 text-left text-sm text-gray-600">
+                        <th className="px-4 py-3">ID</th>
+                        <th className="px-4 py-3">제품명</th>
+                        <th className="px-4 py-3">수량</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {stockList.map((stock) => (
+                        <tr key={stock.id} className="border-t border-gray-200 hover:bg-gray-50">
+                            <td className="px-4 py-3">{stock.id}</td>
+                            <td className="px-4 py-3">{stock.productName}</td>
+                            <td className="px-4 py-3">{stock.quantity}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+
+            <div className="flex justify-center gap-2 mb-8">
+                <button
+                    onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                    disabled={currentPage === 0}
+                    className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                >
+                    이전
+                </button>
+                <span className="px-3 py-1 text-sm text-gray-600">
+                    {currentPage + 1} / {totalPages}
+                </span>
+                <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+                    disabled={currentPage >= totalPages - 1}
+                    className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                >
+                    다음
                 </button>
             </div>
 
@@ -88,26 +132,6 @@ function StockPage() {
                     등록하기
                 </button>
             </div>
-
-            {/* Table */}
-            <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <thead>
-                    <tr className="bg-gray-100 text-left text-sm text-gray-600">
-                        <th className="px-4 py-3">ID</th>
-                        <th className="px-4 py-3">제품명</th>
-                        <th className="px-4 py-3">수량</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {stockList.map((stock) => (
-                        <tr key={stock.id} className="border-t border-gray-200 hover:bg-gray-50">
-                            <td className="px-4 py-3">{stock.id}</td>
-                            <td className="px-4 py-3">{stock.productName}</td>
-                            <td className="px-4 py-3">{stock.quantity}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
         </div>
     )
 }

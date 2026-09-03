@@ -1,4 +1,5 @@
 import type { InvoiceResponse } from "../../../types/invoice";
+import formatDate from "../../../utils/formatDate";
 
 interface InvoiceHistoryModalProps {
     isOpen: boolean;
@@ -30,7 +31,7 @@ function InvoiceHistoryModal({ isOpen, history, onClose, onCancel, onDownload }:
                             <tr key={invoice.id} className="border-t border-gray-200">
                                 <td className="px-4 py-2">{invoice.invoiceNumber}</td>
                                 <td className="px-4 py-2">{invoice.status}</td>
-                                <td className="px-4 py-2">{invoice.invoiceDate}</td>
+                                <td className="px-4 py-2">{formatDate(invoice.invoiceDate)}</td>
                                 <td className="px-4 py-2 flex gap-2">
                                     <button onClick={() => onDownload(invoice.id)} className="text-blue-900 hover:underline text-sm">PDF</button>
                                     <button onClick={() => onCancel(invoice.id)} className="text-red-600 hover:underline text-sm">취소</button>

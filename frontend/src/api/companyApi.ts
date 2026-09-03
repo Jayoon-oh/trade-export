@@ -1,5 +1,5 @@
 import api from './axiosInstance';
-import type { Company, CompanyCreateRequest } from '../types/company';
+import type { Company, CompanyCreateRequest, PagedCompanies } from '../types/company';
 
 export const createCompany = async (dto: CompanyCreateRequest): Promise<number> => {
     const response = await api.post<number>(`/companies`, dto);
@@ -11,9 +11,9 @@ export const updateCompany = async (id: number, dto: CompanyCreateRequest): Prom
     return response.data;
 };
 
-export const getCompanyList = async (role?: string): Promise<Company[]> => {
-    const response = await api.get<Company[]>(`/companies`, {
-        params: { role },
+export const getCompanyList = async (role?: string, companyName?: string, page: number = 0, size: number = 10): Promise<PagedCompanies> => {
+    const response = await api.get<PagedCompanies>(`/companies`, {
+        params: { role, companyName, page, size },
     });
     return response.data;
 };

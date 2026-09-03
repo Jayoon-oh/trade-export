@@ -9,6 +9,7 @@ import type { Shipment } from "../../types/shipment";
 import { getShipmentsList } from "../../api/shipmentApi";
 import EntitySelect from "../../components/EntitySelect";
 import ItemPicker from "../../components/itemPicker";
+import formatDate from "../../utils/formatDate";
 
 function PackingListPage() {
     const [packingList, setPackingList] = useState<PackingListResponse[]>([]);
@@ -31,6 +32,10 @@ function PackingListPage() {
     const [companies, setCompanies] = useState<Company[]>([]);
     const [itemsList, setItemsList] = useState<Items[]>([]);
 
+    // pagination
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+
     useEffect(() => {
         fetchCompanies();
         fetchItems();
@@ -39,21 +44,22 @@ function PackingListPage() {
 
     useEffect(() => {
         fetchPackingLists();
-    }, [buyerId]);
+    }, [buyerId, currentPage]);
 
     const fetchPackingLists = async () => {
-        const data = await getPackingLists(buyerId || undefined);
-        setPackingList(data);
+        const data = await getPackingLists(buyerId || undefined, currentPage);
+        setPackingList(data.content);
+        setTotalPages(data.totalPages);
     }
 
     const fetchShipmentLists = async () => {
         const data = await getShipmentsList();
-        setShipmentList(data);
+        setShipmentList(data.content);
     }
 
     const fetchCompanies = async () => {
         const data = await getCompanyList();
-        setCompanies(data);
+        setCompanies(data.content);
     }
 
     const fetchItems = async () => {
@@ -128,7 +134,7 @@ function PackingListPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
+        <div className="max-w-6xl mx-auto p-10">
             <h1 className="text-2xl font-bold text-gray-800 mb-6">패킹리스트 등록</h1>
 
             <div className="flex gap-2 mb-8">
@@ -167,8 +173,8 @@ function PackingListPage() {
                             <td className="px-4 py-3">{packingList.packingDate}</td>
                             <td className="px-4 py-3">{packingList.totalAmount}</td>
                             <td className="px-4 py-3">{packingList.totalWeight}</td>
-                            <td className="px-4 py-3">{packingList.createdAt}</td>
-                            <td className="px-4 py-3">{packingList.updatedAt}</td>
+                            <td className="px-4 py-3">{formatDate(packingList.createdAt)}</td>
+                            <td className="px-4 py-3">{formatDate(packingList.updatedAt)}</td>
                             <td className="px-4 py-3 flex gap-2 flex-wrap">
                                 <button onClick={() => handleEdit(packingList.id)} className="text-blue-900 hover:underline">수정</button>
                                 <button onClick={() => handleDelete(packingList.id)} className="text-red-600 hover:underline">삭제</button>
@@ -178,6 +184,27 @@ function PackingListPage() {
                     ))}
                 </tbody>
             </table>
+
+            {/* Pagination */}
+            <div className="flex justify-center gap-2 mb-8">
+                <button
+                    onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                    disabled={currentPage === 0}
+                    className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                >
+                    이전
+                </button>
+                <span className="px-3 py-1 text-sm text-gray-600">
+                    {currentPage + 1} / {totalPages}
+                </span>
+                <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+                    disabled={currentPage >= totalPages - 1}
+                    className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                >
+                    다음
+                </button>
+            </div>
 
             {/* Packing list */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">

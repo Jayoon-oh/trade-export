@@ -14,6 +14,14 @@ export interface Orders {
     hasInvoice: boolean;
 }
 
+export interface PagedOrders {
+    content: Orders[];
+    totalPages: number;
+    totalElements: number;
+    number: number;
+    size: number;
+}
+
 export interface OrdersItemLine {
     itemsId: number;
     itemName: string;

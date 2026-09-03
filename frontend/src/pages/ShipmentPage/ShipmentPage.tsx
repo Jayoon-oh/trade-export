@@ -23,6 +23,10 @@ function ShipmentPage() {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [companies, setCompanies] = useState<Company[]>([]);
 
+    // pagination
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+
     useEffect(() => {
         fetchCompanies();
         fetchOrders();
@@ -30,21 +34,22 @@ function ShipmentPage() {
 
     useEffect(() => {
         fetchShipments();
-    }, [buyerId, forwarderId, shipmentStatus]);
+    }, [buyerId, forwarderId, shipmentStatus, currentPage]);
 
     const fetchOrders = async () => {
         const data = await getOrdersList(buyerId || undefined);
-        setOrdersList(data);
+        setOrdersList(data.content);
     }
 
     const fetchShipments = async () => {
-        const data = await getShipmentsList(buyerId || undefined, forwarderId || undefined, shipmentStatus || undefined);
-        setShipmentList(data);
+        const data = await getShipmentsList(buyerId || undefined, forwarderId || undefined, shipmentStatus || undefined, currentPage);
+        setShipmentList(data.content);
+        setTotalPages(data.totalPages)
     }
 
     const fetchCompanies = async () => {
         const data = await getCompanyList();
-        setCompanies(data);
+        setCompanies(data.content);
     }
 
     const handleSubmit = async () => {
@@ -83,7 +88,7 @@ function ShipmentPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
+        <div className="max-w-6xl mx-auto p-10">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">배송 관리</h2>
 
             {/* filter */}
@@ -147,6 +152,27 @@ function ShipmentPage() {
                     ))}
                 </tbody>
             </table>
+
+            {/* Pagination */}
+            <div className="flex justify-center gap-2 mb-8">
+                <button
+                    onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                    disabled={currentPage === 0}
+                    className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                >
+                    이전
+                </button>
+                <span className="px-3 py-1 text-sm text-gray-600">
+                    {currentPage + 1} / {totalPages}
+                </span>
+                <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+                    disabled={currentPage >= totalPages - 1}
+                    className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                >
+                    다음
+                </button>
+            </div>
 
             {/* Form of create & update */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">

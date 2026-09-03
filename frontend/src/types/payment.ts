@@ -4,6 +4,14 @@ export interface PaymentCreateRequest {
     paymentDate: string;
 }
 
+export interface PagedPayments {
+    content: PaymentResponse[];
+    totalPages: number;
+    totalElements: number;
+    number: number;
+    size: number;
+}
+
 export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED';
 
 export interface PaymentResponse {

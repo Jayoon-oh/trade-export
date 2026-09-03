@@ -3,14 +3,19 @@ export interface Company {
     companyName: string;
     address: string;
     country: string;
-    registrationNumber: string;
     nameOfOwner: string;
-    partnerDate: string;
-    category: string;
-    deliveryMethod: string;
+    registrationNumber: string;
     role: string;
-    logoPath: string;
-    signaturePath: string;
+    category?: string;
+    deliveryMethod?: string;
+}
+
+export interface PagedCompanies {
+    content: Company[];
+    totalPages: number;
+    totalElements: number;
+    number: number;
+    size: number;
 }
 
 export interface CompanyCreateRequest {

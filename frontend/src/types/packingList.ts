@@ -7,6 +7,14 @@ export interface PackingListCreateRequest {
     items: PackingListItemRequest[];
 }
 
+export interface PagedPackingLists {
+    content: PackingListResponse[];
+    totalPages: number;
+    totalElements: number;
+    number: number;
+    size: number;
+}
+
 export interface PackingListItemRequest {
     itemsId: number;
     quantity: number;

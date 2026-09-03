@@ -1,5 +1,5 @@
 import api from "./axiosInstance";
-import type { PackingListCreateRequest, PackingListResponse, PackingListItemLine, PackingListDetailResponse } from "../types/packingList";
+import type { PackingListCreateRequest, PackingListResponse, PackingListItemLine, PackingListDetailResponse, PagedPackingLists } from "../types/packingList";
 
 export const generatePackingListPdf = async (packingListId: number): Promise<Blob> => {
     const response = await api.post(`/packing-lists/${packingListId}/pdf`, null, {
@@ -24,9 +24,9 @@ export const createPackingList = async (dto: PackingListCreateRequest): Promise<
     return response.data;
 }
 
-export const getPackingLists = async (buyerId?: number): Promise<PackingListResponse[]> => {
-    const response = await api.get<PackingListResponse[]>('/packing-lists', {
-        params: { buyerId },
+export const getPackingLists = async (buyerId?: number, page: number = 0, size: number = 10): Promise<PagedPackingLists> => {
+    const response = await api.get<PagedPackingLists>('/packing-lists', {
+        params: { buyerId, page, size },
     });
     return response.data;
 };

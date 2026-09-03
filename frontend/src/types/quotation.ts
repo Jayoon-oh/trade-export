@@ -2,12 +2,20 @@ export interface Quotation {
     id: number;
     companyId: number;
     companyName: string;
-    quotationDate?: string;
+    quotationDate: string;
     totalAmount: number;
     currency: string;
     incoterms: string;
     paymentTerm: string;
     comment?: string;
+}
+
+export interface PagedQuotations {
+    content: Quotation[];
+    totalPages: number;
+    totalElements: number;
+    number: number;
+    size: number;
 }
 
 export interface QuotationItemLine {
@@ -34,5 +42,6 @@ export interface QuotationCreateRequest {
     incoterms: string;
     paymentTerm: string;
     comment?: string;
+    quotationDate: string;
     items: QuotationItemRequest[];
 }

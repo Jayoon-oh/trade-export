@@ -1,4 +1,4 @@
-import type { Orders, OrdersCreateRequest, OrdersDetailResponse } from "../types/orders";
+import type { Orders, OrdersCreateRequest, OrdersDetailResponse, PagedOrders } from "../types/orders";
 import api from "./axiosInstance";
 
 export const registerOrders = async (dto: OrdersCreateRequest): Promise<number> => {
@@ -11,9 +11,9 @@ export const updateOrders = async (id: number, dto: OrdersCreateRequest): Promis
     return response.data;
 };
 
-export const getOrdersList = async (buyerId?: number): Promise<Orders[]> => {
-    const response = await api.get<Orders[]>('/orders', {
-        params: { buyerId }
+export const getOrdersList = async (buyerId?: number, page: number = 0, size: number = 10): Promise<PagedOrders> => {
+    const response = await api.get<PagedOrders>('/orders', {
+        params: { buyerId, page, size },
     });
     return response.data;
 };

@@ -5,6 +5,7 @@ import CompanyDetailModal from "./CompanyDetailModal";
 
 function CompanyPage() {
     const [companyList, setCompanyList] = useState<Company[]>([]);
+    const [searchName, setSearchName] = useState('');
     const [form, setForm] = useState<CompanyCreateRequest>({
         companyName: '',
         address: '',
@@ -25,25 +26,37 @@ function CompanyPage() {
     const deliveryMethods = ['해상', '항공', '육상'];
     const [editingId, setEditingId] = useState<number | null>(null);
 
-
     // modal for detail of Company
     const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
 
+    // pagination
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+
     useEffect(() => {
         fetchCompanies();
-    }, []);
+    }, [currentPage]);
 
     const fetchCompanies = async () => {
-        const data = await getCompanyList(searchRole || undefined);
-        setCompanyList(data);
+        const data = await getCompanyList(searchRole || undefined, searchName || undefined, currentPage);
+        setCompanyList(data.content);
+        setTotalPages(data.totalPages);
     }
 
     // Detail of Company
     const handleViewDatail = async (id: number) => {
-        const data = await getCompany(id);
-        setSelectedCompany(data);
-        setIsDetailOpen(true);
+        if (!id) {
+            alert('회사명을 선택해주세요');
+            return;
+        }
+        try {
+            const data = await getCompany(id);
+            setSelectedCompany(data);
+            setIsDetailOpen(true);
+        } catch (error) {
+            alert('조회되는 거래처가 없습니다. 이름을 다시 확인해주세요.')
+        }
     }
 
     const handleCloseModal = () => {
@@ -53,28 +66,32 @@ function CompanyPage() {
 
     // Editing & Creating
     const handleSubmit = async () => {
-        if (editingId) {
-            await updateCompany(editingId, form);
-        } else {
-            await createCompany(form);
-        }
-        setForm({
-            companyName: '',
-            address: '',
-            country: '',
-            nameOfOwner: '',
-            role: '',
+        try {
+            if (editingId) {
+                await updateCompany(editingId, form);
+            } else {
+                await createCompany(form);
+            }
+            setForm({
+                companyName: '',
+                address: '',
+                country: '',
+                nameOfOwner: '',
+                role: '',
 
-            registrationNumber: '',
-            partnerDate: '',
-            category: '',
-            deliveryMethod: '',
-            logoPath: '',
-            signaturePath: ''
-        });
-        setEditingId(null);
-        fetchCompanies();
-    }
+                registrationNumber: '',
+                partnerDate: '',
+                category: '',
+                deliveryMethod: '',
+                logoPath: '',
+                signaturePath: ''
+            });
+            setEditingId(null);
+            fetchCompanies();
+        } catch (error) {
+            alert('거래처 등록/수정에 실패했습니다.');
+        }
+    };
 
     const handleEdit = (company: Company) => {
         const { id, ...formData } = company;
@@ -83,11 +100,17 @@ function CompanyPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
+        <div className="max-w-6xl mx-auto p-10">
             <h1 className="text-2xl font-bold text-gray-800 mb-6">회사 조회</h1>
 
             {/* Search section */}
             <div className="flex gap-2 mb-8">
+                <input
+                    value={searchName}
+                    onChange={(e) => setSearchName(e.target.value)}
+                    placeholder="회사명 검색"
+                    className="border border-gray-300 rounded px-3 py-2"
+                />
                 <select
                     value={searchRole}
                     onChange={(e) => setSearchRole(e.target.value)}
@@ -113,6 +136,7 @@ function CompanyPage() {
                         <th className="px-4 py-3">ID</th>
                         <th className="px-4 py-3">회사명</th>
                         <th className="px-4 py-3">주소</th>
+                        <th className="px-4 py-3">역할</th>
                         <th className="px-4 py-3">국가</th>
                         <th className="px-4 py-3">사업자번호</th>
                         <th className="px-4 py-3"></th>
@@ -124,6 +148,7 @@ function CompanyPage() {
                             <td className="px-4 py-3">{company.id}</td>
                             <td className="px-4 py-3">{company.companyName}</td>
                             <td className="px-4 py-3">{company.address}</td>
+                            <td className="px-4 py-3">{company.role}</td>
                             <td className="px-4 py-3">{company.country}</td>
                             <td className="px-4 py-3">{company.registrationNumber}</td>
                             <td className="px-4 py-3 flex gap-2">
@@ -144,6 +169,27 @@ function CompanyPage() {
                     ))}
                 </tbody>
             </table>
+
+            {/* Pagination */}
+            <div className="flex justify-center gap-2 mb-8">
+                <button
+                    onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                    disabled={currentPage === 0}
+                    className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                >
+                    이전
+                </button>
+                <span className="px-3 py-1 text-sm text-gray-600">
+                    {currentPage + 1} / {totalPages}
+                </span>
+                <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+                    disabled={currentPage >= totalPages - 1}
+                    className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                >
+                    다음
+                </button>
+            </div>
 
             {/* Registration section */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
