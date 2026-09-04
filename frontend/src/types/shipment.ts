@@ -9,6 +9,7 @@ export interface Shipment {
     forwarderName: string;
     fee: number;
     status: ShipmentStatus;
+    orderNumber: string;
     shipmentDate: string;
     createdAt: string;
     updatedAt: string;

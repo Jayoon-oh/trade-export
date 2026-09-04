@@ -43,6 +43,11 @@ function StockPage() {
                 <input
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            fetchStock();
+                        }
+                    }}
                     placeholder="품목명 검색"
                     className="border border-gray-300 rounded px-3 py-2 flex-1"
                 />
@@ -61,6 +66,7 @@ function StockPage() {
                         <th className="px-4 py-3">ID</th>
                         <th className="px-4 py-3">제품명</th>
                         <th className="px-4 py-3">수량</th>
+                        <th className="px-4 py-3">예약 된 수량</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -69,6 +75,7 @@ function StockPage() {
                             <td className="px-4 py-3">{stock.id}</td>
                             <td className="px-4 py-3">{stock.productName}</td>
                             <td className="px-4 py-3">{stock.quantity}</td>
+                            <td className="px-4 py-3">{stock.reservedQuantity}</td>
                         </tr>
                     ))}
                 </tbody>

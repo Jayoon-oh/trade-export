@@ -59,6 +59,7 @@ function PaymentPage() {
                 amount: 0,
                 paymentDate: ''
             });
+            setBalance(null);
             fetchPaymentList();
         } catch (error) {
             alert('결제 등록에 실패했습니다. 잔액을 초과하지 않았는지 확인해주세요.');
@@ -110,7 +111,7 @@ function PaymentPage() {
             <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
                 <thead>
                     <tr className="bg-gray-100 text-left text-sm text-gray-600">
-                        <th className="px-4 py-3">ID</th>
+                        <th className="px-4 py-3">오더 ID</th>
                         <th className="px-4 py-3">인보이스번호</th>
                         <th className="px-4 py-3">바이어</th>
                         <th className="px-4 py-3">금액</th>
@@ -123,7 +124,7 @@ function PaymentPage() {
                 <tbody>
                     {paymentList.map((p) => (
                         <tr key={p.id} className="border-t border-gray-200 hover:bg-gray-50">
-                            <td className="px-4 py-3">{p.id}</td>
+                            <td className="px-4 py-3">{p.orderNumber}</td>
                             <td className="px-4 py-3">{p.invoiceNumber}</td>
                             <td className="px-4 py-3">{p.buyerName}</td>
                             <td className="px-4 py-3">{p.amount}</td>

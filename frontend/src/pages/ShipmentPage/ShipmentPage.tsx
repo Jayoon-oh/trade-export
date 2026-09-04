@@ -7,6 +7,7 @@ import type { Shipment, ShipmentCreateRequest, ShipmentStatus } from "../../type
 import { useState, useEffect } from "react";
 import EntitySelect from "../../components/EntitySelect";
 import StatusSelect from "../../components/StatusSelect";
+import OrderSelectModal from "./components/OrderSelectModal";
 
 function ShipmentPage() {
     const [ordersList, setOrdersList] = useState<Orders[]>([]);
@@ -26,6 +27,10 @@ function ShipmentPage() {
     // pagination
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+
+    // modal for selecting company
+    const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+    const [selectedOrderLabel, setSelectedOrderLabel] = useState('');
 
     useEffect(() => {
         fetchCompanies();
@@ -53,6 +58,24 @@ function ShipmentPage() {
     }
 
     const handleSubmit = async () => {
+        // validation
+        if (!form.ordersId) {
+            alert('오더를 선택해주세요.');
+            return;
+        }
+        if (!form.forwarderId) {
+            alert('포워더 선택해주세요.');
+            return;
+        }
+        if (!form.fee) {
+            alert('운임비 입력해주세요.');
+            return;
+        }
+        if (!form.shipmentDate) {
+            alert('날짜를 선택해주세요.');
+            return;
+        }
+
         if (editingId) {
             await updateShipment(editingId, form);
         } else {
@@ -87,6 +110,14 @@ function ShipmentPage() {
         fetchShipments();
     };
 
+    // modal for selecting order
+    const handleOrderSelect = (orderId: number) => {
+        setForm({ ...form, ordersId: orderId });
+        const selected = ordersList.find(o => o.id === orderId);
+        setSelectedOrderLabel(selected ? `#${selected.orderNumber} - ${selected.buyerName}` : '');
+        setIsOrderModalOpen(false);
+    };
+
     return (
         <div className="max-w-6xl mx-auto p-10">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">배송 관리</h2>
@@ -119,7 +150,6 @@ function ShipmentPage() {
             <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
                 <thead>
                     <tr className="bg-gray-100 text-left text-sm text-gray-600">
-                        <th className="px-4 py-3">ID</th>
                         <th className="px-4 py-3">오더 ID</th>
                         <th className="px-4 py-3">바이어</th>
                         <th className="px-4 py-3">포워더</th>
@@ -132,8 +162,7 @@ function ShipmentPage() {
                 <tbody>
                     {shipmentList.map((s) => (
                         <tr key={s.id} className="border-t border-gray-200 hover:bg-gray-50">
-                            <td className="px-4 py-3">{s.id}</td>
-                            <td className="px-4 py-3">{s.ordersId}</td>
+                            <td className="px-4 py-3">{s.orderNumber}</td>
                             <td className="px-4 py-3">{s.buyerName}</td>
                             <td className="px-4 py-3">{s.forwarderName}</td>
                             <td className="px-4 py-3">{s.fee}</td>
@@ -179,12 +208,13 @@ function ShipmentPage() {
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">{editingId ? '배송 수정' : '배송 등록'}</h3>
 
                 <div className="grid grid-cols-2 gap-3 mb-4">
-                    <EntitySelect
-                        value={form.ordersId}
-                        onChange={(id) => setForm({ ...form, ordersId: id })}
-                        options={ordersList.map(o => ({ id: o.id, label: `#${o.id} - ${o.buyerName}` }))}
-                        placeholder="오더 선택"
-                    />
+                    <button
+                        type="button"
+                        onClick={() => setIsOrderModalOpen(true)}
+                        className="border border-gray-300 rounded px-3 py-2 text-left text-gray-700"
+                    >
+                        {selectedOrderLabel || '오더 선택'}
+                    </button>
 
                     <EntitySelect
                         value={form.forwarderId}
@@ -218,9 +248,16 @@ function ShipmentPage() {
                             취소
                         </button>
                     )}
+
+                    <OrderSelectModal
+                        isOpen={isOrderModalOpen}
+                        onClose={() => setIsOrderModalOpen(false)}
+                        onSelect={handleOrderSelect}
+                    />
                 </div>
             </div>
         </div>
+
     );
 
 }

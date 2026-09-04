@@ -153,7 +153,7 @@ function PackingListPage() {
             <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
                 <thead>
                     <tr className="bg-gray-100 text-left text-sm text-gray-600">
-                        <th className="px-4 py-3">ID</th>
+                        <th className="px-4 py-3">오더 ID</th>
                         <th className="px-4 py-3">회사명</th>
                         <th className="px-4 py-3">운송사</th>
                         <th className="px-4 py-3">포장날짜</th>
@@ -167,7 +167,7 @@ function PackingListPage() {
                 <tbody>
                     {packingList.map((packingList) => (
                         <tr key={packingList.id} className="border-t border-gray-200 hover:bg-gray-50">
-                            <td className="px-4 py-3">{packingList.id}</td>
+                            <td className="px-4 py-3">{packingList.orderNumber}</td>
                             <td className="px-4 py-3">{packingList.buyerName}</td>
                             <td className="px-4 py-3">{packingList.forwarderName}</td>
                             <td className="px-4 py-3">{packingList.packingDate}</td>

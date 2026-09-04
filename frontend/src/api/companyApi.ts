@@ -11,9 +11,17 @@ export const updateCompany = async (id: number, dto: CompanyCreateRequest): Prom
     return response.data;
 };
 
+// pagination
 export const getCompanyList = async (role?: string, companyName?: string, page: number = 0, size: number = 10): Promise<PagedCompanies> => {
     const response = await api.get<PagedCompanies>(`/companies`, {
         params: { role, companyName, page, size },
+    });
+    return response.data;
+};
+
+export const getAllCompanies = async (role?: string): Promise<Company[]> => {
+    const response = await api.get<Company[]>('/companies/all', {
+        params: { role },
     });
     return response.data;
 };

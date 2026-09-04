@@ -56,6 +56,7 @@ export interface PackingListResponse {
     packingDate: string;
     totalAmount: number;
     totalWeight: number;
+    orderNumber: string;
     comment?: string;
     createdAt: string;
     updatedAt: string;

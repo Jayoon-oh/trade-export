@@ -23,6 +23,7 @@ export interface PaymentResponse {
     amount: number;
     paymentDate: string;
     status: PaymentStatus;
+    orderNumber: string;
     createdAt: string;
     updatedAt: string;
 }

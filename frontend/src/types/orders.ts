@@ -10,6 +10,7 @@ export interface Orders {
     updatedAt: string;
     currency: string;
     incoterms: string;
+    orderNumber: string;
     paymentTerm: string;
     hasInvoice: boolean;
 }
@@ -50,6 +51,7 @@ export interface OrdersCreateRequest {
 export interface OrdersItemRequest {
     itemsId: number;
     quantity: number;
+    price?: number;
 }
 
 

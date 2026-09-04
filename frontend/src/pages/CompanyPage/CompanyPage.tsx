@@ -21,7 +21,7 @@ function CompanyPage() {
         signaturePath: ''
     })
     const [searchRole, setSearchRole] = useState('');
-    const roles = ['Forwarder', 'Buyer', 'Seller', 'Carrier'];
+    const roles = ['FORWARDER', 'BUYER', 'SELLER', 'CARRIER'];
     const categories = ['국제운송', '국내운송'];
     const deliveryMethods = ['해상', '항공', '육상'];
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -66,6 +66,30 @@ function CompanyPage() {
 
     // Editing & Creating
     const handleSubmit = async () => {
+        if (!form.companyName.trim()) {
+            alert('회사명을 입력해주세요.');
+            return;
+        }
+        if (!form.address.trim()) {
+            alert('주소를 입력해주세요.');
+            return;
+        }
+        if (!form.country.trim()) {
+            alert('국가를 입력해주세요.');
+            return;
+        }
+        if (!form.nameOfOwner.trim()) {
+            alert('대표자명을 입력해주세요.');
+            return;
+        }
+        if (!form.role) {
+            alert('역할을 선택해주세요.');
+            return;
+        }
+        if (form.registrationNumber && !/^[\d-]+$/.test(form.registrationNumber)) {
+            alert('사업자번호는 숫자와 하이픈(-)만 입력 가능합니다.');
+            return;
+        }
         try {
             if (editingId) {
                 await updateCompany(editingId, form);
@@ -108,6 +132,11 @@ function CompanyPage() {
                 <input
                     value={searchName}
                     onChange={(e) => setSearchName(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            fetchCompanies();
+                        }
+                    }}
                     placeholder="회사명 검색"
                     className="border border-gray-300 rounded px-3 py-2"
                 />
@@ -238,7 +267,7 @@ function CompanyPage() {
                 </div>
 
                 {/* when Role is Forwarder OR Carrier */}
-                {(form.role === 'Forwarder' || form.role === 'Carrier') && (
+                {(form.role === 'Forwarder' || form.role === 'CARRIER') && (
                     <div className="grid grid-cols-2 gap-3 mb-4">
                         <select
                             value={form.category}

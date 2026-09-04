@@ -38,4 +38,5 @@ export interface InvoiceResponse {
     totalAmount: number;
     exchangeRate: number;
     currency: string;
+    orderNumber: string;
 }

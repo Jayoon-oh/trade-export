@@ -84,6 +84,32 @@ function OrdersPage() {
     };
 
     const handleSubmit = async () => {
+        // validation
+        if (!form.buyerId) {
+            alert('바이어를 선택해주세요.');
+            return;
+        }
+        if (!form.ordersDate) {
+            alert('주문일을 선택해주세요.');
+            return;
+        }
+        if (!form.currency) {
+            alert('통화를 선택해주세요.');
+            return;
+        }
+        if (!form.incoterms) {
+            alert('인코텀즈를 선택해주세요.');
+            return;
+        }
+        if (!form.paymentTerm) {
+            alert('결제조건을 선택해주세요.');
+            return;
+        }
+        if (form.items.length === 0) {
+            alert('품목을 최소 1개 이상 추가해주세요.');
+            return;
+        }
+
         try {
             const payload = {
                 ...form,
@@ -237,7 +263,7 @@ function OrdersPage() {
             <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
                 <thead>
                     <tr className="bg-gray-100 text-left text-sm text-gray-600">
-                        <th className="px-4 py-3">ID</th>
+                        <th className="px-4 py-3">오더 ID</th>
                         <th className="px-4 py-3">바이어명</th>
                         <th className="px-4 py-3">금액</th>
                         <th className="px-4 py-3">통화</th>
@@ -249,7 +275,7 @@ function OrdersPage() {
                 <tbody>
                     {ordersList.map((orders) => (
                         <tr key={orders.id} className="border-t border-gray-200 hover:bg-gray-50">
-                            <td className="px-4 py-3">{orders.id}</td>
+                            <td className="px-4 py-3">{orders.orderNumber}</td>
                             <td className="px-4 py-3">{orders.buyerName}</td>
                             <td className="px-4 py-3">{orders.amount}</td>
                             <td className="px-4 py-3">{orders.currency}</td>
@@ -297,7 +323,7 @@ function OrdersPage() {
                     <EntitySelect
                         value={form.buyerId}
                         onChange={(id) => setForm({ ...form, buyerId: id })}
-                        options={companies.map(c => ({ id: c.id, label: c.companyName }))}
+                        options={companies.filter(c => c.role === 'BUYER').map(c => ({ id: c.id, label: c.companyName }))}
                         placeholder="바이어 선택"
                         disabled={editingId != null}
                     />
@@ -340,7 +366,7 @@ function OrdersPage() {
                         <ItemPicker
                             itemsId={currentItem.itemsId}
                             quantity={currentItem.quantity}
-                            itemsList={itemsList.map(item => ({ id: item.id, label: item.productName }))}
+                            itemsList={itemsList.map(item => ({ id: item.id, label: item.productName, price: item.price }))}
                             onChangeItem={(id) => setCurrentItem({ ...currentItem, itemsId: id })}
                             onChangeQuantity={(qty) => setCurrentItem({ ...currentItem, quantity: qty })}
                         />

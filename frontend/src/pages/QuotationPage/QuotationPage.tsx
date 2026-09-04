@@ -188,7 +188,7 @@ function QuotationPage() {
                     <EntitySelect
                         value={form.companyId}
                         onChange={(id) => setForm({ ...form, companyId: id })}
-                        options={companies.map(c => ({ id: c.id, label: c.companyName }))}
+                        options={companies.filter(c => c.role === 'BUYER').map(c => ({ id: c.id, label: c.companyName }))}
                         placeholder="바이어 선택"
                         disabled={editingId != null}
                     />
@@ -225,7 +225,7 @@ function QuotationPage() {
                         <ItemPicker
                             itemsId={currentItem.itemsId}
                             quantity={currentItem.quantity}
-                            itemsList={itemsList.map(i => ({ id: i.id, label: i.productName }))}
+                            itemsList={itemsList.map(i => ({ id: i.id, label: i.productName, price: i.price }))}
                             onChangeItem={(id) => setCurrentItem({ ...currentItem, itemsId: id })}
                             onChangeQuantity={(qty) => setCurrentItem({ ...currentItem, quantity: qty })}
                         />
