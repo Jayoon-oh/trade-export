@@ -1,7 +1,7 @@
 import { getPackingList, createPackingList, deletePackingList, getPackingLists, handleGeneratePackingList, updatePackingList } from "../../api/packingListApi"
 import type { Items } from "../../types/items"
 import type { Company } from "../../types/company"
-import { getCompanyList } from "../../api/companyApi";
+import { getAllCompanies, getCompanyList } from "../../api/companyApi";
 import { getItemsList } from "../../api/itemsApi";
 import { useState, useEffect } from "react"
 import type { PackingListCreateRequest, PackingListItemRequest, PackingListResponse } from "../../types/packingList";
@@ -58,8 +58,8 @@ function PackingListPage() {
     }
 
     const fetchCompanies = async () => {
-        const data = await getCompanyList();
-        setCompanies(data.content);
+        const data = await getAllCompanies();
+        setCompanies(data);
     }
 
     const fetchItems = async () => {
@@ -73,10 +73,14 @@ function PackingListPage() {
             return;
         }
         try {
+            const payload = {
+                ...form,
+                items: form.items.map(({ itemsId, quantity, actualWeight }) => ({ itemsId, quantity, actualWeight })),
+            };
             if (editingId) {
-                await updatePackingList(editingId, form);
+                await updatePackingList(editingId, payload);
             } else {
-                await createPackingList(form);
+                await createPackingList(payload);
             }
             setForm({
                 shipmentId: 0,
@@ -238,24 +242,30 @@ function PackingListPage() {
                         <ItemPicker
                             itemsId={currentItem.itemsId}
                             quantity={currentItem.quantity}
-                            itemsList={itemsList.map(item => ({ id: item.id, label: item.productName }))}
-                            onChangeItem={(id) => setCurrentItem({ ...currentItem, itemsId: id })}
+                            itemsList={itemsList.map(item => ({ id: item.id, label: item.productName, weight: item.standardWeight }))}
+                            onChangeItem={(id) => {
+                                const selected = itemsList.find(item => item.id === id);
+                                setCurrentItem({ ...currentItem, itemsId: id, itemName: selected?.productName });
+                            }}
                             onChangeQuantity={(qty) => setCurrentItem({ ...currentItem, quantity: qty })}
                         />
-                        <input
-                            type="number"
-                            value={currentItem.actualWeight || ''}
-                            onChange={(e) => setCurrentItem({ ...currentItem, actualWeight: Number(e.target.value) })}
-                            placeholder="실측 중량"
-                            className="border border-gray-300 rounded px-3 py-2"
-                        />
+                        <div className="relative">
+                            <input
+                                type="number"
+                                value={currentItem.actualWeight || ''}
+                                onChange={(e) => setCurrentItem({ ...currentItem, actualWeight: Number(e.target.value) })}
+                                placeholder="실측 중량"
+                                className="border border-gray-300 rounded px-3 py-2 pr-10"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">kg</span>
+                        </div>
                         <button onClick={handleAddItem} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">품목 추가</button>
                     </div>
 
                     <ul className="space-y-1">
                         {form.items.map((item, index) => (
                             <li key={index} className="flex justify-between items-center bg-white border border-gray-200 rounded px-3 py-2 text-sm">
-                                <span>품목ID: {item.itemsId}, 수량: {item.quantity}, 실측중량: {item.actualWeight}</span>
+                                <span>제품: {item.itemName}, 수량: {item.quantity}, 실측중량: {item.actualWeight} kg</span>
                                 <button onClick={() => handleRemoveItem(index)} className="text-red-600 hover:underline">삭제</button>
                             </li>
                         ))}

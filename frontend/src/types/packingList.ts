@@ -19,6 +19,7 @@ export interface PackingListItemRequest {
     itemsId: number;
     quantity: number;
     actualWeight: number;
+    itemName?: string;
 }
 
 export interface PackingListItemLine {

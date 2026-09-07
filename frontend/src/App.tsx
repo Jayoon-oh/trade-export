@@ -8,6 +8,7 @@ import OrdersPage from './pages/OrderPage/OrdersPage'
 import ShipmentPage from './pages/ShipmentPage/ShipmentPage'
 import PackingListPage from './pages/PackingListPage/PackingListPage'
 import PaymentPage from './pages/PaymentPage/PaymentPage'
+import LoginPage from './pages/LoginPage/LoginPage'
 
 function App() {
 
@@ -18,6 +19,7 @@ function App() {
         <div className="flex-1 flex flex-col">
           <main className="flex-1">
             <Routes>
+              <Route path="/login" element={<LoginPage />} />
               <Route path="/" element={<Navigate to="/orders" replace />} />
               <Route path="/stock" element={<StockPage />} />
               <Route path="/companies" element={<CompanyPage />} />

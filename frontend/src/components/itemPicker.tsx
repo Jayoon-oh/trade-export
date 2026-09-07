@@ -3,7 +3,8 @@ import EntitySelect from "./EntitySelect";
 interface ItemPickerItem {
     id: number;
     label: string;
-    price: number;
+    price?: number;
+    weight?: number;
 }
 
 interface ItemPickerProps {
@@ -30,10 +31,16 @@ function ItemPicker({ itemsId, quantity, itemsList, onChangeItem, onChangeQuanti
                 onChange={(e) => onChangeQuantity(Number(e.target.value))}
                 placeholder="수량"
             />
-            {selectedItem && (
+            {selectedItem && selectedItem.price != null && (
                 <span className="text-sm text-gray-600 self-center">
                     단가: {selectedItem.price.toLocaleString()}원
                     {quantity > 0 && ` / 합계: ${(selectedItem.price * quantity).toLocaleString()}원`}
+                </span>
+            )}
+            {selectedItem && selectedItem.weight != null && (
+                <span className="text-sm text-gray-600 self-center">
+                    기준중량: {selectedItem.weight}kg
+                    {quantity > 0 && ` / 합계중량: ${(selectedItem.weight * quantity).toFixed(2)}kg`}
                 </span>
             )}
         </>

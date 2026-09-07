@@ -1,6 +1,6 @@
 import { getShipment, createShipment, getShipmentsList, updateShipmentStatus, updateShipment } from "../../api/shipmentApi";
 import { getOrdersList } from "../../api/ordersApi";
-import { getCompanyList } from "../../api/companyApi";
+import { getAllCompanies, getCompanyList } from "../../api/companyApi";
 import type { Company } from "../../types/company";
 import type { Orders } from "../../types/orders";
 import type { Shipment, ShipmentCreateRequest, ShipmentStatus } from "../../types/shipment";
@@ -53,8 +53,8 @@ function ShipmentPage() {
     }
 
     const fetchCompanies = async () => {
-        const data = await getCompanyList();
-        setCompanies(data.content);
+        const data = await getAllCompanies();
+        setCompanies(data);
     }
 
     const handleSubmit = async () => {

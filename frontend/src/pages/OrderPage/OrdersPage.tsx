@@ -1,6 +1,6 @@
 import type { Orders, OrdersCreateRequest, OrdersItemRequest } from "../../types/orders";
 import { getInvoiceList, issueInvoice, cancelInvoice, handleGenerateInvoice } from "../../api/invoiceApi";
-import { getCompanyList } from "../../api/companyApi";
+import { getAllCompanies, getCompanyList } from "../../api/companyApi";
 import { getItemsList } from "../../api/itemsApi";
 import { getOrdersList, deleteOrders, getOrder, registerOrders, updateOrders } from "../../api/ordersApi";
 import { useState, useEffect } from "react";
@@ -69,8 +69,8 @@ function OrdersPage() {
     }
 
     const fetchCompanies = async () => {
-        const data = await getCompanyList();
-        setCompanies(data.content);
+        const data = await getAllCompanies();
+        setCompanies(data);
     }
 
     const fetchQuotations = async () => {
