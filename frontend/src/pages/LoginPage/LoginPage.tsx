@@ -22,7 +22,7 @@ function LoginPage() {
             localStorage.setItem('token', data.token);
             localStorage.setItem('name', data.name);
             localStorage.setItem('role', data.role);
-            navigate('/orders');
+            navigate('/dashboard');
         } catch (error) {
             alert('아이디 또는 비밀번호가 올바르지 않습니다.');
         }

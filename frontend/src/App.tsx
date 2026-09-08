@@ -9,6 +9,8 @@ import ShipmentPage from './pages/ShipmentPage/ShipmentPage'
 import PackingListPage from './pages/PackingListPage/PackingListPage'
 import PaymentPage from './pages/PaymentPage/PaymentPage'
 import LoginPage from './pages/LoginPage/LoginPage'
+import DashboardPage from './pages/Dashboard/DashboardPage'
+import PrivateRoute from './components/PrivateRoute'
 
 function App() {
 
@@ -20,14 +22,18 @@ function App() {
           <main className="flex-1">
             <Routes>
               <Route path="/login" element={<LoginPage />} />
-              <Route path="/" element={<Navigate to="/orders" replace />} />
-              <Route path="/stock" element={<StockPage />} />
-              <Route path="/companies" element={<CompanyPage />} />
-              <Route path="/quotations" element={<QuotationPage />} />
-              <Route path="/orders" element={<OrdersPage />} />
-              <Route path="/shipments" element={<ShipmentPage />} />
-              <Route path="/packing-lists" element={<PackingListPage />} />
-              <Route path="/payments" element={<PaymentPage />} />
+
+              <Route element={<PrivateRoute />}>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/stock" element={<StockPage />} />
+                <Route path="/companies" element={<CompanyPage />} />
+                <Route path="/quotations" element={<QuotationPage />} />
+                <Route path="/orders" element={<OrdersPage />} />
+                <Route path="/shipments" element={<ShipmentPage />} />
+                <Route path="/packing-lists" element={<PackingListPage />} />
+                <Route path="/payments" element={<PaymentPage />} />
+              </Route>
             </Routes>
           </main>
           <Footer />
