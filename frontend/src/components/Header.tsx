@@ -1,7 +1,15 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 function Header() {
     const location = useLocation();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('name');
+        localStorage.removeItem('role');
+        navigate('/login');
+    }
 
     const menuItems = [
         { to: '/stock', label: '재고' },
@@ -32,6 +40,12 @@ function Header() {
                     </Link>
                 ))}
             </nav>
+            <button
+                onClick={handleLogout}
+                className="mt-auto px-2 py-2 text-sm text-white/70 hover:text-white text-left"
+            >
+                로그아웃
+            </button>
         </header>
     )
 }

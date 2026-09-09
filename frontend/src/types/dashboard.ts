@@ -8,7 +8,7 @@ export interface OrderPipeline {
     hasShipment: boolean;
     hasPackingList: boolean;
     isFullyPaid: boolean;
-    nextAction: boolean;
+    nextAction: string;
 }
 
 export interface PipelineFunnel {
@@ -21,4 +21,23 @@ export interface PipelineFunnel {
     shipmentCount: number;
     paymentCount: number;
     paymentAmount: number;
+}
+
+export interface PaymentRecord {
+    paymentDate: string;
+    amount: number;
+}
+
+export interface OrderDetail {
+    orderId: number;
+    orderNumber: string;
+    buyerName: string;
+    amount: number;
+    invoiceNumber: string | null;
+    invoiceDate: string | null;
+    invoiceAmount: number;
+    exchangeRate: number | null;
+    totalPaid: number;
+    remaining: number;
+    payments: PaymentRecord[];
 }
