@@ -1,50 +1,34 @@
-import { getShipment, createShipment, getShipmentsList, updateShipmentStatus, updateShipment } from "../../api/shipmentApi";
-import { getOrdersList } from "../../api/ordersApi";
-import { getAllCompanies, getCompanyList } from "../../api/companyApi";
+import { getShipmentsList, updateShipmentStatus } from "../../api/shipmentApi";
+import { getAllCompanies } from "../../api/companyApi";
 import type { Company } from "../../types/company";
-import type { Orders } from "../../types/orders";
-import type { Shipment, ShipmentCreateRequest, ShipmentStatus } from "../../types/shipment";
+import type { Shipment, ShipmentStatus } from "../../types/shipment";
 import { useState, useEffect } from "react";
 import EntitySelect from "../../components/EntitySelect";
 import StatusSelect from "../../components/StatusSelect";
-import OrderSelectModal from "./components/OrderSelectModal";
+import ShipmentQuickEditCard from "./components/ShipmentQuickEditCard";
 
 function ShipmentPage() {
-    const [ordersList, setOrdersList] = useState<Orders[]>([]);
     const [shipmentList, setShipmentList] = useState<Shipment[]>([]);
     const [buyerId, setBuyerId] = useState(0);
     const [forwarderId, setForwarderId] = useState(0);
     const [shipmentStatus, setShipmentStatus] = useState<ShipmentStatus>();
-    const [form, setForm] = useState<ShipmentCreateRequest>({
-        ordersId: 0,
-        forwarderId: 0,
-        fee: 0,
-        shipmentDate: '',
-    })
-    const [editingId, setEditingId] = useState<number | null>(null);
     const [companies, setCompanies] = useState<Company[]>([]);
 
     // pagination
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
 
-    // modal for selecting company
-    const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
-    const [selectedOrderLabel, setSelectedOrderLabel] = useState('');
+    // selecting company
+    const [isCardOpen, setIsCardOpen] = useState(false);
+    const [editingShipmentId, setEditingShipmentId] = useState<number | null>(null);
 
     useEffect(() => {
         fetchCompanies();
-        fetchOrders();
     }, [])
 
     useEffect(() => {
         fetchShipments();
     }, [buyerId, forwarderId, shipmentStatus, currentPage]);
-
-    const fetchOrders = async () => {
-        const data = await getOrdersList(buyerId || undefined);
-        setOrdersList(data.content);
-    }
 
     const fetchShipments = async () => {
         const data = await getShipmentsList(buyerId || undefined, forwarderId || undefined, shipmentStatus || undefined, currentPage);
@@ -57,70 +41,15 @@ function ShipmentPage() {
         setCompanies(data);
     }
 
-    const handleSubmit = async () => {
-        // validation
-        if (!form.ordersId) {
-            alert('오더를 선택해주세요.');
-            return;
-        }
-        if (!form.forwarderId) {
-            alert('포워더 선택해주세요.');
-            return;
-        }
-        if (!form.fee) {
-            alert('운임비 입력해주세요.');
-            return;
-        }
-        if (!form.shipmentDate) {
-            alert('날짜를 선택해주세요.');
-            return;
-        }
-
-        if (editingId) {
-            await updateShipment(editingId, form);
-        } else {
-            await createShipment(form);
-        }
-        setForm({
-            ordersId: 0,
-            forwarderId: 0,
-            fee: 0,
-            shipmentDate: '',
-        });
-        setEditingId(null);
-        fetchShipments();
-    }
-
-
-    const handleEdit = async (shipmentId: number) => {
-        const detail = await getShipment(shipmentId);
-
-        setForm({
-            ordersId: detail.ordersId,
-            forwarderId: detail.forwarderId,
-            fee: detail.fee,
-            shipmentDate: detail.shipmentDate,
-        });
-        setEditingId(shipmentId);
-    };
-
     const handleStatusChange = async (shipmentId: number, newStatus: ShipmentStatus) => {
         if (!confirm(`상태를 ${newStatus}(으)로 변경하시겠습니까?`)) return;
         await updateShipmentStatus(shipmentId, newStatus);
         fetchShipments();
     };
 
-    // modal for selecting order
-    const handleOrderSelect = (orderId: number) => {
-        setForm({ ...form, ordersId: orderId });
-        const selected = ordersList.find(o => o.id === orderId);
-        setSelectedOrderLabel(selected ? `#${selected.orderNumber} - ${selected.buyerName}` : '');
-        setIsOrderModalOpen(false);
-    };
-
     return (
         <div className="max-w-6xl mx-auto p-10">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">배송 관리</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">선적 관리</h2>
 
             {/* filter */}
             <div className="flex gap-2 mb-8">
@@ -130,134 +59,101 @@ function ShipmentPage() {
                     options={companies.filter(c => c.role === 'BUYER').map(c => ({ id: c.id, label: c.companyName }))}
                     placeholder="전체 바이어"
                 />
-
                 <EntitySelect
                     value={forwarderId}
                     onChange={setForwarderId}
                     options={companies.filter(c => c.role === 'FORWARDER').map(c => ({ id: c.id, label: c.companyName }))}
                     placeholder="전체 포워더"
                 />
-
                 <StatusSelect
                     value={shipmentStatus ?? ''}
                     onChange={(status) => setShipmentStatus(status as ShipmentStatus || undefined)}
                     options={['PLANNED', 'SHIPPED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED']}
                     placeholder="전체 상태"
                 />
-            </div>
-
-            {/* list */}
-            <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
-                <thead>
-                    <tr className="bg-gray-100 text-left text-sm text-gray-600">
-                        <th className="px-4 py-3">오더 ID</th>
-                        <th className="px-4 py-3">바이어</th>
-                        <th className="px-4 py-3">포워더</th>
-                        <th className="px-4 py-3">운임</th>
-                        <th className="px-4 py-3">상태</th>
-                        <th className="px-4 py-3">선적일</th>
-                        <th className="px-4 py-3"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {shipmentList.map((s) => (
-                        <tr key={s.id} className="border-t border-gray-200 hover:bg-gray-50">
-                            <td className="px-4 py-3">{s.orderNumber}</td>
-                            <td className="px-4 py-3">{s.buyerName}</td>
-                            <td className="px-4 py-3">{s.forwarderName}</td>
-                            <td className="px-4 py-3">{s.fee}</td>
-                            <td className="px-4 py-3">
-                                <StatusSelect
-                                    value={s.status}
-                                    onChange={(status) => handleStatusChange(s.id, status as ShipmentStatus)}
-                                    options={['PLANNED', 'SHIPPED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED']}
-                                />
-                            </td>
-                            <td className="px-4 py-3">{s.shipmentDate}</td>
-                            <td className="px-4 py-3">
-                                <button onClick={() => handleEdit(s.id)} className="text-blue-900 hover:underline">수정</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-
-            {/* Pagination */}
-            <div className="flex justify-center gap-2 mb-8">
-                <button
-                    onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
-                    disabled={currentPage === 0}
-                    className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
-                >
-                    이전
-                </button>
-                <span className="px-3 py-1 text-sm text-gray-600">
-                    {currentPage + 1} / {totalPages}
-                </span>
-                <button
-                    onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
-                    disabled={currentPage >= totalPages - 1}
-                    className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
-                >
-                    다음
+                <button onClick={() => { setEditingShipmentId(null); setIsCardOpen(true); }} className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">
+                    + 신규 등록
                 </button>
             </div>
 
-            {/* Form of create & update */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">{editingId ? '배송 수정' : '배송 등록'}</h3>
+            <div className="flex gap-4">
+                <div className="flex-1">
+                    {/* list */}
+                    <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
+                        <thead>
+                            <tr className="bg-gray-100 text-left text-sm text-gray-600">
+                                <th className="px-4 py-3">오더 ID</th>
+                                <th className="px-4 py-3">바이어</th>
+                                <th className="px-4 py-3">포워더</th>
+                                <th className="px-4 py-3">운임</th>
+                                <th className="px-4 py-3">상태</th>
+                                <th className="px-4 py-3">선적일</th>
+                                <th className="px-4 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {shipmentList.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="px-4 py-8 text-center text-gray-400 text-sm">
+                                        선적 내역이 없습니다
+                                    </td>
+                                </tr>
+                            ) : (
+                                shipmentList.map((s) => (
+                                    <tr key={s.id} className="border-t border-gray-200 hover:bg-gray-50">
+                                        <td className="px-4 py-3">{s.orderNumber}</td>
+                                        <td className="px-4 py-3">{s.buyerName}</td>
+                                        <td className="px-4 py-3">{s.forwarderName}</td>
+                                        <td className="px-4 py-3">{s.fee}</td>
+                                        <td className="px-4 py-3">
+                                            <StatusSelect
+                                                value={s.status}
+                                                onChange={(status) => handleStatusChange(s.id, status as ShipmentStatus)}
+                                                options={['PLANNED', 'SHIPPED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED']}
+                                            />
+                                        </td>
+                                        <td className="px-4 py-3">{s.shipmentDate}</td>
+                                        <td className="px-4 py-3">
+                                            <button onClick={() => { setEditingShipmentId(s.id); setIsCardOpen(true); }} className="text-blue-900 hover:underline">수정</button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
 
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                    <button
-                        type="button"
-                        onClick={() => setIsOrderModalOpen(true)}
-                        className="border border-gray-300 rounded px-3 py-2 text-left text-gray-700"
-                    >
-                        {selectedOrderLabel || '오더 선택'}
-                    </button>
-
-                    <EntitySelect
-                        value={form.forwarderId}
-                        onChange={(id) => setForm({ ...form, forwarderId: id })}
-                        options={companies.filter(c => c.role === 'FORWARDER').map(c => ({ id: c.id, label: c.companyName }))}
-                        placeholder="포워더 선택"
-                    />
-
-                    <input
-                        type='number'
-                        placeholder='운임비'
-                        value={form.fee === 0 ? '' : form.fee}
-                        onChange={(e) => setForm({ ...form, fee: Number(e.target.value) })}
-                        className="border border-gray-300 rounded px-3 py-2"
-                    />
-
-                    <input
-                        type='date'
-                        value={form.shipmentDate}
-                        onChange={(e) => setForm({ ...form, shipmentDate: e.target.value })}
-                        className="border border-gray-300 rounded px-3 py-2"
-                    />
-                </div>
-
-                <div className="flex gap-2">
-                    <button onClick={handleSubmit} className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">
-                        {editingId ? '수정 완료' : '등록'}
-                    </button>
-                    {editingId && (
-                        <button onClick={() => setEditingId(null)} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
-                            취소
+                    {/* Pagination */}
+                    <div className="flex justify-center gap-2 mb-8">
+                        <button
+                            onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                            disabled={currentPage === 0}
+                            className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                        >
+                            이전
                         </button>
-                    )}
-
-                    <OrderSelectModal
-                        isOpen={isOrderModalOpen}
-                        onClose={() => setIsOrderModalOpen(false)}
-                        onSelect={handleOrderSelect}
-                    />
+                        <span className="px-3 py-1 text-sm text-gray-600">
+                            {currentPage + 1} / {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+                            disabled={currentPage >= totalPages - 1}
+                            className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                        >
+                            다음
+                        </button>
+                    </div>
                 </div>
+
+                {isCardOpen && (
+                    <ShipmentQuickEditCard
+                        key={editingShipmentId ?? 'new'}
+                        shipmentId={editingShipmentId}
+                        onSuccess={() => { setIsCardOpen(false); fetchShipments(); }}
+                        onCancel={() => setIsCardOpen(false)}
+                    />
+                )}
             </div>
         </div>
-
     );
 
 }

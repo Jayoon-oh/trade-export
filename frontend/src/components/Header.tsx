@@ -16,7 +16,7 @@ function Header() {
         { to: '/companies', label: '거래처' },
         { to: '/quotations', label: '견적' },
         { to: '/orders', label: '오더' },
-        { to: '/shipments', label: '배송' },
+        { to: '/shipments', label: '선적' },
         { to: '/packing-lists', label: '패킹리스트' },
         { to: '/payments', label: '결제' },
     ];

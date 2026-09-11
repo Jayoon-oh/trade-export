@@ -50,7 +50,7 @@ function DashboardPage() {
         switch (nextAction) {
             case '인보이스 발행':
                 return `/orders`;
-            case '배송 등록':
+            case '선적 등록':
                 return `/shipments`;
             case '패킹리스트 등록':
                 return `/packing-lists`;
@@ -73,7 +73,7 @@ function DashboardPage() {
                             <FunnelCard label="견적" count={funnel.quotationCount} amount={funnel.quotationAmount} />
                             <FunnelCard label="오더" count={funnel.ordersCount} amount={funnel.ordersAmount} />
                             <FunnelCard label="인보이스" count={funnel.invoiceCount} amount={funnel.invoiceAmount} />
-                            <FunnelCard label="배송" count={funnel.shipmentCount} />
+                            <FunnelCard label="선적" count={funnel.shipmentCount} />
                             <FunnelCard label="결제" count={funnel.paymentCount} amount={funnel.paymentAmount} />
                         </div>
                     )}
@@ -90,36 +90,44 @@ function DashboardPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {orders.map((order) => (
-                                <tr key={order.orderId} className="border-t border-gray-200 hover:bg-gray-50">
-                                    <td className="px-4 py-3">{order.orderNumber}</td>
-                                    <td className="px-4 py-3">{order.buyerName}</td>
-                                    <td className="px-4 py-3">{order.amount.toLocaleString()}</td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex gap-1">
-                                            <span className={order.hasQuotation ? 'text-green-600' : 'text-gray-300'}>●</span>
-                                            <span className={order.hasInvoice ? 'text-green-600' : 'text-gray-300'}>●</span>
-                                            <span className={order.hasPackingList ? 'text-green-600' : 'text-gray-300'}>●</span>
-                                            <span className={order.hasShipment ? 'text-green-600' : 'text-gray-300'}>●</span>
-                                            <span className={order.isFullyPaid ? 'text-green-600' : 'text-gray-300'}>●</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {order.nextAction === '완료' ? (
-                                            <span className="text-gray-400">완료</span>
-                                        ) : (
-                                            <Link to={getActionUrl(order.nextAction)} className="text-blue-900 hover:underline">
-                                                {order.nextAction}
-                                            </Link>
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <button onClick={() => handleViewDetail(order.orderId)} className="text-blue-900 hover:underline text-sm">
-                                            {selectedOrderId === order.orderId ? '접기' : '상세보기'}
-                                        </button>
+                            {orders.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6} className="px-4 py-8 text-center text-gray-400 text-sm">
+                                        진행 내역이 없습니다
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                orders.map((order) => (
+                                    <tr key={order.orderId} className="border-t border-gray-200 hover:bg-gray-50">
+                                        <td className="px-4 py-3">{order.orderNumber}</td>
+                                        <td className="px-4 py-3">{order.buyerName}</td>
+                                        <td className="px-4 py-3">{order.amount.toLocaleString()}</td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex gap-1">
+                                                <span className={order.hasQuotation ? 'text-green-600' : 'text-gray-300'}>●</span>
+                                                <span className={order.hasInvoice ? 'text-green-600' : 'text-gray-300'}>●</span>
+                                                <span className={order.hasPackingList ? 'text-green-600' : 'text-gray-300'}>●</span>
+                                                <span className={order.hasShipment ? 'text-green-600' : 'text-gray-300'}>●</span>
+                                                <span className={order.isFullyPaid ? 'text-green-600' : 'text-gray-300'}>●</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            {order.nextAction === '완료' ? (
+                                                <span className="text-gray-400">완료</span>
+                                            ) : (
+                                                <Link to={getActionUrl(order.nextAction)} className="text-blue-900 hover:underline">
+                                                    {order.nextAction}
+                                                </Link>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <button onClick={() => handleViewDetail(order.orderId)} className="text-blue-900 hover:underline text-sm">
+                                                {selectedOrderId === order.orderId ? '접기' : '상세보기'}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>

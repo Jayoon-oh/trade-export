@@ -1,7 +1,7 @@
 import type { Orders } from "../../types/orders";
 import { getInvoiceList, issueInvoice, cancelInvoice, handleGenerateInvoice } from "../../api/invoiceApi";
 import { getAllCompanies } from "../../api/companyApi";
-import { getOrdersList, deleteOrders} from "../../api/ordersApi";
+import { getOrdersList, deleteOrders } from "../../api/ordersApi";
 import { useState, useEffect } from "react";
 import type { Company } from "../../types/company";
 import type { InvoiceResponse } from "../../types/invoice";
@@ -149,24 +149,32 @@ function OrdersPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {ordersList.map((orders) => (
-                                <tr key={orders.id} className="border-t border-gray-200 hover:bg-gray-50">
-                                    <td className="px-4 py-3">{orders.orderNumber}</td>
-                                    <td className="px-4 py-3">{orders.buyerName}</td>
-                                    <td className="px-4 py-3">{orders.amount}</td>
-                                    <td className="px-4 py-3">{orders.currency}</td>
-                                    <td className="px-4 py-3">{formatDate(orders.ordersDate)}</td>
-                                    <td className="px-4 py-3">{orders.comment || '-'}</td>
-                                    <td className="px-4 py-3 flex gap-2 flex-wrap">
-                                        <button onClick={() => { setEditingId(orders.id); setView('edit'); }} className="text-blue-900 hover:underline">수정</button>
-                                        {!orders.hasInvoice && (
-                                            <button onClick={() => handleDelete(orders.id)} className="text-red-600 hover:underline">삭제</button>
-                                        )}
-                                        <button onClick={() => handleIssueInvoice(orders.id)} className="text-green-700 hover:underline">인보이스 발행</button>
-                                        <button onClick={() => handleViewHistory(orders.id)} className="text-gray-600 hover:underline">발행 이력</button>
+                            {ordersList.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="px-4 py-8 text-center text-gray-400 text-sm">
+                                        오더 내역이 없습니다
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                ordersList.map((orders) => (
+                                    <tr key={orders.id} className="border-t border-gray-200 hover:bg-gray-50">
+                                        <td className="px-4 py-3">{orders.orderNumber}</td>
+                                        <td className="px-4 py-3">{orders.buyerName}</td>
+                                        <td className="px-4 py-3">{orders.amount}</td>
+                                        <td className="px-4 py-3">{orders.currency}</td>
+                                        <td className="px-4 py-3">{formatDate(orders.ordersDate)}</td>
+                                        <td className="px-4 py-3">{orders.comment || '-'}</td>
+                                        <td className="px-4 py-3 flex gap-2 flex-wrap">
+                                            <button onClick={() => { setEditingId(orders.id); setView('edit'); }} className="text-blue-900 hover:underline">수정</button>
+                                            {!orders.hasInvoice && (
+                                                <button onClick={() => handleDelete(orders.id)} className="text-red-600 hover:underline">삭제</button>
+                                            )}
+                                            <button onClick={() => handleIssueInvoice(orders.id)} className="text-green-700 hover:underline">인보이스 발행</button>
+                                            <button onClick={() => handleViewHistory(orders.id)} className="text-gray-600 hover:underline">발행 이력</button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
 

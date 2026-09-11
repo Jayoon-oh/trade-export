@@ -7,7 +7,7 @@ import type { Orders } from "../../../types/orders";
 interface OrderSelectModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSelect: (orderId: number) => void;
+    onSelect: (orderId: number, orderNumber: string, buyerName: string) => void;
 }
 
 function OrderSelectModal({ isOpen, onClose, onSelect }: OrderSelectModalProps) {
@@ -99,7 +99,7 @@ function OrderSelectModal({ isOpen, onClose, onSelect }: OrderSelectModalProps) 
                                                     {expandedOrderId === o.id ? '접기' : '상세보기'}
                                                 </button>
                                                 <button
-                                                    onClick={() => onSelect(o.id)}
+                                                    onClick={() => onSelect(o.id, o.orderNumber, o.buyerName)}
                                                     className="text-blue-900 hover:underline text-sm"
                                                 >
                                                     선택
