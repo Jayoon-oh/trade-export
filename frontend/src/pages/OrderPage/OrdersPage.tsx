@@ -10,6 +10,7 @@ import EntitySelect from "../../components/EntitySelect";
 import formatDate from "../../utils/formatDate";
 import OrdersCreateForm from "./components/OrdersCreateForm";
 import OrdersEditForm from "./components/OrdersEditForm";
+import InvoiceSplitModal from "./components/InvoiceSplitModal";
 
 function OrdersPage() {
     const [ordersList, setOrdersList] = useState<Orders[]>([]);
@@ -28,6 +29,10 @@ function OrdersPage() {
     // pagination
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+
+    // issue Invoice
+    const [isSplitModalOpen, setIsSplitModalOpen] = useState(false);
+    const [splitOrderId, setSplitOrderId] = useState<number | null>(null);
 
     useEffect(() => {
         fetchCompanies();
@@ -63,30 +68,10 @@ function OrdersPage() {
         }
     };
 
-    const handleIssueInvoice = async (orderId: number) => {
-        try {
-            if (!orderId) {
-                alert('오더를 선택해주세요.');
-                return;
-            }
-
-            const rateInput = prompt('환율을 입력하세요');
-            if (!rateInput) {
-                return;
-            }
-
-            const rate = Number(rateInput);
-            if (isNaN(rate) || rate <= 0) {
-                alert('환율은 0보다 큰 숫자로 입력해주세요.');
-                return;
-            }
-
-            const invoiceId = await issueInvoice(orderId, { exchangeRate: rate });
-            await handleGenerateInvoice(invoiceId);
-        } catch (error) {
-            alert('발행에 실패했습니다. 이미 인보이스가 존재하는지 확인해주세요.');
-        }
-    }
+    const handleOpenSplitModal = (orderId: number) => {
+        setSplitOrderId(orderId);
+        setIsSplitModalOpen(true);
+    };
 
     const handleViewHistory = async (orderId: number) => {
         const data = await getInvoiceList(orderId);
@@ -169,7 +154,7 @@ function OrdersPage() {
                                             {!orders.hasInvoice && (
                                                 <button onClick={() => handleDelete(orders.id)} className="text-red-600 hover:underline">삭제</button>
                                             )}
-                                            <button onClick={() => handleIssueInvoice(orders.id)} className="text-green-700 hover:underline">인보이스 발행</button>
+                                            <button onClick={() => handleOpenSplitModal(orders.id)} className="text-green-700 hover:underline">인보이스 발행</button>
                                             <button onClick={() => handleViewHistory(orders.id)} className="text-gray-600 hover:underline">발행 이력</button>
                                         </td>
                                     </tr>
@@ -216,6 +201,19 @@ function OrdersPage() {
                 onCancel={handleCancelInvoice}
                 onDownload={handleGenerateInvoice}
             />
+
+            {splitOrderId && (
+                <InvoiceSplitModal
+                    ordersId={splitOrderId}
+                    isOpen={isSplitModalOpen}
+                    onClose={() => setIsSplitModalOpen(false)}
+                    onSuccess={async (invoiceId) => {
+                        setIsSplitModalOpen(false);
+                        await handleGenerateInvoice(invoiceId);
+                        fetchOrders();
+                    }}
+                />
+            )}
         </div >
     );
 }

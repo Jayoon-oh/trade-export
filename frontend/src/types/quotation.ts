@@ -45,3 +45,4 @@ export interface QuotationCreateRequest {
     quotationDate: string;
     items: QuotationItemRequest[];
 }
+

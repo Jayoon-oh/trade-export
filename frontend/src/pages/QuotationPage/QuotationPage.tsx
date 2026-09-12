@@ -1,4 +1,4 @@
-import { getQuotationList, deleteQuotation } from "../../api/quotationApi";
+import { getQuotationList, deleteQuotation, handleGenerateQuotation } from "../../api/quotationApi";
 import { getCompanyList } from "../../api/companyApi";
 import type { Quotation } from "../../types/quotation";
 import type { Company } from "../../types/company";
@@ -102,6 +102,7 @@ function QuotationPage() {
                                         <td className="px-4 py-3 flex gap-2">
                                             <button onClick={() => { setEditingId(quotation.id); setView('edit'); }} className="text-blue-900 hover:underline">수정</button>
                                             <button onClick={() => handleDelete(quotation.id)} className="text-red-600 hover:underline">삭제</button>
+                                            <button onClick={() => handleGenerateQuotation(quotation.id)} className="text-gray-600 hover:underline">PDF 다운로드</button>
                                         </td>
                                     </tr>
                                 ))

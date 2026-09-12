@@ -1,5 +1,5 @@
 import api from './axiosInstance';
-import type { InvoiceCreateRequest, InvoiceResponse, InvoiceStatus } from "../types/invoice";
+import type { InvoiceCreateRequest, InvoiceResponse, InvoiceStatus, RemainingItem } from "../types/invoice";
 
 
 export const generateInvoicePdf = async (invoiceId: number): Promise<Blob> => {
@@ -41,3 +41,8 @@ export const getInvoicesByStatus = async (status: InvoiceStatus): Promise<Invoic
     });
     return response.data;
 }
+
+export const getRemainingItems = async (ordersId: number): Promise<RemainingItem[]> => {
+    const response = await api.get<RemainingItem[]>(`/orders/${ordersId}/remaining-items`);
+    return response.data;
+};

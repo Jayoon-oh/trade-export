@@ -7,6 +7,7 @@ export interface InvoiceItemLine {
 
 export interface InvoiceCreateRequest {
     exchangeRate: number;
+    items: InvoiceItemRequest[];
 }
 
 export interface InvoicePdfData {
@@ -39,4 +40,19 @@ export interface InvoiceResponse {
     exchangeRate: number;
     currency: string;
     orderNumber: string;
+}
+
+// Partial invoice
+export interface RemainingItem {
+    itemsId: number;
+    itemName: string;
+    orderedQuantity: number;
+    invoicedQuantity: number;
+    remainingQuantity: number;
+    unitPrice: number;
+}
+
+export interface InvoiceItemRequest {
+    itemsId: number;
+    quantity: number;
 }
