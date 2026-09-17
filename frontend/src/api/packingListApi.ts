@@ -24,9 +24,9 @@ export const createPackingList = async (dto: PackingListCreateRequest): Promise<
     return response.data;
 }
 
-export const getPackingLists = async (buyerId?: number, page: number = 0, size: number = 10): Promise<PagedPackingLists> => {
+export const getPackingLists = async (buyerId?: number, orderNumber?: string, page: number = 0,  size: number = 10): Promise<PagedPackingLists> => {
     const response = await api.get<PagedPackingLists>('/packing-lists', {
-        params: { buyerId, page, size },
+        params: { buyerId, orderNumber, page, size },
     });
     return response.data;
 };

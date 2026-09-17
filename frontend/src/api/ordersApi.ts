@@ -11,9 +11,9 @@ export const updateOrders = async (id: number, dto: OrdersCreateRequest): Promis
     return response.data;
 };
 
-export const getOrdersList = async (buyerId?: number, page: number = 0, size: number = 10): Promise<PagedOrders> => {
+export const getOrdersList = async (buyerId?: number, orderNumber?: string, page: number = 0, size: number = 10): Promise<PagedOrders> => {
     const response = await api.get<PagedOrders>('/orders', {
-        params: { buyerId, page, size },
+        params: { buyerId, orderNumber, page, size },
     });
     return response.data;
 };

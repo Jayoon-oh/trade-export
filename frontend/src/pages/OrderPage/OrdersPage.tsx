@@ -34,6 +34,10 @@ function OrdersPage() {
     const [isSplitModalOpen, setIsSplitModalOpen] = useState(false);
     const [splitOrderId, setSplitOrderId] = useState<number | null>(null);
 
+    // search by orderNumber
+    const [orderNumberSearch, setOrderNumberSearch] = useState('');
+
+
     useEffect(() => {
         fetchCompanies();
     }, []);
@@ -44,7 +48,7 @@ function OrdersPage() {
 
 
     const fetchOrders = async () => {
-        const data = await getOrdersList(buyerId || undefined, currentPage);
+        const data = await getOrdersList(buyerId || undefined, orderNumberSearch || undefined, currentPage);
         setOrdersList(data.content);
         setTotalPages(data.totalPages);
     }
@@ -112,7 +116,17 @@ function OrdersPage() {
 
             {view === 'list' && (
                 <>
-                    <div className="mb-8">
+                    <div className="flex gap-2 mb-8">
+                        <input
+                            value={orderNumberSearch}
+                            onChange={(e) => setOrderNumberSearch(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') fetchOrders(); }}
+                            placeholder="오더번호 검색"
+                            className="border border-gray-300 rounded px-3 py-2"
+                        />
+                        <button onClick={fetchOrders} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+                            검색
+                        </button>
                         <EntitySelect
                             value={buyerId}
                             onChange={setBuyerId}

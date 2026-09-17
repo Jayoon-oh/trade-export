@@ -6,9 +6,9 @@ export const createShipment = async (dto: ShipmentCreateRequest): Promise<Shipme
     return response.data;
 };
 
-export const getShipmentsList = async (buyerId?: number, forwarderId?: number, shipmentStatus?: string, page: number = 0, size: number = 10): Promise<PagedShipments> => {
+export const getShipmentsList = async (buyerId?: number, forwarderId?: number, shipmentStatus?: string, orderNumber?: string, page: number = 0, size: number = 10): Promise<PagedShipments> => {
     const response = await api.get<PagedShipments>('/shipments', {
-        params: { buyerId, forwarderId, shipmentStatus, page, size },
+        params: { buyerId, forwarderId, shipmentStatus, orderNumber, page, size },
     });
     return response.data;
 };

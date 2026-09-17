@@ -6,9 +6,9 @@ export const createPayment = async (dto: PaymentCreateRequest): Promise<number> 
     return response.data;
 }
 
-export const getPayments = async (buyerId?: number, status?: string, page: number = 0, size: number = 10): Promise<PagedPayments> => {
+export const getPayments = async (buyerId?: number, status?: string, invoiceNumber?: string, page: number = 0, size: number = 10): Promise<PagedPayments> => {
     const response = await api.get<PagedPayments>('/payments', {
-        params: { buyerId, status, page, size },
+        params: { buyerId, status, invoiceNumber, page, size },
     });
     return response.data;
 };

@@ -27,6 +27,8 @@ function PaymentPage() {
     const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
     const [paymentDetail, setPaymentDetail] = useState<PaymentDetail | null>(null);
 
+    const [invoiceNumberSearch, setInvoiceNumberSearch] = useState('');
+
     useEffect(() => {
         fetchCompanies();
     }, []);
@@ -36,7 +38,7 @@ function PaymentPage() {
     }, [buyerId, status, currentPage]);
 
     const fetchPaymentList = async () => {
-        const data = await getPayments(buyerId || undefined, status || undefined, currentPage);
+        const data = await getPayments(buyerId || undefined, status || undefined, invoiceNumberSearch || undefined, currentPage);
         setPaymentList(data.content);
         setTotalPages(data.totalPages);
     }
@@ -78,6 +80,16 @@ function PaymentPage() {
 
             {/* filter */}
             <div className="flex gap-2 mb-8">
+                <input
+                    value={invoiceNumberSearch}
+                    onChange={(e) => setInvoiceNumberSearch(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') fetchPaymentList(); }}
+                    placeholder="인보이스번호 검색"
+                    className="border border-gray-300 rounded px-3 py-2"
+                />
+                <button onClick={fetchPaymentList} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+                    검색
+                </button>
                 <EntitySelect
                     value={buyerId}
                     onChange={setBuyerId}

@@ -22,6 +22,8 @@ function PackingListPage() {
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
 
+    const [orderNumberSearch, setOrderNumberSearch] = useState('');
+
     useEffect(() => {
         fetchCompanies();
     }, []);
@@ -31,7 +33,7 @@ function PackingListPage() {
     }, [buyerId, currentPage]);
 
     const fetchPackingLists = async () => {
-        const data = await getPackingLists(buyerId || undefined, currentPage);
+        const data = await getPackingLists(buyerId || undefined, orderNumberSearch || undefined, currentPage);
         setPackingList(data.content);
         setTotalPages(data.totalPages);
     }
@@ -58,15 +60,22 @@ function PackingListPage() {
             {view === 'list' && (
                 <>
                     <div className="flex gap-2 mb-8">
+                        <input
+                            value={orderNumberSearch}
+                            onChange={(e) => setOrderNumberSearch(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') fetchPackingLists(); }}
+                            placeholder="오더번호 검색"
+                            className="border border-gray-300 rounded px-3 py-2"
+                        />
+                        <button onClick={fetchPackingLists} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+                            검색
+                        </button>
                         <EntitySelect
                             value={buyerId}
                             onChange={setBuyerId}
                             options={companies.filter(c => c.role === 'BUYER').map(c => ({ id: c.id, label: c.companyName }))}
                             placeholder="전체 바이어"
                         />
-                        <button onClick={fetchPackingLists} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
-                            검색
-                        </button>
                     </div>
 
                     {/* Table */}

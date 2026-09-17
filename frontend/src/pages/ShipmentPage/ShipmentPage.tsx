@@ -22,6 +22,8 @@ function ShipmentPage() {
     const [isCardOpen, setIsCardOpen] = useState(false);
     const [editingShipmentId, setEditingShipmentId] = useState<number | null>(null);
 
+    const [orderNumberSearch, setOrderNumberSearch] = useState('');
+
     useEffect(() => {
         fetchCompanies();
     }, [])
@@ -31,7 +33,7 @@ function ShipmentPage() {
     }, [buyerId, forwarderId, shipmentStatus, currentPage]);
 
     const fetchShipments = async () => {
-        const data = await getShipmentsList(buyerId || undefined, forwarderId || undefined, shipmentStatus || undefined, currentPage);
+        const data = await getShipmentsList(buyerId || undefined, forwarderId || undefined, shipmentStatus || undefined, orderNumberSearch || undefined, currentPage);
         setShipmentList(data.content);
         setTotalPages(data.totalPages)
     }
@@ -53,6 +55,16 @@ function ShipmentPage() {
 
             {/* filter */}
             <div className="flex gap-2 mb-8">
+                <input
+                    value={orderNumberSearch}
+                    onChange={(e) => setOrderNumberSearch(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') fetchShipments(); }}
+                    placeholder="오더번호 검색"
+                    className="border border-gray-300 rounded px-3 py-2"
+                />
+                <button onClick={fetchShipments} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+                    검색
+                </button>
                 <EntitySelect
                     value={buyerId}
                     onChange={setBuyerId}
