@@ -1,5 +1,5 @@
-import { getPayments, updatePayment } from "../../api/paymentApi";
-import type { PaymentStatus, PaymentResponse } from "../../types/payment";
+import { getPaymentDetail, getPayments, updatePayment } from "../../api/paymentApi";
+import type { PaymentStatus, PaymentResponse, PaymentDetail } from "../../types/payment";
 import { useEffect, useState } from "react";
 import type { Company } from "../../types/company";
 import { getCompanyList } from "../../api/companyApi";
@@ -7,6 +7,7 @@ import EntitySelect from "../../components/EntitySelect";
 import StatusSelect from "../../components/StatusSelect";
 import formatDate from "../../utils/formatDate";
 import PaymentQuickEditCard from "./components/PaymentQuickEditCard";
+import PaymentDetailPanel from "./components/PaymentDetailPanel";
 
 function PaymentPage() {
     const [paymentList, setPaymentList] = useState<PaymentResponse[]>([]);
@@ -21,6 +22,10 @@ function PaymentPage() {
     const [isCardOpen, setIsCardOpen] = useState(false);
     // reset card
     const [cardKey, setCardKey] = useState(0);
+
+    // payment detail
+    const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
+    const [paymentDetail, setPaymentDetail] = useState<PaymentDetail | null>(null);
 
     useEffect(() => {
         fetchCompanies();
@@ -48,9 +53,24 @@ function PaymentPage() {
     }
 
     const handleOpenNew = () => {
+        setSelectedInvoiceId(null);
+        setPaymentDetail(null);
         setCardKey(prev => prev + 1);
         setIsCardOpen(true);
     }
+
+    const handleViewDetail = async (invoiceId: number) => {
+        if (selectedInvoiceId === invoiceId) {
+            setSelectedInvoiceId(null);
+            setPaymentDetail(null);
+            return;
+        }
+        // close, when register card is open.
+        setIsCardOpen(false);
+        const data = await getPaymentDetail(invoiceId);
+        setPaymentDetail(data);
+        setSelectedInvoiceId(invoiceId);
+    };
 
     return (
         <div className="max-w-6xl mx-auto p-10">
@@ -86,6 +106,7 @@ function PaymentPage() {
                                 <th className="px-4 py-3">금액</th>
                                 <th className="px-4 py-3">결제일</th>
                                 <th className="px-4 py-3">상태</th>
+                                <th className="px-4 py-3"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -108,6 +129,11 @@ function PaymentPage() {
                                                 onChange={(s) => handleStatusChange(p.id, s as PaymentStatus)}
                                                 options={['PENDING', 'COMPLETED', 'CANCELLED']}
                                             />
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <button onClick={() => handleViewDetail(p.invoiceId)} className="text-blue-900 hover:underline text-sm">
+                                                {selectedInvoiceId === p.invoiceId ? '접기' : '상세보기'}
+                                            </button>
                                         </td>
                                     </tr>
                                 ))
@@ -145,6 +171,11 @@ function PaymentPage() {
                         onSuccess={() => { setIsCardOpen(false); fetchPaymentList(); }}
                         onCancel={() => setIsCardOpen(false)}
                     />
+                )}
+                {paymentDetail && (
+                    <div className="w-1/3 border-l border-gray-200 min-h-screen p-6 bg-white flex-shrink-0">
+                        <PaymentDetailPanel detail={paymentDetail} onClose={() => { setSelectedInvoiceId(null); setPaymentDetail(null); }} />
+                    </div>
                 )}
             </div>
         </div>

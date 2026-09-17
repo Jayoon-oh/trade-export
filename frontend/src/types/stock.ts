@@ -11,4 +11,7 @@ export interface Stock {
     productName: string;
     quantity: number;
     reservedQuantity: number;
+    price: number;
+    setQty: number;
+    standardWeight: number;
 }

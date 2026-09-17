@@ -1,3 +1,5 @@
+import { PaymentRecord } from "./payment";
+
 export interface OrderPipeline {
     orderId: number;
     orderNumber: string;
@@ -21,11 +23,6 @@ export interface PipelineFunnel {
     shipmentCount: number;
     paymentCount: number;
     paymentAmount: number;
-}
-
-export interface PaymentRecord {
-    paymentDate: string;
-    amount: number;
 }
 
 export interface OrderDetail {

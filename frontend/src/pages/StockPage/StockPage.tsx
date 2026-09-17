@@ -1,21 +1,23 @@
 import { useState, useEffect } from 'react';
 import { getStockList } from '../../api/stockApi';
 import type { Stock } from '../../types/stock';
-import type { ItemsCreateRequest } from '../../types/items';
-import { createItems, updateItems, getItemsList } from '../../api/itemsApi';
+import StockQuickEditCard from './components/StockQuickEditCard';
+import StockDetailModal from './components/StockDetailModal';
 
 function StockPage() {
     const [stockList, setStockList] = useState<Stock[]>([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
 
-    const [form, setForm] = useState<ItemsCreateRequest>({
-        productName: '',
-        price: 0,
-        setQty: 0,
-        standardWeight: 0,
-    });
     const [searchTerm, setSearchTerm] = useState('');
+
+    //register card
+    const [isCardOpen, setIsCardOpen] = useState(false);
+    const [cardKey, setCardKey] = useState(0);
+
+    // Item detail card
+    const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
+    const [isDetailOpen, setIsDetailOpen] = useState(false);
 
     useEffect(() => {
         fetchStock();
@@ -27,12 +29,16 @@ function StockPage() {
         setTotalPages(data.totalPages);
     };
 
-    const handleCreate = async () => {
-        const savedId = await createItems(form);
-        console.log('등록된 id:', savedId);
-        setForm({ productName: '', price: 0, setQty: 0, standardWeight: 0 });
-        fetchStock();
-    }
+    // Reset card
+    const handleOpenNew = () => {
+        setCardKey(prev => prev + 1);
+        setIsCardOpen(true);
+    };
+
+    const handleViewDetail = (stock: Stock) => {
+        setSelectedStock(stock);
+        setIsDetailOpen(true);
+    };
 
     return (
         <div className="max-w-6xl mx-auto p-10">
@@ -57,89 +63,77 @@ function StockPage() {
                 >
                     검색
                 </button>
-            </div>
-
-            {/* Table */}
-            <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <thead>
-                    <tr className="bg-gray-100 text-left text-sm text-gray-600">
-                        <th className="px-4 py-3">ID</th>
-                        <th className="px-4 py-3">제품명</th>
-                        <th className="px-4 py-3">수량</th>
-                        <th className="px-4 py-3">예약 된 수량</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {stockList.map((stock) => (
-                        <tr key={stock.id} className="border-t border-gray-200 hover:bg-gray-50">
-                            <td className="px-4 py-3">{stock.id}</td>
-                            <td className="px-4 py-3">{stock.productName}</td>
-                            <td className="px-4 py-3">{stock.quantity}</td>
-                            <td className="px-4 py-3">{stock.reservedQuantity}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-
-            <div className="flex justify-center gap-2 mb-8">
-                <button
-                    onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
-                    disabled={currentPage === 0}
-                    className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
-                >
-                    이전
-                </button>
-                <span className="px-3 py-1 text-sm text-gray-600">
-                    {currentPage + 1} / {totalPages}
-                </span>
-                <button
-                    onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
-                    disabled={currentPage >= totalPages - 1}
-                    className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
-                >
-                    다음
+                <button onClick={handleOpenNew} className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">
+                    + 품목 등록
                 </button>
             </div>
 
-            {/* Registration section */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">품목 등록</h2>
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                    <input value={form.productName}
-                        onChange={(e) => setForm({ ...form, productName: e.target.value })}
-                        placeholder='제품명'
-                        className="border border-gray-300 rounded px-3 py-2"
-                    />
-                    <input
-                        type="number"
-                        value={form.price}
-                        onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
-                        placeholder='가격'
-                        className="border border-gray-300 rounded px-3 py-2"
-                    />
-                    <input
-                        type="number"
-                        value={form.setQty}
-                        onChange={(e) => setForm({ ...form, setQty: Number(e.target.value) })}
-                        placeholder='세트 수'
-                        className="border border-gray-300 rounded px-3 py-2"
-                    />
-                    <input
-                        type="number"
-                        value={form.standardWeight}
-                        onChange={(e) => setForm({ ...form, standardWeight: Number(e.target.value) })}
-                        placeholder='무게'
-                        className="border border-gray-300 rounded px-3 py-2"
-                    />
+            <div className="flex gap-4">
+                <div className="flex-1">
+                    {/* Table */}
+                    <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <thead>
+                            <tr className="bg-gray-100 text-left text-sm text-gray-600">
+                                <th className="px-4 py-3">ID</th>
+                                <th className="px-4 py-3">제품명</th>
+                                <th className="px-4 py-3">수량</th>
+                                <th className="px-4 py-3">예약 된 수량</th>
+                                <th className="px-4 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {stockList.map((stock) => (
+                                <tr key={stock.id} className="border-t border-gray-200 hover:bg-gray-50">
+                                    <td className="px-4 py-3">{stock.id}</td>
+                                    <td className="px-4 py-3">{stock.productName}</td>
+                                    <td className="px-4 py-3">{stock.quantity}</td>
+                                    <td className="px-4 py-3">{stock.reservedQuantity}</td>
+                                    <td className="px-4 py-3">
+                                        <button onClick={() => handleViewDetail(stock)} className="text-blue-900 hover:underline">제품 상세</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    {/* Pagination */}
+                    <div className="flex justify-center gap-2 mb-8">
+                        <button
+                            onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                            disabled={currentPage === 0}
+                            className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                        >
+                            이전
+                        </button>
+                        <span className="px-3 py-1 text-sm text-gray-600">
+                            {currentPage + 1} / {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+                            disabled={currentPage >= totalPages - 1}
+                            className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                        >
+                            다음
+                        </button>
+                    </div>
                 </div>
-                <button
-                    onClick={handleCreate}
-                    className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800"
-                >
-                    등록하기
-                </button>
+
+                {isCardOpen && (
+                    <StockQuickEditCard
+                        key={cardKey}
+                        onSuccess={() => { setIsCardOpen(false); fetchStock(); }}
+                        onCancel={() => setIsCardOpen(false)}
+                    />
+                )}
+                <StockDetailModal
+                    isOpen={isDetailOpen}
+                    stock={selectedStock}
+                    onClose={() => { setIsDetailOpen(false); setSelectedStock(null); }}
+                />
+
+
             </div>
-        </div>
+        </div >
     )
 }
 

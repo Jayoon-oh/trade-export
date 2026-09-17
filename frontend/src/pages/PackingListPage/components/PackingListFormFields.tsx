@@ -1,8 +1,7 @@
-import EntitySelect from '../../../components/EntitySelect'; 
-import ItemPicker from '../../../components/itemPicker'; 
-import type { Shipment } from '../../../types/shipment'; 
-import type { Items } from '../../../types/items'; 
-import type { PackingListCreateRequest, PackingListItemRequest } from '../../../types/packingList';
+import ItemPicker from '../../../components/itemPicker';
+import type { AvailableItem, PackingListCreateRequest, PackingListItemRequest } from '../../../types/packingList';
+import ShipmentSelectModal from '../../ShipmentPage/components/ShipmentSelectModal';
+import { useState } from 'react';
 
 interface PackingListFormFieldsProps {
     form: PackingListCreateRequest;
@@ -11,22 +10,31 @@ interface PackingListFormFieldsProps {
     setCurrentItem: (item: PackingListItemRequest) => void;
     onAddItem: () => void;
     onRemoveItem: (index: number) => void;
-    shipmentList: Shipment[];
-    itemsList: Items[];
+    itemsList: AvailableItem[];
     disabled?: boolean;
 }
 
-function PackingListFormFields({ form, setForm, currentItem, setCurrentItem, onAddItem, onRemoveItem, shipmentList, itemsList, disabled }: PackingListFormFieldsProps) {
+function PackingListFormFields({ form, setForm, currentItem, setCurrentItem, onAddItem, onRemoveItem, itemsList, disabled }: PackingListFormFieldsProps) {
+    const [isShipmentModalOpen, setIsShipmentModalOpen] = useState(false);
+    const [selectedShipmentLabel, setSelectedShipmentLabel] = useState('');
+
+    const handleShipmentSelect = (shipmentId: number, label: string) => {
+        setForm({ ...form, shipmentId, items: [] });
+        setSelectedShipmentLabel(label);
+        setIsShipmentModalOpen(false);
+    };
+
     return (
         <>
             <div className="grid grid-cols-2 gap-3 mb-4">
-                <EntitySelect
-                    value={form.shipmentId}
-                    onChange={(id) => setForm({ ...form, shipmentId: id })}
-                    options={shipmentList.map(s => ({ id: s.id, label: `#${s.id} - ${s.buyerName}` }))}
-                    placeholder="선적 선택"
+                <button
+                    type="button"
+                    onClick={() => setIsShipmentModalOpen(true)}
                     disabled={disabled}
-                />
+                    className="border border-gray-300 rounded px-3 py-2 text-left text-gray-700 disabled:bg-gray-100 disabled:text-gray-400"
+                >
+                    {selectedShipmentLabel || '선적 선택'}
+                </button>
                 <input
                     type="date"
                     value={form.packingDate}
@@ -47,10 +55,10 @@ function PackingListFormFields({ form, setForm, currentItem, setCurrentItem, onA
                     <ItemPicker
                         itemsId={currentItem.itemsId}
                         quantity={currentItem.quantity}
-                        itemsList={itemsList.map(item => ({ id: item.id, label: item.productName, weight: item.standardWeight }))}
+                        itemsList={itemsList.map(item => ({ id: item.itemsId, label: item.itemName, weight: item.standardWeight }))}
                         onChangeItem={(id) => {
-                            const selected = itemsList.find(item => item.id === id);
-                            setCurrentItem({ ...currentItem, itemsId: id, itemName: selected?.productName });
+                            const selected = itemsList.find(item => item.itemsId === id);
+                            setCurrentItem({ ...currentItem, itemsId: id, itemName: selected?.itemName });
                         }}
                         onChangeQuantity={(qty) => setCurrentItem({ ...currentItem, quantity: qty })}
                     />
@@ -76,6 +84,12 @@ function PackingListFormFields({ form, setForm, currentItem, setCurrentItem, onA
                     ))}
                 </ul>
             </div>
+
+            <ShipmentSelectModal
+                isOpen={isShipmentModalOpen}
+                onClose={() => setIsShipmentModalOpen(false)}
+                onSelect={handleShipmentSelect}
+            />
         </>
     );
 }

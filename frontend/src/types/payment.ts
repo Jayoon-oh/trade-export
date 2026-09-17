@@ -34,3 +34,17 @@ export interface InvoiceBalance {
     totalPaid: number;
     remaining: number;
 }
+
+export interface PaymentRecord {
+    paymentDate: string;
+    amount: number;
+}
+
+export interface PaymentDetail {
+    invoiceNumber: string;
+    invoiceDate: string;
+    invoiceAmount: number;
+    totalPaid: number;
+    remaining: number;
+    payments: PaymentRecord[];
+}

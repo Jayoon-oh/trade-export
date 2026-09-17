@@ -1,5 +1,5 @@
 import api from "./axiosInstance";
-import type { PaymentResponse, PaymentCreateRequest, PaymentStatus, InvoiceBalance, PagedPayments } from "../types/payment";
+import type { PaymentResponse, PaymentCreateRequest, PaymentStatus, InvoiceBalance, PagedPayments, PaymentDetail } from "../types/payment";
 
 export const createPayment = async (dto: PaymentCreateRequest): Promise<number> => {
     const response = await api.post<number>(`/payments`, dto);
@@ -29,3 +29,8 @@ export const getInvoiceBalance = async (invoiceId: number): Promise<InvoiceBalan
     const response = await api.get<InvoiceBalance>(`/payments/balance/${invoiceId}`)
     return response.data;
 }
+
+export const getPaymentDetail = async (invoiceId: number): Promise<PaymentDetail> => {
+    const response = await api.get<PaymentDetail>(`/payments/invoice/${invoiceId}/detail`);
+    return response.data;
+};

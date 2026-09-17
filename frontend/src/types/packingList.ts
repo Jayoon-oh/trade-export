@@ -67,3 +67,10 @@ export interface PackingListDetailResponse {
     packingList: PackingListResponse;
     items: PackingListItemLine[];
 }
+
+export interface AvailableItem {
+    itemsId: number;
+    itemName: string;
+    orderedQuantity: number;
+    standardWeight: number;
+}
