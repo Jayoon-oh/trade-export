@@ -1,4 +1,6 @@
+import { useRef } from 'react';
 import type { CompanyCreateRequest } from '../../../types/company';
+import { Autocomplete } from '@react-google-maps/api';
 
 interface CompanyFormFieldsProps {
     form: CompanyCreateRequest;
@@ -8,19 +10,33 @@ interface CompanyFormFieldsProps {
 function CompanyFormFields({ form, setForm }: CompanyFormFieldsProps) {
     const roles = ['FORWARDER', 'BUYER', 'SELLER', 'CARRIER'];
     const roleLabels: Record<string, string> = {
-    FORWARDER: '포워더', BUYER: '바이어', SELLER: '판매자', CARRIER: '운송사'
-};
+        FORWARDER: '포워더', BUYER: '바이어', SELLER: '판매자', CARRIER: '운송사'
+    };
 
     const categories = ['국제운송', '국내운송'];
     const deliveryMethods = ['해상', '항공', '육상'];
-    const countries = [
-        '대한민국', '미국', '중국', '일본', '독일', '인도', '베트남', '태국', '네덜란드'];
+    const countries = ['대한민국', '미국', '중국', '일본', '독일', '인도', '베트남', '태국', '네덜란드'];
+
+    // GoogleMap API
+    const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+
+    const handlePlaceChanged = () => {
+        const place = autocompleteRef.current?.getPlace();
+        if (place?.formatted_address) {
+            setForm({ ...form, address: place.formatted_address });
+        }
+    };
 
     return (
         <>
             <div className="grid grid-cols-2 gap-3 mb-4">
                 <input value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} placeholder="회사명" className="border border-gray-300 rounded px-3 py-2" />
-                <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="주소" className="border border-gray-300 rounded px-3 py-2" />
+                <Autocomplete
+                    onLoad={(autocomplete) => { autocompleteRef.current = autocomplete; }}
+                    onPlaceChanged={handlePlaceChanged}
+                >
+                <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="주소" className="border border-gray-300 rounded px-3 py-2 w-full" />
+                </Autocomplete>
                 <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="border border-gray-300 rounded px-3 py-2">
                     <option value="">국가 선택</option>
                     {countries.map((c) => <option key={c} value={c}>{c}</option>)}
