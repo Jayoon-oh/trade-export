@@ -7,20 +7,29 @@ interface CompanyFormFieldsProps {
 
 function CompanyFormFields({ form, setForm }: CompanyFormFieldsProps) {
     const roles = ['FORWARDER', 'BUYER', 'SELLER', 'CARRIER'];
+    const roleLabels: Record<string, string> = {
+    FORWARDER: '포워더', BUYER: '바이어', SELLER: '판매자', CARRIER: '운송사'
+};
+
     const categories = ['국제운송', '국내운송'];
     const deliveryMethods = ['해상', '항공', '육상'];
+    const countries = [
+        '대한민국', '미국', '중국', '일본', '독일', '인도', '베트남', '태국', '네덜란드'];
 
     return (
         <>
             <div className="grid grid-cols-2 gap-3 mb-4">
                 <input value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} placeholder="회사명" className="border border-gray-300 rounded px-3 py-2" />
                 <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="주소" className="border border-gray-300 rounded px-3 py-2" />
-                <input value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} placeholder="국가" className="border border-gray-300 rounded px-3 py-2" />
+                <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="border border-gray-300 rounded px-3 py-2">
+                    <option value="">국가 선택</option>
+                    {countries.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
                 <input value={form.nameOfOwner} onChange={(e) => setForm({ ...form, nameOfOwner: e.target.value })} placeholder="대표자명" className="border border-gray-300 rounded px-3 py-2" />
                 <input value={form.registrationNumber} onChange={(e) => setForm({ ...form, registrationNumber: e.target.value })} placeholder="사업자번호" className="border border-gray-300 rounded px-3 py-2" />
                 <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="border border-gray-300 rounded px-3 py-2">
                     <option value="">역할 선택</option>
-                    {roles.map((role) => <option key={role} value={role}>{role}</option>)}
+                    {roles.map((role) => <option key={role} value={role}>{roleLabels[role]}</option>)}
                 </select>
             </div>
 

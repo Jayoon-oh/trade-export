@@ -4,9 +4,9 @@ import { getAllCompanies } from "../../api/companyApi";
 import { useState, useEffect } from "react"
 import type { PackingListResponse } from "../../types/packingList";
 import EntitySelect from "../../components/EntitySelect";
-import formatDate from "../../utils/formatDate";
 import PackingListCreateForm from "./components/PackingListCreateForm";
 import PackingListEditForm from "./components/PackingListEditForm";
+import formatDateOnly from "../../utils/formatDateOnly";
 
 function PackingListPage() {
     const [packingList, setPackingList] = useState<PackingListResponse[]>([]);
@@ -86,17 +86,14 @@ function PackingListPage() {
                                 <th className="px-4 py-3">회사명</th>
                                 <th className="px-4 py-3">운송사</th>
                                 <th className="px-4 py-3">포장날짜</th>
-                                <th className="px-4 py-3">총수량</th>
                                 <th className="px-4 py-3">총무게</th>
-                                <th className="px-4 py-3">등록날짜</th>
-                                <th className="px-4 py-3">수정날짜</th>
                                 <th className="px-4 py-3"></th>
                             </tr>
                         </thead>
                         <tbody>
                             {packingList.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="px-4 py-8 text-center text-gray-400 text-sm">
+                                    <td colSpan={6} className="px-4 py-8 text-center text-gray-400 text-sm">
                                         패킹 내역이 없습니다
                                     </td>
                                 </tr>
@@ -107,10 +104,7 @@ function PackingListPage() {
                                         <td className="px-4 py-3">{packingList.buyerName}</td>
                                         <td className="px-4 py-3">{packingList.forwarderName}</td>
                                         <td className="px-4 py-3">{packingList.packingDate}</td>
-                                        <td className="px-4 py-3">{packingList.totalAmount}</td>
-                                        <td className="px-4 py-3">{packingList.totalWeight}</td>
-                                        <td className="px-4 py-3">{formatDate(packingList.createdAt)}</td>
-                                        <td className="px-4 py-3">{formatDate(packingList.updatedAt)}</td>
+                                        <td className="px-4 py-3">{packingList.totalWeight} kg</td>
                                         <td className="px-4 py-3 flex gap-2 flex-wrap">
                                             <button onClick={() => { setEditingId(packingList.id); setView('edit'); }} className="text-blue-900 hover:underline">수정</button>
                                             <button onClick={() => handleDelete(packingList.id)} className="text-red-600 hover:underline">삭제</button>

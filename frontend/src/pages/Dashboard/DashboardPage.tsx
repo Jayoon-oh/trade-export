@@ -65,8 +65,8 @@ function DashboardPage() {
         <div className="flex">
             {/* Left side: main content */}
             <div className={`p-10 transition-all duration-200 ${orderDetail ? 'w-2/3' : 'w-full'}`}>
-                <div className="max-w-6xl">
-                    <h1 className="text-2xl font-bold text-gray-800 mb-6">My Order Pipeline</h1>
+                <div className="max-w-6xl mx-auto">
+                    <h1 className="text-2xl font-bold text-gray-800 mb-6">오더 파이프라인</h1>
 
                     {funnel && (
                         <div className="grid grid-cols-5 gap-3 mb-8">

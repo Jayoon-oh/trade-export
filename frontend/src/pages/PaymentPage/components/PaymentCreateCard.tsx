@@ -5,12 +5,12 @@ import EntitySelect from '../../../components/EntitySelect';
 import type { InvoiceResponse } from '../../../types/invoice';
 import type { PaymentCreateRequest, InvoiceBalance} from '../../../types/payment';
 
-interface PaymentQuickEditCardProps {
+interface PaymentCreateCardProps {
     onSuccess: () => void;
     onCancel: () => void;
 }
 
-function PaymentQuickEditCard({ onSuccess, onCancel }: PaymentQuickEditCardProps) {
+function PaymentCreateCard({ onSuccess, onCancel }: PaymentCreateCardProps) {
     const [form, setForm] = useState<PaymentCreateRequest>({
         invoiceId: 0, amount: 0, paymentDate: ''
     });
@@ -92,4 +92,4 @@ function PaymentQuickEditCard({ onSuccess, onCancel }: PaymentQuickEditCardProps
     );
 }
 
-export default PaymentQuickEditCard;
+export default PaymentCreateCard;

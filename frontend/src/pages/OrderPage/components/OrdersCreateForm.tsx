@@ -30,23 +30,16 @@ function OrdersCreateForm({ onSuccess }: OrdersCreateFormProps) {
         quantity: 0,
     });
     const [companies, setCompanies] = useState<Company[]>([]);
-    const [quotationList, setQuotationList] = useState<Quotation[]>([]);
     const [itemsList, setItemsList] = useState<Items[]>([]);
 
     useEffect(() => {
         fetchCompanies();
-        fetchQuotations();
         fetchItems();
     }, []);
 
     const fetchCompanies = async () => {
         const data = await getAllCompanies();
         setCompanies(data);
-    };
-
-    const fetchQuotations = async () => {
-        const data = await getQuotationList();
-        setQuotationList(data.content);
     };
 
     const fetchItems = async () => {
@@ -101,7 +94,6 @@ function OrdersCreateForm({ onSuccess }: OrdersCreateFormProps) {
                 onAddItem={handleAddItem}
                 onRemoveItem={handleRemoveItem}
                 companies={companies}
-                quotationList={quotationList}
                 itemsList={itemsList}
             />
 

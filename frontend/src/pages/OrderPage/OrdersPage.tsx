@@ -11,6 +11,7 @@ import formatDate from "../../utils/formatDate";
 import OrdersCreateForm from "./components/OrdersCreateForm";
 import OrdersEditForm from "./components/OrdersEditForm";
 import InvoiceSplitModal from "./components/InvoiceSplitModal";
+import formatDateOnly from "../../utils/formatDateOnly";
 
 function OrdersPage() {
     const [ordersList, setOrdersList] = useState<Orders[]>([]);
@@ -33,6 +34,7 @@ function OrdersPage() {
     // issue Invoice
     const [isSplitModalOpen, setIsSplitModalOpen] = useState(false);
     const [splitOrderId, setSplitOrderId] = useState<number | null>(null);
+    const [splitOrderCurrency, setSplitOrderCurrency] = useState('');
 
     // search by orderNumber
     const [orderNumberSearch, setOrderNumberSearch] = useState('');
@@ -72,8 +74,9 @@ function OrdersPage() {
         }
     };
 
-    const handleOpenSplitModal = (orderId: number) => {
+    const handleOpenSplitModal = (orderId: number, currency: string) => {
         setSplitOrderId(orderId);
+        setSplitOrderCurrency(currency);
         setIsSplitModalOpen(true);
     };
 
@@ -161,14 +164,14 @@ function OrdersPage() {
                                         <td className="px-4 py-3">{orders.buyerName}</td>
                                         <td className="px-4 py-3">{orders.amount}</td>
                                         <td className="px-4 py-3">{orders.currency}</td>
-                                        <td className="px-4 py-3">{formatDate(orders.ordersDate)}</td>
+                                        <td className="px-4 py-3">{formatDateOnly(orders.ordersDate)}</td>
                                         <td className="px-4 py-3">{orders.comment || '-'}</td>
                                         <td className="px-4 py-3 flex gap-2 flex-wrap">
                                             <button onClick={() => { setEditingId(orders.id); setView('edit'); }} className="text-blue-900 hover:underline">수정</button>
                                             {!orders.hasInvoice && (
                                                 <button onClick={() => handleDelete(orders.id)} className="text-red-600 hover:underline">삭제</button>
                                             )}
-                                            <button onClick={() => handleOpenSplitModal(orders.id)} className="text-green-700 hover:underline">인보이스 발행</button>
+                                            <button onClick={() => handleOpenSplitModal(orders.id, orders.currency)} className="text-green-700 hover:underline">인보이스 발행</button>
                                             <button onClick={() => handleViewHistory(orders.id)} className="text-gray-600 hover:underline">발행 이력</button>
                                         </td>
                                     </tr>
@@ -219,6 +222,7 @@ function OrdersPage() {
             {splitOrderId && (
                 <InvoiceSplitModal
                     ordersId={splitOrderId}
+                    orderCurrency={splitOrderCurrency} 
                     isOpen={isSplitModalOpen}
                     onClose={() => setIsSplitModalOpen(false)}
                     onSuccess={async (invoiceId) => {

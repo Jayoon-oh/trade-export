@@ -1,9 +1,11 @@
+import { useState } from "react";
 import EntitySelect from "../../../components/EntitySelect";
 import ItemPicker from "../../../components/itemPicker";
 import type { Company } from "../../../types/company";
 import type { Items } from "../../../types/items";
 import type { OrdersCreateRequest, OrdersItemRequest } from "../../../types/orders";
 import type { Quotation } from "../../../types/quotation";
+import QuotationSelectModal from "./QuotationSelectModal";
 
 interface OrdersFormFieldsProps {
     form: OrdersCreateRequest;
@@ -13,15 +15,24 @@ interface OrdersFormFieldsProps {
     onAddItem: () => void;
     onRemoveItem: (index: number) => void;
     companies: Company[];
-    quotationList: Quotation[];
     itemsList: Items[];
     disabled?: boolean;
 }
 
-function OrdersFormFields({ form, setForm, currentItem, setCurrentItem, onAddItem, onRemoveItem, companies, quotationList, itemsList, disabled }: OrdersFormFieldsProps) {
+function OrdersFormFields({ form, setForm, currentItem, setCurrentItem, onAddItem, onRemoveItem, companies, itemsList, disabled }: OrdersFormFieldsProps) {
     const currencies = ['USD', 'KRW', 'EUR'];
     const incotermsList = ['FOB', 'CIF', 'CFR', 'EXW', 'DAP'];
     const paymentTerms = ['TT'];
+
+    // select quotation
+    const [isQuotationModalOpen, setIsQuotationModalOpen] = useState(false);
+    const [selectedQuotationLabel, setSelectedQuotationLabel] = useState('');
+
+    const handleQuotationSelect = (quotationId: number, label: string) => {
+        setForm({ ...form, quotationId });
+        setSelectedQuotationLabel(label);
+        setIsQuotationModalOpen(false);
+    };
 
     return (
         <>
@@ -33,12 +44,13 @@ function OrdersFormFields({ form, setForm, currentItem, setCurrentItem, onAddIte
                     placeholder="바이어 선택"
                     disabled={disabled}
                 />
-                <EntitySelect
-                    value={form.quotationId ?? 0}
-                    onChange={(id) => setForm({ ...form, quotationId: id })}
-                    options={quotationList.map(q => ({ id: q.id, label: `#${q.id} - ${q.companyName}` }))}
-                    placeholder="견적 선택 (선택사항)"
-                />
+                <button
+                    type="button"
+                    onClick={() => setIsQuotationModalOpen(true)}
+                    className="border border-gray-300 rounded px-3 py-2 text-left text-gray-700"
+                >
+                    {selectedQuotationLabel || '견적 선택 (선택사항)'}
+                </button>
                 <input
                     type="date"
                     value={form.ordersDate}
@@ -64,7 +76,30 @@ function OrdersFormFields({ form, setForm, currentItem, setCurrentItem, onAddIte
                 placeholder="코멘트"
                 className="border border-gray-300 rounded px-3 py-2 w-full mb-4"
             />
-
+            <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="relative">
+                    <input
+                        type="number"
+                        value={form.freightCoveredByCompany ? '' : (form.freightCost || '')}
+                        onChange={(e) => setForm({ ...form, freightCost: Number(e.target.value) })}
+                        placeholder="운임비"
+                        disabled={form.freightCoveredByCompany}
+                        className="border border-gray-300 rounded px-3 py-2 w-full disabled:bg-gray-100 disabled:text-gray-400"
+                    />
+                </div>
+                <label className="flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                        type="checkbox"
+                        checked={form.freightCoveredByCompany || false}
+                        onChange={(e) => setForm({
+                            ...form,
+                            freightCoveredByCompany: e.target.checked,
+                            freightCost: e.target.checked ? 0 : form.freightCost,
+                        })}
+                    />
+                    운임비 회사 부담 (0원)
+                </label>
+            </div>
 
             {/* Add itmes */}
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
@@ -88,6 +123,12 @@ function OrdersFormFields({ form, setForm, currentItem, setCurrentItem, onAddIte
                         </li>
                     ))}
                 </ul>
+
+                <QuotationSelectModal
+                    isOpen={isQuotationModalOpen}
+                    onClose={() => setIsQuotationModalOpen(false)}
+                    onSelect={handleQuotationSelect}
+                />
             </div>
         </>
     )

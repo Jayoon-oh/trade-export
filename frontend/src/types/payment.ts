@@ -48,3 +48,10 @@ export interface PaymentDetail {
     remaining: number;
     payments: PaymentRecord[];
 }
+
+export interface PaymentStatusHistory {
+    previousStatus: string | null;
+    newStatus: string;
+    changedAt: string;
+    changedByName: string;
+}

@@ -1,13 +1,14 @@
-import { getPaymentDetail, getPayments, updatePayment } from "../../api/paymentApi";
-import type { PaymentStatus, PaymentResponse, PaymentDetail } from "../../types/payment";
+import { getPaymentDetail, getPayments, getPaymentStatusHistory, updatePayment } from "../../api/paymentApi";
+import type { PaymentStatus, PaymentResponse, PaymentDetail, PaymentStatusHistory } from "../../types/payment";
 import { useEffect, useState } from "react";
 import type { Company } from "../../types/company";
 import { getCompanyList } from "../../api/companyApi";
 import EntitySelect from "../../components/EntitySelect";
 import StatusSelect from "../../components/StatusSelect";
-import formatDate from "../../utils/formatDate";
-import PaymentQuickEditCard from "./components/PaymentQuickEditCard";
+import PaymentCreateCard from "./components/PaymentCreateCard";
 import PaymentDetailPanel from "./components/PaymentDetailPanel";
+import PaymentStatusHistoryPanel from "./components/PaymentStatusHistoryPanel";
+import formatDateOnly from "../../utils/formatDateOnly";
 
 function PaymentPage() {
     const [paymentList, setPaymentList] = useState<PaymentResponse[]>([]);
@@ -29,6 +30,11 @@ function PaymentPage() {
 
     const [invoiceNumberSearch, setInvoiceNumberSearch] = useState('');
 
+    // history per payment status
+    const [expandedHistoryId, setExpandedHistoryId] = useState<number | null>(null);
+    const [statusHistory, setStatusHistory] = useState<PaymentStatusHistory[]>([]);
+
+
     useEffect(() => {
         fetchCompanies();
     }, []);
@@ -49,14 +55,25 @@ function PaymentPage() {
     }
 
     const handleStatusChange = async (paymentId: number, newStatus: PaymentStatus) => {
-        if (!confirm(`상태를 ${newStatus}로 변경하시겠습니끼?`)) return;
+        if (!confirm(`상태를 ${newStatus}로 변경하시겠습니까?`)) return;
         await updatePayment(paymentId, newStatus);
         fetchPaymentList();
+
+        if (selectedInvoiceId) {
+            const data = await getPaymentDetail(selectedInvoiceId);
+            setPaymentDetail(data);
+        }
+
+        if (expandedHistoryId === paymentId) {
+            const historyData = await getPaymentStatusHistory(paymentId);
+            setStatusHistory(historyData);
+        }
     }
 
     const handleOpenNew = () => {
         setSelectedInvoiceId(null);
         setPaymentDetail(null);
+        setExpandedHistoryId(null);
         setCardKey(prev => prev + 1);
         setIsCardOpen(true);
     }
@@ -69,9 +86,23 @@ function PaymentPage() {
         }
         // close, when register card is open.
         setIsCardOpen(false);
+        setExpandedHistoryId(null);
         const data = await getPaymentDetail(invoiceId);
         setPaymentDetail(data);
         setSelectedInvoiceId(invoiceId);
+    };
+
+    const handleToggleHistory = async (paymentId: number) => {
+        if (expandedHistoryId === paymentId) {
+            setExpandedHistoryId(null);
+            return;
+        }
+        setIsCardOpen(false);
+        setSelectedInvoiceId(null);
+        setPaymentDetail(null);
+        const data = await getPaymentStatusHistory(paymentId);
+        setStatusHistory(data);
+        setExpandedHistoryId(paymentId);
     };
 
     return (
@@ -116,15 +147,17 @@ function PaymentPage() {
                                 <th className="px-4 py-3">바이어</th>
                                 <th className="px-4 py-3">인보이스번호</th>
                                 <th className="px-4 py-3">금액</th>
-                                <th className="px-4 py-3">결제일</th>
                                 <th className="px-4 py-3">상태</th>
+                                <th className="px-4 py-3"></th>
+                                <th className="px-4 py-3">등록일</th>
+                                <th className="px-4 py-3">결제일</th>
                                 <th className="px-4 py-3"></th>
                             </tr>
                         </thead>
                         <tbody>
                             {paymentList.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-4 py-8 text-center text-gray-400 text-sm">
+                                    <td colSpan={8} className="px-4 py-8 text-center text-gray-400 text-sm">
                                         결제 내역이 없습니다
                                     </td>
                                 </tr>
@@ -134,7 +167,6 @@ function PaymentPage() {
                                         <td className="px-4 py-3">{p.buyerName}</td>
                                         <td className="px-4 py-3">{p.invoiceNumber}</td>
                                         <td className="px-4 py-3">{p.amount}</td>
-                                        <td className="px-4 py-3">{formatDate(p.paymentDate)}</td>
                                         <td className="px-4 py-3">
                                             <StatusSelect
                                                 value={p.status}
@@ -142,6 +174,13 @@ function PaymentPage() {
                                                 options={['PENDING', 'COMPLETED', 'CANCELLED']}
                                             />
                                         </td>
+                                        <td className="px-4 py-3">
+                                            <button onClick={() => handleToggleHistory(p.id)} className="text-gray-500 hover:text-gray-800" aria-label="이력 보기">
+                                                ⏱
+                                            </button>
+                                        </td>
+                                        <td className="px-4 py-3">{formatDateOnly(p.createdAt)}</td>
+                                        <td className="px-4 py-3">{formatDateOnly(p.paymentDate)}</td>
                                         <td className="px-4 py-3">
                                             <button onClick={() => handleViewDetail(p.invoiceId)} className="text-blue-900 hover:underline text-sm">
                                                 {selectedInvoiceId === p.invoiceId ? '접기' : '상세보기'}
@@ -178,7 +217,7 @@ function PaymentPage() {
 
                 {/* register form */}
                 {isCardOpen && (
-                    <PaymentQuickEditCard
+                    <PaymentCreateCard
                         key={cardKey}
                         onSuccess={() => { setIsCardOpen(false); fetchPaymentList(); }}
                         onCancel={() => setIsCardOpen(false)}
@@ -187,6 +226,11 @@ function PaymentPage() {
                 {paymentDetail && (
                     <div className="w-1/3 border-l border-gray-200 min-h-screen p-6 bg-white flex-shrink-0">
                         <PaymentDetailPanel detail={paymentDetail} onClose={() => { setSelectedInvoiceId(null); setPaymentDetail(null); }} />
+                    </div>
+                )}
+                {expandedHistoryId && (
+                    <div className="w-1/3 border-l border-gray-200 min-h-screen p-6 bg-white flex-shrink-0">
+                        <PaymentStatusHistoryPanel history={statusHistory} onClose={() => setExpandedHistoryId(null)} />
                     </div>
                 )}
             </div>

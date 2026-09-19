@@ -4,12 +4,13 @@ import type { RemainingItem } from '../../../types/invoice';
 
 interface InvoiceSplitModalProps {
     ordersId: number;
+    orderCurrency: string;
     isOpen: boolean;
     onClose: () => void;
     onSuccess: (invoiceId: number) => void;
 }
 
-function InvoiceSplitModal({ ordersId, isOpen, onClose, onSuccess }: InvoiceSplitModalProps) {
+function InvoiceSplitModal({ ordersId,orderCurrency, isOpen, onClose, onSuccess }: InvoiceSplitModalProps) {
     const [remainingItems, setRemainingItems] = useState<RemainingItem[]>([]);
     const [quantities, setQuantities] = useState<Record<number, number>>({});
     const [exchangeRate, setExchangeRate] = useState('');
@@ -112,7 +113,7 @@ function InvoiceSplitModal({ ordersId, isOpen, onClose, onSuccess }: InvoiceSpli
                 </table>
 
                 <div className="flex items-center gap-2 mb-4">
-                    <label className="text-sm text-gray-700">환율:</label>
+                    <label className="text-sm text-gray-700">환율 (1 {orderCurrency} = ? KRW):</label>
                     <input
                         type="number"
                         value={exchangeRate}

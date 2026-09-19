@@ -46,6 +46,8 @@ export interface OrdersCreateRequest {
     incoterms: string;
     paymentTerm: string;
     items: OrdersItemRequest[];
+    freightCost?: number;
+    freightCoveredByCompany?: boolean;
 }
 
 export interface OrdersItemRequest {

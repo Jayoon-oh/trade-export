@@ -12,6 +12,7 @@ function Header() {
     }
 
     const menuItems = [
+        { to: '/dashboard', label: '대시보드' },
         { to: '/stock', label: '재고' },
         { to: '/companies', label: '거래처' },
         { to: '/quotations', label: '견적' },

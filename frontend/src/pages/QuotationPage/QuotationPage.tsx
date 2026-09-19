@@ -4,7 +4,7 @@ import type { Quotation } from "../../types/quotation";
 import type { Company } from "../../types/company";
 import { useState, useEffect } from "react";
 import EntitySelect from "../../components/EntitySelect";
-import formatDate from "../../utils/formatDate";
+import formatDateOnly from "../../utils/formatDateOnly";
 import QuotationCreateForm from "./components/QuotationCreateFom";
 import QuotationEditForm from "./components/QuotationEditForm";
 
@@ -97,7 +97,7 @@ function QuotationPage() {
                                         <td className="px-4 py-3">{quotation.companyName}</td>
                                         <td className="px-4 py-3">{quotation.totalAmount}</td>
                                         <td className="px-4 py-3">{quotation.currency}</td>
-                                        <td className="px-4 py-3">{formatDate(quotation.quotationDate)}</td>
+                                        <td className="px-4 py-3">{formatDateOnly(quotation.quotationDate)}</td>
                                         <td className="px-4 py-3">{quotation.comment || '-'}</td>
                                         <td className="px-4 py-3 flex gap-2">
                                             <button onClick={() => { setEditingId(quotation.id); setView('edit'); }} className="text-blue-900 hover:underline">수정</button>

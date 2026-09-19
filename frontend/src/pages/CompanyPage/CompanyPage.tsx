@@ -11,6 +11,9 @@ function CompanyPage() {
 
     const [searchRole, setSearchRole] = useState('');
     const roles = ['FORWARDER', 'BUYER', 'SELLER', 'CARRIER'];
+    const roleLabels: Record<string, string> = {
+    FORWARDER: '포워더', BUYER: '바이어', SELLER: '판매자', CARRIER: '운송사'
+};
 
     // pagination
     const [currentPage, setCurrentPage] = useState(0);
@@ -81,7 +84,7 @@ function CompanyPage() {
                 >
                     <option value="">전체</option>
                     {roles.map((role) => (
-                        <option key={role} value={role}>{role}</option>
+                        <option key={role} value={role}>{roleLabels[role]}</option>
                     ))}
                 </select>
                 <button
@@ -120,7 +123,7 @@ function CompanyPage() {
                                         <td className="px-4 py-3">{company.id}</td>
                                         <td className="px-4 py-3">{company.companyName}</td>
                                         <td className="px-4 py-3">{company.address}</td>
-                                        <td className="px-4 py-3">{company.role}</td>
+                                        <td className="px-4 py-3">{roleLabels[company.role]}</td>
                                         <td className="px-4 py-3">{company.country}</td>
                                         <td className="px-4 py-3">{company.registrationNumber}</td>
                                         <td className="px-4 py-3 flex gap-2">
