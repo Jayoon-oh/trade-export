@@ -15,7 +15,7 @@ function QuotationCreateForm({ onSuccess }: QuotationCreateFormProps) {
     const [form, setForm] = useState<QuotationCreateRequest>({
         companyId: 0, currency: '', incoterms: '', paymentTerm: '', quotationDate: '', comment: '', items: []
     });
-    const [currentItem, setCurrentItem] = useState<QuotationItemRequest>({ itemsId: 0, quantity: 0 });
+    const [currentItem, setCurrentItem] = useState<QuotationItemRequest>({ itemsId: 0, quantity: 0, itemName: '' });
     const [companies, setCompanies] = useState<Company[]>([]);
     const [itemsList, setItemsList] = useState<Items[]>([]);
 
@@ -38,7 +38,7 @@ function QuotationCreateForm({ onSuccess }: QuotationCreateFormProps) {
         if (!currentItem.itemsId) { alert('품목을 선택해주세요.'); return; }
         if (!currentItem.quantity || currentItem.quantity <= 0) { alert('수량은 0보다 큰 숫자로 입력해주세요'); return; }
         setForm({ ...form, items: [...form.items, currentItem] });
-        setCurrentItem({ itemsId: 0, quantity: 0 });
+        setCurrentItem({ itemsId: 0, quantity: 0, itemName: '' });
     };
 
     const handleRemoveItem = (indexToRemove: number) => {
@@ -48,6 +48,7 @@ function QuotationCreateForm({ onSuccess }: QuotationCreateFormProps) {
     const handleSubmit = async () => {
         try {
             await createQuotation(form);
+            alert('견석서가 동록되었습니다.')
             onSuccess();
         } catch (error: any) {
             const message = error.response?.data || '견적 등록에 실패했습니다.';

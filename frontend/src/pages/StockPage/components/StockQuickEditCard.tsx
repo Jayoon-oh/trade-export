@@ -15,6 +15,7 @@ function StockQuickEditCard({ onSuccess, onCancel }: StockQuickEditCardProps) {
     const handleSubmit = async () => {
         try {
             await createItems(form);
+            alert('수정이 완료되었습니다.');
             onSuccess();
         } catch (error) {
             alert('품목 등록에 실패했습니다.');

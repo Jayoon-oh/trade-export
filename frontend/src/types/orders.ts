@@ -54,6 +54,7 @@ export interface OrdersItemRequest {
     itemsId: number;
     quantity: number;
     price?: number;
+    itemName: string;
 }
 
 

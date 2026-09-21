@@ -4,9 +4,7 @@ import type { OrdersCreateRequest, OrdersItemRequest } from "../../../types/orde
 import OrdersFormFields from "./OrdersFormFields";
 import type { Company } from "../../../types/company";
 import type { Items } from "../../../types/items";
-import type { Quotation } from "../../../types/quotation";
 import { getItemsList } from "../../../api/itemsApi";
-import { getQuotationList } from "../../../api/quotationApi";
 import { getAllCompanies } from "../../../api/companyApi";
 
 interface OrdersCreateFormProps {
@@ -28,6 +26,7 @@ function OrdersCreateForm({ onSuccess }: OrdersCreateFormProps) {
     const [currentItem, setCurrentItem] = useState<OrdersItemRequest>({
         itemsId: 0,
         quantity: 0,
+        itemName: ''
     });
     const [companies, setCompanies] = useState<Company[]>([]);
     const [itemsList, setItemsList] = useState<Items[]>([]);
@@ -57,7 +56,7 @@ function OrdersCreateForm({ onSuccess }: OrdersCreateFormProps) {
             return;
         }
         setForm({ ...form, items: [...form.items, currentItem] });
-        setCurrentItem({ itemsId: 0, quantity: 0 });
+        setCurrentItem({ itemsId: 0, quantity: 0, itemName: '' });
     };
 
     const handleRemoveItem = (indexToRemove: number) => {
@@ -75,6 +74,7 @@ function OrdersCreateForm({ onSuccess }: OrdersCreateFormProps) {
         try {
             const payload = { ...form, quotationId: form.quotationId || undefined };
             await registerOrders(payload)
+            alert('등록이 완료되었습니다.');
             onSuccess();
         } catch (error: any) {
             const message = error.response?.data || '오더 등록/수정에 실패했습니다.';

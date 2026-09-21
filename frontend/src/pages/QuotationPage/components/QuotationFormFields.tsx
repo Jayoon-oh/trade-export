@@ -1,8 +1,8 @@
-import EntitySelect from '../../../components/EntitySelect'; 
-import ItemPicker from '../../../components/itemPicker'; 
-import type { Company } from '../../../types/company'; 
+import EntitySelect from '../../../components/EntitySelect';
+import ItemPicker from '../../../components/itemPicker';
+import type { Company } from '../../../types/company';
 import type { Items } from '../../../types/items';
-import type { QuotationCreateRequest, QuotationItemRequest } from '../../../types/quotation'; 
+import type { QuotationCreateRequest, QuotationItemRequest } from '../../../types/quotation';
 
 interface QuotationFormFieldsProps {
     form: QuotationCreateRequest;
@@ -64,7 +64,12 @@ function QuotationFormFields({ form, setForm, currentItem, setCurrentItem, onAdd
                         itemsId={currentItem.itemsId}
                         quantity={currentItem.quantity}
                         itemsList={itemsList.map(i => ({ id: i.id, label: i.productName, price: i.price }))}
-                        onChangeItem={(id) => setCurrentItem({ ...currentItem, itemsId: id })}
+                        onChangeItem={(id) => {
+                            const selected = itemsList.find(item => item.id === id);
+                            setCurrentItem({
+                                ...currentItem, itemsId: id, itemName: selected?.productName ?? ''
+                            });
+                        }}
                         onChangeQuantity={(qty) => setCurrentItem({ ...currentItem, quantity: qty })}
                     />
                     <button onClick={onAddItem} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">품목 추가</button>
@@ -73,7 +78,7 @@ function QuotationFormFields({ form, setForm, currentItem, setCurrentItem, onAdd
                 <ul className="space-y-1">
                     {form.items.map((item, index) => (
                         <li key={index} className="flex justify-between items-center bg-white border border-gray-200 rounded px-3 py-2 text-sm">
-                            <span>품목ID: {item.itemsId}, 수량: {item.quantity}</span>
+                            <span>품목: {item.itemName}, 수량: {item.quantity}</span>
                             <button onClick={() => onRemoveItem(index)} className="text-red-600 hover:underline">삭제</button>
                         </li>
                     ))}

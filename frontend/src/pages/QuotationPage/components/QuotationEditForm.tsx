@@ -16,7 +16,7 @@ function QuotationEditForm({ quotationId, onSuccess }: QuotationEditFormProps) {
     const [form, setForm] = useState<QuotationCreateRequest>({
         companyId: 0, currency: '', incoterms: '', paymentTerm: '', quotationDate: '', comment: '', items: []
     });
-    const [currentItem, setCurrentItem] = useState<QuotationItemRequest>({ itemsId: 0, quantity: 0 });
+    const [currentItem, setCurrentItem] = useState<QuotationItemRequest>({ itemsId: 0, quantity: 0, itemName: '' });
     const [companies, setCompanies] = useState<Company[]>([]);
     const [itemsList, setItemsList] = useState<Items[]>([]);
 
@@ -45,7 +45,7 @@ function QuotationEditForm({ quotationId, onSuccess }: QuotationEditFormProps) {
             paymentTerm: detail.quotation.paymentTerm,
             quotationDate: detail.quotation.quotationDate,
             comment: detail.quotation.comment,
-            items: detail.items.map((item) => ({ itemsId: item.itemsId, quantity: item.quantity })),
+            items: detail.items.map((item) => ({ itemsId: item.itemsId, quantity: item.quantity, itemName: item.itemName })),
         });
     };
 
@@ -53,7 +53,7 @@ function QuotationEditForm({ quotationId, onSuccess }: QuotationEditFormProps) {
         if (!currentItem.itemsId) { alert('품목을 선택해주세요.'); return; }
         if (!currentItem.quantity || currentItem.quantity <= 0) { alert('수량은 0보다 큰 숫자로 입력해주세요'); return; }
         setForm({ ...form, items: [...form.items, currentItem] });
-        setCurrentItem({ itemsId: 0, quantity: 0 });
+        setCurrentItem({ itemsId: 0, quantity: 0, itemName: '' });
     };
 
     const handleRemoveItem = (indexToRemove: number) => {
@@ -63,6 +63,7 @@ function QuotationEditForm({ quotationId, onSuccess }: QuotationEditFormProps) {
     const handleSubmit = async () => {
         try {
             await updateQuotation(quotationId, form);
+            alert('수정이 완료되었습니다.');
             onSuccess();
         } catch (error: any) {
             const message = error.response?.data || '견적 수정에 실패했습니다.';

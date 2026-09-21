@@ -7,7 +7,6 @@ export interface Shipment {
     buyerName: string;
     forwarderId: number;
     forwarderName: string;
-    fee: number;
     status: ShipmentStatus;
     orderNumber: string;
     shipmentDate: string;
@@ -26,6 +25,12 @@ export interface PagedShipments {
 export interface ShipmentCreateRequest {
     ordersId: number;
     forwarderId: number;
-    fee: number;
     shipmentDate: string;
+}
+
+export interface ShipmentStatusHistory {
+    previousStatus: string | null;
+    newStatus: string;
+    changedAt: string;
+    changedByName: string;
 }

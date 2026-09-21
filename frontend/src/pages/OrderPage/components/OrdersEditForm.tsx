@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import type { OrdersCreateRequest, OrdersItemRequest } from "../../../types/orders";
 import type { Company } from "../../../types/company";
 import type { Items } from "../../../types/items";
-import type { Quotation } from "../../../types/quotation";
 import { getItemsList } from "../../../api/itemsApi";
-import { getQuotationList } from "../../../api/quotationApi";
 import { getAllCompanies } from "../../../api/companyApi";
 import { getOrder, updateOrders } from "../../../api/ordersApi";
 import OrdersFormFields from "./OrdersFormFields";
@@ -29,6 +27,7 @@ function OrdersEditForm({ orderId, onSuccess }: OrdersEditFormProps) {
     const [currentItem, setCurrentItem] = useState<OrdersItemRequest>({
         itemsId: 0,
         quantity: 0,
+        itemName: ''
     });
     const [companies, setCompanies] = useState<Company[]>([]);
     const [itemsList, setItemsList] = useState<Items[]>([]);
@@ -60,11 +59,11 @@ function OrdersEditForm({ orderId, onSuccess }: OrdersEditFormProps) {
             currency: detail.orders.currency,
             incoterms: detail.orders.incoterms,
             paymentTerm: detail.orders.paymentTerm,
-            items: detail.items.map((item) => ({ itemsId: item.itemsId, quantity: item.quantity }))
+            items: detail.items.map((item) => ({ itemsId: item.itemsId, quantity: item.quantity, itemName: item.itemName }))
         });
     };
 
-        const handleAddItem = () => {
+    const handleAddItem = () => {
         if (!currentItem.itemsId) {
             alert('품목을 선택해주세요.');
             return;
@@ -74,14 +73,14 @@ function OrdersEditForm({ orderId, onSuccess }: OrdersEditFormProps) {
             return;
         }
         setForm({ ...form, items: [...form.items, currentItem] });
-        setCurrentItem({ itemsId: 0, quantity: 0 });
+        setCurrentItem({ itemsId: 0, quantity: 0, itemName: '' });
     };
 
     const handleRemoveItem = (indexToRemove: number) => {
         setForm({ ...form, items: form.items.filter((_, index) => index !== indexToRemove) });
     };
 
-        const handleSubmit = async () => {
+    const handleSubmit = async () => {
         if (!form.buyerId) { alert('바이어를 선택해주세요.'); return; }
         if (!form.ordersDate) { alert('주문일을 선택해주세요.'); return; }
         if (!form.currency) { alert('통화를 선택해주세요.'); return; }
@@ -92,13 +91,14 @@ function OrdersEditForm({ orderId, onSuccess }: OrdersEditFormProps) {
         try {
             const payload = { ...form, quotationId: form.quotationId || undefined };
             await updateOrders(orderId, payload);
+            alert('수정이 완료되었습니다.');
             onSuccess();
         } catch (error: any) {
             const message = error.response?.data || '오더 수정에 실패했습니다.';
             alert(message);
         }
     };
-    
+
     return (
         <div className="bg-white border border-gray-200 rounded-lg p-6">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">오더 수정</h2>

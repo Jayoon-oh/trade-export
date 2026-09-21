@@ -1,4 +1,4 @@
-import type { PagedShipments, Shipment, ShipmentCreateRequest, ShipmentStatus } from "../types/shipment";
+import type { PagedShipments, Shipment, ShipmentCreateRequest, ShipmentStatus, ShipmentStatusHistory } from "../types/shipment";
 import api from "./axiosInstance";
 
 export const createShipment = async (dto: ShipmentCreateRequest): Promise<Shipment> => {
@@ -27,5 +27,10 @@ export const updateShipmentStatus = async (id: number, status: ShipmentStatus): 
 
 export const updateShipment = async (id: number, dto: ShipmentCreateRequest): Promise<Shipment> => {
     const response = await api.put<Shipment>(`/shipments/${id}`, dto);
+    return response.data;
+};
+
+export const getShipmentStatusHistory = async (shipmentId: number): Promise<ShipmentStatusHistory[]> => {
+    const response = await api.get<ShipmentStatusHistory[]>(`/shipments/${shipmentId}/history`);
     return response.data;
 };

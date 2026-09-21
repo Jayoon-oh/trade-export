@@ -7,7 +7,6 @@ import type { Company } from "../../types/company";
 import type { InvoiceResponse } from "../../types/invoice";
 import InvoiceHistoryModal from "./components/InvoiceHistoryModal";
 import EntitySelect from "../../components/EntitySelect";
-import formatDate from "../../utils/formatDate";
 import OrdersCreateForm from "./components/OrdersCreateForm";
 import OrdersEditForm from "./components/OrdersEditForm";
 import InvoiceSplitModal from "./components/InvoiceSplitModal";
@@ -97,6 +96,8 @@ function OrdersPage() {
             alert('인보이스를 선택해주세요.')
             return;
         }
+        if (!confirm('해당 인보이스를 취소하시겠습니까?')) return;
+
         try {
             await cancelInvoice(invoiceId);
             if (historyOrderId) {
@@ -141,7 +142,7 @@ function OrdersPage() {
                     <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
                         <thead>
                             <tr className="bg-gray-100 text-left text-sm text-gray-600">
-                                <th className="px-4 py-3">오더 ID</th>
+                                <th className="px-4 py-3">오더번호</th>
                                 <th className="px-4 py-3">바이어명</th>
                                 <th className="px-4 py-3">금액</th>
                                 <th className="px-4 py-3">통화</th>
@@ -222,7 +223,7 @@ function OrdersPage() {
             {splitOrderId && (
                 <InvoiceSplitModal
                     ordersId={splitOrderId}
-                    orderCurrency={splitOrderCurrency} 
+                    orderCurrency={splitOrderCurrency}
                     isOpen={isSplitModalOpen}
                     onClose={() => setIsSplitModalOpen(false)}
                     onSuccess={async (invoiceId) => {

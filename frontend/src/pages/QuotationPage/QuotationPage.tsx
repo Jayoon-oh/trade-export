@@ -74,7 +74,6 @@ function QuotationPage() {
                     <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
                         <thead>
                             <tr className="bg-gray-100 text-left text-sm text-gray-600">
-                                <th className="px-4 py-3">ID</th>
                                 <th className="px-4 py-3">바이어명</th>
                                 <th className="px-4 py-3">금액</th>
                                 <th className="px-4 py-3">통화</th>
@@ -93,7 +92,6 @@ function QuotationPage() {
                             ) : (
                                 quotationList.map((quotation) => (
                                     <tr key={quotation.id} className="border-t border-gray-200 hover:bg-gray-50">
-                                        <td className="px-4 py-3">{quotation.id}</td>
                                         <td className="px-4 py-3">{quotation.companyName}</td>
                                         <td className="px-4 py-3">{quotation.totalAmount}</td>
                                         <td className="px-4 py-3">{quotation.currency}</td>
@@ -138,7 +136,7 @@ function QuotationPage() {
             )}
 
             {view === 'edit' && editingId && (
-                <QuotationEditForm quotationId={editingId} onSuccess={() => { setView('edit'); fetchQuotation(); }} />
+                <QuotationEditForm quotationId={editingId} onSuccess={() => { setView('list'); fetchQuotation(); }} />
             )}
         </div>
     )

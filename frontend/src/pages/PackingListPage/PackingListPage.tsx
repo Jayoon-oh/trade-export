@@ -82,7 +82,7 @@ function PackingListPage() {
                     <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
                         <thead>
                             <tr className="bg-gray-100 text-left text-sm text-gray-600">
-                                <th className="px-4 py-3">오더 ID</th>
+                                <th className="px-4 py-3">오더번호</th>
                                 <th className="px-4 py-3">회사명</th>
                                 <th className="px-4 py-3">운송사</th>
                                 <th className="px-4 py-3">포장날짜</th>

@@ -74,20 +74,22 @@ function StockPage() {
                     <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden">
                         <thead>
                             <tr className="bg-gray-100 text-left text-sm text-gray-600">
-                                <th className="px-4 py-3">ID</th>
                                 <th className="px-4 py-3">제품명</th>
                                 <th className="px-4 py-3">수량</th>
-                                <th className="px-4 py-3">예약 된 수량</th>
+                                <th className="px-4 py-3">예약 수량</th>
+                                <th className="px-4 py-3">가격</th>
+                                <th className="px-4 py-3">무게(kg)</th>
                                 <th className="px-4 py-3"></th>
                             </tr>
                         </thead>
                         <tbody>
                             {stockList.map((stock) => (
                                 <tr key={stock.id} className="border-t border-gray-200 hover:bg-gray-50">
-                                    <td className="px-4 py-3">{stock.id}</td>
                                     <td className="px-4 py-3">{stock.productName}</td>
                                     <td className="px-4 py-3">{stock.quantity}</td>
                                     <td className="px-4 py-3">{stock.reservedQuantity}</td>
+                                    <td className="px-4 py-3">{stock.price}</td>
+                                    <td className="px-4 py-3">{stock.standardWeight}</td>
                                     <td className="px-4 py-3">
                                         <button onClick={() => handleViewDetail(stock)} className="text-blue-900 hover:underline">제품 상세</button>
                                     </td>

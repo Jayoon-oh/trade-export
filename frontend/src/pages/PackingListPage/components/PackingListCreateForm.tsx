@@ -73,6 +73,7 @@ function PackingListCreateForm({ onSuccess }: PackingListCreateFormProps) {
                 items: form.items.map(({ itemsId, quantity, actualWeight }) => ({ itemsId, quantity, actualWeight })),
             };
             await createPackingList(payload);
+            alert('패킹리스트가 생성되었습니다.')
             onSuccess();
         } catch (error: any) {
             alert('등록에 실패했습니다. 이미 등록된 패킹리스트가 있는지 확인해주세요.');

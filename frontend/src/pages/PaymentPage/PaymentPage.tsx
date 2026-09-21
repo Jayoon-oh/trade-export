@@ -148,7 +148,7 @@ function PaymentPage() {
                                 <th className="px-4 py-3">인보이스번호</th>
                                 <th className="px-4 py-3">금액</th>
                                 <th className="px-4 py-3">상태</th>
-                                <th className="px-4 py-3"></th>
+                                <th className="px-4 py-3">상태이력</th>
                                 <th className="px-4 py-3">등록일</th>
                                 <th className="px-4 py-3">결제일</th>
                                 <th className="px-4 py-3"></th>

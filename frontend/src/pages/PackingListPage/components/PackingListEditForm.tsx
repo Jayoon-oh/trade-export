@@ -65,6 +65,7 @@ function PackingListEditForm({ packingListId, onSuccess }: PackingListEditFormPr
                 items: form.items.map(({ itemsId, quantity, actualWeight }) => ({ itemsId, quantity, actualWeight })),
             };
             await updatePackingList(packingListId, payload);
+            alert('수정이 완료되었습니다.')
             onSuccess();
         } catch (error: any) {
             alert('수정에 실패했습니다.');

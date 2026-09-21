@@ -39,6 +39,7 @@ function PaymentCreateCard({ onSuccess, onCancel }: PaymentCreateCardProps) {
     const handleSubmit = async () => {
         try {
             await createPayment(form);
+            alert('결제 등록이 완료되었습니다.')
             onSuccess();
         } catch (error) {
             alert('결제 등록에 실패했습니다. 잔액을 초과하지 않았는지 확인해주세요.');

@@ -34,6 +34,7 @@ export interface QuotationDetailResponse {
 export interface QuotationItemRequest {
     itemsId: number;
     quantity: number;
+    itemName: string;
 }
 
 export interface QuotationCreateRequest {

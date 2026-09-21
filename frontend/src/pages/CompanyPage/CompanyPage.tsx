@@ -101,7 +101,6 @@ function CompanyPage() {
                     <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
                         <thead>
                             <tr className="bg-gray-100 text-left text-sm text-gray-600">
-                                <th className="px-4 py-3">ID</th>
                                 <th className="px-4 py-3">회사명</th>
                                 <th className="px-4 py-3">주소</th>
                                 <th className="px-4 py-3">역할</th>
@@ -120,7 +119,6 @@ function CompanyPage() {
                             ) : (
                                 companyList.map((company) => (
                                     <tr key={company.id} className="border-t border-gray-200 hover:bg-gray-50">
-                                        <td className="px-4 py-3">{company.id}</td>
                                         <td className="px-4 py-3">{company.companyName}</td>
                                         <td className="px-4 py-3">{company.address}</td>
                                         <td className="px-4 py-3">{roleLabels[company.role]}</td>

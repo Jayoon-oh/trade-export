@@ -1,4 +1,4 @@
-import { getShipmentsList, updateShipmentStatus } from "../../api/shipmentApi";
+import { getShipmentsList, getShipmentStatusHistory, updateShipmentStatus } from "../../api/shipmentApi";
 import { getAllCompanies } from "../../api/companyApi";
 import type { Company } from "../../types/company";
 import type { Shipment, ShipmentStatus } from "../../types/shipment";
@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import EntitySelect from "../../components/EntitySelect";
 import StatusSelect from "../../components/StatusSelect";
 import ShipmentQuickEditCard from "./components/ShipmentQuickEditCard";
+import ShipmentStatusHistoryPanel from "./components/ShipmentStatusHistory";
 
 function ShipmentPage() {
     const [shipmentList, setShipmentList] = useState<Shipment[]>([]);
@@ -23,6 +24,10 @@ function ShipmentPage() {
     const [editingShipmentId, setEditingShipmentId] = useState<number | null>(null);
 
     const [orderNumberSearch, setOrderNumberSearch] = useState('');
+
+    // history of shipment status
+    const [expandedHistoryId, setExpandedHistoryId] = useState<number | null>(null);
+    const [statusHistory, setStatusHistory] = useState<ShipmentStatusHistory[]>([]);
 
     useEffect(() => {
         fetchCompanies();
@@ -47,6 +52,22 @@ function ShipmentPage() {
         if (!confirm(`상태를 ${newStatus}(으)로 변경하시겠습니까?`)) return;
         await updateShipmentStatus(shipmentId, newStatus);
         fetchShipments();
+
+        if (expandedHistoryId === shipmentId) {
+            const historyData = await getShipmentStatusHistory(shipmentId);
+            setStatusHistory(historyData);
+        }
+    };
+
+    const handleToggleHistory = async (shipmentId: number) => {
+        if (expandedHistoryId === shipmentId) {
+            setExpandedHistoryId(null);
+            return;
+        }
+        setIsCardOpen(false);
+        const data = await getShipmentStatusHistory(shipmentId);
+        setStatusHistory(data);
+        setExpandedHistoryId(shipmentId);
     };
 
     return (
@@ -94,11 +115,11 @@ function ShipmentPage() {
                     <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
                         <thead>
                             <tr className="bg-gray-100 text-left text-sm text-gray-600">
-                                <th className="px-4 py-3">오더 ID</th>
+                                <th className="px-4 py-3">오더번호</th>
                                 <th className="px-4 py-3">바이어</th>
                                 <th className="px-4 py-3">포워더</th>
-                                <th className="px-4 py-3">운임</th>
                                 <th className="px-4 py-3">상태</th>
+                                <th className="px-4 py-3">상태이력</th>
                                 <th className="px-4 py-3">선적일</th>
                                 <th className="px-4 py-3"></th>
                             </tr>
@@ -116,13 +137,17 @@ function ShipmentPage() {
                                         <td className="px-4 py-3">{s.orderNumber}</td>
                                         <td className="px-4 py-3">{s.buyerName}</td>
                                         <td className="px-4 py-3">{s.forwarderName}</td>
-                                        <td className="px-4 py-3">{s.fee}</td>
                                         <td className="px-4 py-3">
                                             <StatusSelect
                                                 value={s.status}
                                                 onChange={(status) => handleStatusChange(s.id, status as ShipmentStatus)}
                                                 options={['PLANNED', 'SHIPPED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED']}
                                             />
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <button onClick={() => handleToggleHistory(s.id)} className="text-gray-500 hover:text-gray-800" aria-label="이력 보기">
+                                                ⏱
+                                            </button>
                                         </td>
                                         <td className="px-4 py-3">{s.shipmentDate}</td>
                                         <td className="px-4 py-3">
@@ -163,6 +188,11 @@ function ShipmentPage() {
                         onSuccess={() => { setIsCardOpen(false); fetchShipments(); }}
                         onCancel={() => setIsCardOpen(false)}
                     />
+                )}
+                {expandedHistoryId && (
+                    <div className="w-1/3 border-l border-gray-200 min-h-screen p-6 bg-white flex-shrink-0">
+                        <ShipmentStatusHistoryPanel history={statusHistory} onClose={() => setExpandedHistoryId(null)} />
+                    </div>
                 )}
             </div>
         </div>

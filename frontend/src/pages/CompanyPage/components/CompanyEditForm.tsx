@@ -39,6 +39,7 @@ function CompanyEditForm({ companyId, onSuccess }: CompanyEditFormProps) {
 
         try {
             await updateCompany(companyId, form);
+            alert('수정이 완료되었습니다.');
             onSuccess();
         } catch (error) {
             alert('거래처 수정에 실패했습니다.');
