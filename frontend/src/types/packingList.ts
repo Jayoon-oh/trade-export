@@ -61,6 +61,7 @@ export interface PackingListResponse {
     comment?: string;
     createdAt: string;
     updatedAt: string;
+    shipmentSequence: number;
 }
 
 export interface PackingListDetailResponse {

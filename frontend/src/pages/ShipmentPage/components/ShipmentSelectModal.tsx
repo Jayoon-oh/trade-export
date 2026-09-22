@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAllCompanies } from '../../../api/companyApi';
-import { getShipmentsList } from '../../../api/shipmentApi'; 
+import { getShipmentsList } from '../../../api/shipmentApi';
 import { getAvailableItems } from '../../../api/packingListApi';
 import type { Company } from '../../../types/company';
 import type { Shipment } from '../../../types/shipment';
@@ -89,7 +89,10 @@ function ShipmentSelectModal({ isOpen, onClose, onSelect }: ShipmentSelectModalP
                                 shipments.map((s) => (
                                     <>
                                         <tr key={s.id} className="border-t border-gray-200 hover:bg-gray-50">
-                                            <td className="px-4 py-2">{s.orderNumber}</td>
+                                            <td className="px-4 py-2">
+                                                {s.orderNumber}
+                                                {s.shipmentSequence > 1 && <span className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded ml-1">({s.shipmentSequence}차)</span>}
+                                            </td>
                                             <td className="px-4 py-2">{s.forwarderName}</td>
                                             <td className="px-4 py-2">{s.shipmentDate}</td>
                                             <td className="px-4 py-2 flex gap-2">
@@ -100,7 +103,7 @@ function ShipmentSelectModal({ isOpen, onClose, onSelect }: ShipmentSelectModalP
                                                     {expandedShipmentId === s.id ? '접기' : '상세보기'}
                                                 </button>
                                                 <button
-                                                    onClick={() => onSelect(s.id, `#${s.orderNumber} - ${s.buyerName}`)}
+                                                    onClick={() => onSelect(s.id, `#${s.orderNumber}${s.shipmentSequence > 1 ? ` (${s.shipmentSequence}차)` : ''} - ${s.buyerName}`)}
                                                     className="text-blue-900 hover:underline text-sm"
                                                 >
                                                     선택

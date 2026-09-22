@@ -9,6 +9,7 @@ import PaymentCreateCard from "./components/PaymentCreateCard";
 import PaymentDetailPanel from "./components/PaymentDetailPanel";
 import PaymentStatusHistoryPanel from "./components/PaymentStatusHistoryPanel";
 import formatDateOnly from "../../utils/formatDateOnly";
+import { Clock } from "lucide-react";
 
 function PaymentPage() {
     const [paymentList, setPaymentList] = useState<PaymentResponse[]>([]);
@@ -55,20 +56,39 @@ function PaymentPage() {
     }
 
     const handleStatusChange = async (paymentId: number, newStatus: PaymentStatus) => {
-        if (!confirm(`상태를 ${newStatus}로 변경하시겠습니까?`)) return;
-        await updatePayment(paymentId, newStatus);
-        fetchPaymentList();
+        const isIrreversible = newStatus === 'COMPLETED' || newStatus === 'CANCELLED';
+        const confirmMessage = isIrreversible
+            ? `${newStatus}(으)로 변경하면 다시 되돌릴 수 없습니다. 계속하시겠습니까?`
+            : `상태를 ${newStatus}(으)로 변경하시겠습니까?`;
 
-        if (selectedInvoiceId) {
-            const data = await getPaymentDetail(selectedInvoiceId);
-            setPaymentDetail(data);
-        }
+        if (!confirm(confirmMessage)) return;
 
-        if (expandedHistoryId === paymentId) {
-            const historyData = await getPaymentStatusHistory(paymentId);
-            setStatusHistory(historyData);
+        try {
+            await updatePayment(paymentId, newStatus);
+            fetchPaymentList();
+
+            if (selectedInvoiceId === paymentId) {
+                const data = await getPaymentDetail(selectedInvoiceId);
+                setPaymentDetail(data);
+            }
+
+            if (expandedHistoryId === paymentId) {
+                const historyData = await getPaymentStatusHistory(paymentId);
+                setStatusHistory(historyData);
+            }
+        } catch (error: any) {
+            const message = error.response?.data || '상태 변경에 실패했습니다.';
+            alert(message);
+            fetchPaymentList;
         }
     }
+
+    // constraint changing status
+    const getAvailableStatuses = (currentStatus: string) => {
+        if (currentStatus === 'COMPLETED') return ['COMPLETED'];
+        if (currentStatus === 'CANCELLED') return ['CANCELLED'];
+        return ['PENDING', 'COMPLETED', 'CANCELLED'];
+    };
 
     const handleOpenNew = () => {
         setSelectedInvoiceId(null);
@@ -144,13 +164,13 @@ function PaymentPage() {
                     <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
                         <thead>
                             <tr className="bg-gray-100 text-left text-sm text-gray-600">
-                                <th className="px-4 py-3">바이어</th>
-                                <th className="px-4 py-3">인보이스번호</th>
+                                <th className="px-4 py-3 whitespace-nowrap">바이어</th>
+                                <th className="px-4 py-3 whitespace-nowrap">인보이스번호</th>
                                 <th className="px-4 py-3">금액</th>
                                 <th className="px-4 py-3">상태</th>
-                                <th className="px-4 py-3">상태이력</th>
-                                <th className="px-4 py-3">등록일</th>
-                                <th className="px-4 py-3">결제일</th>
+                                <th className="px-4 py-3 whitespace-nowrap">상태이력</th>
+                                <th className="px-4 py-3 whitespace-nowrap">등록일</th>
+                                <th className="px-4 py-3 whitespace-nowrap">결제일</th>
                                 <th className="px-4 py-3"></th>
                             </tr>
                         </thead>
@@ -164,24 +184,24 @@ function PaymentPage() {
                             ) : (
                                 paymentList.map((p) => (
                                     <tr key={p.id} className="border-t border-gray-200 hover:bg-gray-50">
-                                        <td className="px-4 py-3">{p.buyerName}</td>
-                                        <td className="px-4 py-3">{p.invoiceNumber}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap">{p.buyerName}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap">{p.invoiceNumber}</td>
                                         <td className="px-4 py-3">{p.amount}</td>
                                         <td className="px-4 py-3">
                                             <StatusSelect
                                                 value={p.status}
                                                 onChange={(s) => handleStatusChange(p.id, s as PaymentStatus)}
-                                                options={['PENDING', 'COMPLETED', 'CANCELLED']}
+                                                options={getAvailableStatuses(p.status)}
                                             />
                                         </td>
                                         <td className="px-4 py-3">
-                                            <button onClick={() => handleToggleHistory(p.id)} className="text-gray-500 hover:text-gray-800" aria-label="이력 보기">
-                                                ⏱
+                                            <button onClick={() => handleToggleHistory(p.id)} aria-label="이력 보기">
+                                                <Clock size={18} />
                                             </button>
                                         </td>
-                                        <td className="px-4 py-3">{formatDateOnly(p.createdAt)}</td>
-                                        <td className="px-4 py-3">{formatDateOnly(p.paymentDate)}</td>
-                                        <td className="px-4 py-3">
+                                        <td className="px-4 py-3 whitespace-nowrap">{formatDateOnly(p.createdAt)}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap">{formatDateOnly(p.paymentDate)}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap">
                                             <button onClick={() => handleViewDetail(p.invoiceId)} className="text-blue-900 hover:underline text-sm">
                                                 {selectedInvoiceId === p.invoiceId ? '접기' : '상세보기'}
                                             </button>

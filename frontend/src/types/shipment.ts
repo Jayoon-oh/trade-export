@@ -12,6 +12,7 @@ export interface Shipment {
     shipmentDate: string;
     createdAt: string;
     updatedAt: string;
+    shipmentSequence: number;
 }
 
 export interface PagedShipments {

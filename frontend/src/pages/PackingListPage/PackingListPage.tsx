@@ -100,7 +100,10 @@ function PackingListPage() {
                             ) : (
                                 packingList.map((packingList) => (
                                     <tr key={packingList.id} className="border-t border-gray-200 hover:bg-gray-50">
-                                        <td className="px-4 py-3">{packingList.orderNumber}</td>
+                                        <td className="px-4 py-3">
+                                            {packingList.orderNumber}
+                                            {packingList.shipmentSequence > 1 && <span className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded ml-1">({packingList.shipmentSequence}차)</span>}
+                                        </td>
                                         <td className="px-4 py-3">{packingList.buyerName}</td>
                                         <td className="px-4 py-3">{packingList.forwarderName}</td>
                                         <td className="px-4 py-3">{packingList.packingDate}</td>

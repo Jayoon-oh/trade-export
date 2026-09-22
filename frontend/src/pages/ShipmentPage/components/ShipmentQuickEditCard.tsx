@@ -51,10 +51,11 @@ function ShipmentQuickEditCard({ shipmentId, onSuccess, onCancel }: ShipmentQuic
         try {
             if (shipmentId) {
                 await updateShipment(shipmentId, form);
+                alert('수정이 완료되었습니다.')
             } else {
                 await createShipment(form);
+                alert('등록이 완료되었습니다.')
             }
-            alert('수정이 완료되었습니다.')
             onSuccess();
         } catch (error: any) {
             alert('저장에 실패했습니다.');

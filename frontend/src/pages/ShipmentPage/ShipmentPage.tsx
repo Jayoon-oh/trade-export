@@ -1,12 +1,13 @@
 import { getShipmentsList, getShipmentStatusHistory, updateShipmentStatus } from "../../api/shipmentApi";
 import { getAllCompanies } from "../../api/companyApi";
 import type { Company } from "../../types/company";
-import type { Shipment, ShipmentStatus } from "../../types/shipment";
+import type { Shipment, ShipmentStatus, ShipmentStatusHistory } from "../../types/shipment";
 import { useState, useEffect } from "react";
 import EntitySelect from "../../components/EntitySelect";
 import StatusSelect from "../../components/StatusSelect";
 import ShipmentQuickEditCard from "./components/ShipmentQuickEditCard";
 import ShipmentStatusHistoryPanel from "./components/ShipmentStatusHistory";
+import { Clock } from "lucide-react";
 
 function ShipmentPage() {
     const [shipmentList, setShipmentList] = useState<Shipment[]>([]);
@@ -49,14 +50,32 @@ function ShipmentPage() {
     }
 
     const handleStatusChange = async (shipmentId: number, newStatus: ShipmentStatus) => {
-        if (!confirm(`상태를 ${newStatus}(으)로 변경하시겠습니까?`)) return;
-        await updateShipmentStatus(shipmentId, newStatus);
-        fetchShipments();
+        const isIrreversible = newStatus === 'DELIVERED' || newStatus === 'CANCELLED';
+        const confirmMessage = isIrreversible
+            ? `${newStatus}(으)로 변경하면 다시 되돌릴 수 없습니다. 계속하시겠습니까?`
+            : `상태를 ${newStatus}(으)로 변경하시겠습니까?`;
 
-        if (expandedHistoryId === shipmentId) {
-            const historyData = await getShipmentStatusHistory(shipmentId);
-            setStatusHistory(historyData);
+        if (!confirm(confirmMessage)) return;
+
+        try {
+            await updateShipmentStatus(shipmentId, newStatus);
+            fetchShipments();
+
+            if (expandedHistoryId === shipmentId) {
+                const historyData = await getShipmentStatusHistory(shipmentId);
+                setStatusHistory(historyData);
+            }
+        } catch (error: any) {
+            alert(error.response?.data || '상태 변경에 실패했습니다.');
+            fetchShipments();
         }
+    };
+
+    // constraint changing status
+    const getAvailableStatuses = (currentStatus: string) => {
+        if (currentStatus === 'DELIVERED') return ['DELIVERED'];
+        if (currentStatus === 'CANCELLED') return ['CANCELLED'];
+        return ['PLANNED', 'SHIPPED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED'];
     };
 
     const handleToggleHistory = async (shipmentId: number) => {
@@ -65,6 +84,7 @@ function ShipmentPage() {
             return;
         }
         setIsCardOpen(false);
+        
         const data = await getShipmentStatusHistory(shipmentId);
         setStatusHistory(data);
         setExpandedHistoryId(shipmentId);
@@ -104,7 +124,7 @@ function ShipmentPage() {
                     options={['PLANNED', 'SHIPPED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED']}
                     placeholder="전체 상태"
                 />
-                <button onClick={() => { setEditingShipmentId(null); setIsCardOpen(true); }} className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">
+                <button onClick={() => { setEditingShipmentId(null); setExpandedHistoryId(null); setIsCardOpen(true); }} className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">
                     + 신규 등록
                 </button>
             </div>
@@ -119,7 +139,7 @@ function ShipmentPage() {
                                 <th className="px-4 py-3">바이어</th>
                                 <th className="px-4 py-3">포워더</th>
                                 <th className="px-4 py-3">상태</th>
-                                <th className="px-4 py-3">상태이력</th>
+                                <th className="px-4 py-3 whitespace-nowrap">상태이력</th>
                                 <th className="px-4 py-3">선적일</th>
                                 <th className="px-4 py-3"></th>
                             </tr>
@@ -134,24 +154,27 @@ function ShipmentPage() {
                             ) : (
                                 shipmentList.map((s) => (
                                     <tr key={s.id} className="border-t border-gray-200 hover:bg-gray-50">
-                                        <td className="px-4 py-3">{s.orderNumber}</td>
+                                        <td className="px-4 py-3">
+                                            {s.orderNumber}
+                                            {s.shipmentSequence > 1 && <span className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded ml-1">({s.shipmentSequence}차)</span>}
+                                        </td>
                                         <td className="px-4 py-3">{s.buyerName}</td>
                                         <td className="px-4 py-3">{s.forwarderName}</td>
                                         <td className="px-4 py-3">
                                             <StatusSelect
                                                 value={s.status}
                                                 onChange={(status) => handleStatusChange(s.id, status as ShipmentStatus)}
-                                                options={['PLANNED', 'SHIPPED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED']}
+                                                options={getAvailableStatuses(s.status)}
                                             />
                                         </td>
                                         <td className="px-4 py-3">
-                                            <button onClick={() => handleToggleHistory(s.id)} className="text-gray-500 hover:text-gray-800" aria-label="이력 보기">
-                                                ⏱
+                                            <button onClick={() => handleToggleHistory(s.id)} aria-label="이력 보기">
+                                                <Clock size={18} />
                                             </button>
                                         </td>
                                         <td className="px-4 py-3">{s.shipmentDate}</td>
                                         <td className="px-4 py-3">
-                                            <button onClick={() => { setEditingShipmentId(s.id); setIsCardOpen(true); }} className="text-blue-900 hover:underline">수정</button>
+                                            <button onClick={() => { setEditingShipmentId(s.id); setExpandedHistoryId(null); setIsCardOpen(true); }} className="text-blue-900 hover:underline">수정</button>
                                         </td>
                                     </tr>
                                 ))
