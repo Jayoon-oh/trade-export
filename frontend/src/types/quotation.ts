@@ -2,6 +2,7 @@ export interface Quotation {
     id: number;
     companyId: number;
     companyName: string;
+    companyCountry: string;
     quotationDate: string;
     totalAmount: number;
     currency: string;
@@ -41,6 +42,7 @@ export interface QuotationCreateRequest {
     companyId: number;
     currency: string;
     incoterms: string;
+    exchangeRate?: number;
     paymentTerm: string;
     comment?: string;
     quotationDate: string;

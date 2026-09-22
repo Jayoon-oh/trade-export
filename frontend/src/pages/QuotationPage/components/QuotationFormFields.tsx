@@ -41,6 +41,13 @@ function QuotationFormFields({ form, setForm, currentItem, setCurrentItem, onAdd
                     <option value="">통화 선택</option>
                     {currencies.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
+                <input
+                    type="number"
+                    value={form.exchangeRate || ''}
+                    onChange={(e) => setForm({ ...form, exchangeRate: Number(e.target.value) })}
+                    placeholder="환율 (1 통화 = ? KRW)"
+                    className="border border-gray-300 rounded px-3 py-2"
+                />
                 <select value={form.incoterms} onChange={(e) => setForm({ ...form, incoterms: e.target.value })} className="border border-gray-300 rounded px-3 py-2">
                     <option value="">인코텀즈 선택</option>
                     {incotermsList.map((c) => <option key={c} value={c}>{c}</option>)}

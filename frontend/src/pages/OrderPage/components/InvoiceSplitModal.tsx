@@ -5,12 +5,13 @@ import type { RemainingItem } from '../../../types/invoice';
 interface InvoiceSplitModalProps {
     ordersId: number;
     orderCurrency: string;
+    orderExchangeRate?: number;
     isOpen: boolean;
     onClose: () => void;
     onSuccess: (invoiceId: number) => void;
 }
 
-function InvoiceSplitModal({ ordersId,orderCurrency, isOpen, onClose, onSuccess }: InvoiceSplitModalProps) {
+function InvoiceSplitModal({ ordersId, orderCurrency, orderExchangeRate, isOpen, onClose, onSuccess }: InvoiceSplitModalProps) {
     const [remainingItems, setRemainingItems] = useState<RemainingItem[]>([]);
     const [quantities, setQuantities] = useState<Record<number, number>>({});
     const [exchangeRate, setExchangeRate] = useState('');
@@ -43,7 +44,7 @@ function InvoiceSplitModal({ ordersId,orderCurrency, isOpen, onClose, onSuccess 
     };
 
     const handleConfirm = async () => {
-        const rate = Number(exchangeRate);
+        const rate = orderExchangeRate ?? Number(exchangeRate);
         if (!exchangeRate || isNaN(rate) || rate <= 0) {
             alert('환율을 올바르게 입력해주세요.');
             return;
@@ -112,17 +113,23 @@ function InvoiceSplitModal({ ordersId,orderCurrency, isOpen, onClose, onSuccess 
                     </tbody>
                 </table>
 
-                <div className="flex items-center gap-2 mb-4">
-                    <label className="text-sm text-gray-700">환율 (1 {orderCurrency} = ? KRW):</label>
-                    <input
-                        type="number"
-                        value={exchangeRate}
-                        onChange={(e) => setExchangeRate(e.target.value)}
-                        placeholder="예: 1350"
-                        className="border border-gray-300 rounded px-3 py-2"
-                    />
-                </div>
-
+                {orderExchangeRate ? (
+                    <p className="text-sm text-gray-600">
+                        환율: 1 {orderCurrency} = {orderExchangeRate.toLocaleString()} KRW (견적 시점 환율 적용)
+                    </p>
+                ) : (
+                    <div className="flex items-center gap-2 mb-4">
+                        <label className="text-sm text-gray-700">환율 (1 {orderCurrency} = ? KRW):</label>
+                        <input
+                            type="number"
+                            value={exchangeRate}
+                            onChange={(e) => setExchangeRate(e.target.value)}
+                            placeholder="예: 1350"
+                            className="border border-gray-300 rounded px-3 py-2"
+                        />
+                    </div>
+                )}
+                
                 <p className="text-right font-semibold mb-4">
                     청구 예정 금액: {calculateTotal().toLocaleString()}
                 </p>

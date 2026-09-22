@@ -75,8 +75,8 @@ function QuotationPage() {
                         <thead>
                             <tr className="bg-gray-100 text-left text-sm text-gray-600">
                                 <th className="px-4 py-3">바이어명</th>
+                                <th className="px-4 py-3">국가</th>
                                 <th className="px-4 py-3">금액</th>
-                                <th className="px-4 py-3">통화</th>
                                 <th className="px-4 py-3">등록일</th>
                                 <th className="px-4 py-3">특이사항</th>
                                 <th className="px-4 py-3"></th>
@@ -93,14 +93,14 @@ function QuotationPage() {
                                 quotationList.map((quotation) => (
                                     <tr key={quotation.id} className="border-t border-gray-200 hover:bg-gray-50">
                                         <td className="px-4 py-3">{quotation.companyName}</td>
-                                        <td className="px-4 py-3">{quotation.totalAmount}</td>
-                                        <td className="px-4 py-3">{quotation.currency}</td>
+                                        <td className="px-4 py-3">{quotation.companyCountry}</td>
+                                        <td className="px-4 py-3">{quotation.totalAmount.toLocaleString()} ({quotation.currency})</td>
                                         <td className="px-4 py-3">{formatDateOnly(quotation.quotationDate)}</td>
                                         <td className="px-4 py-3">{quotation.comment || '-'}</td>
                                         <td className="px-4 py-3 flex gap-2">
                                             <button onClick={() => { setEditingId(quotation.id); setView('edit'); }} className="text-blue-900 hover:underline">수정</button>
                                             <button onClick={() => handleDelete(quotation.id)} className="text-red-600 hover:underline">삭제</button>
-                                            <button onClick={() => handleGenerateQuotation(quotation.id)} className="text-gray-600 hover:underline">PDF 다운로드</button>
+                                            <button onClick={() => handleGenerateQuotation(quotation.id)} className="text-gray-600 hover:underline">견적서 발행</button>
                                         </td>
                                     </tr>
                                 ))

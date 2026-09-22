@@ -144,8 +144,8 @@ function OrdersPage() {
                             <tr className="bg-gray-100 text-left text-sm text-gray-600">
                                 <th className="px-4 py-3">오더번호</th>
                                 <th className="px-4 py-3">바이어명</th>
-                                <th className="px-4 py-3">금액</th>
-                                <th className="px-4 py-3">통화</th>
+                                <th className="px-4 py-3">국가</th>
+                                <th className="px-4 py-3">금액(KRW)</th>
                                 <th className="px-4 py-3">주문일</th>
                                 <th className="px-4 py-3">특이사항</th>
                                 <th className="px-4 py-3"></th>
@@ -163,8 +163,8 @@ function OrdersPage() {
                                     <tr key={orders.id} className="border-t border-gray-200 hover:bg-gray-50">
                                         <td className="px-4 py-3">{orders.orderNumber}</td>
                                         <td className="px-4 py-3">{orders.buyerName}</td>
-                                        <td className="px-4 py-3">{orders.amount}</td>
-                                        <td className="px-4 py-3">{orders.currency}</td>
+                                        <td className="px-4 py-3">{orders.buyerCountry}</td>
+                                        <td className="px-4 py-3">{orders.amount.toLocaleString()}</td>
                                         <td className="px-4 py-3">{formatDateOnly(orders.ordersDate)}</td>
                                         <td className="px-4 py-3">{orders.comment || '-'}</td>
                                         <td className="px-4 py-3 flex gap-2 flex-wrap">

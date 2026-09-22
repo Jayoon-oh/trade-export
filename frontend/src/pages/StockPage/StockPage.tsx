@@ -77,7 +77,7 @@ function StockPage() {
                                 <th className="px-4 py-3">제품명</th>
                                 <th className="px-4 py-3">수량</th>
                                 <th className="px-4 py-3">예약 수량</th>
-                                <th className="px-4 py-3">가격</th>
+                                <th className="px-4 py-3">가격(KRW)</th>
                                 <th className="px-4 py-3">무게(kg)</th>
                                 <th className="px-4 py-3"></th>
                             </tr>
@@ -88,7 +88,7 @@ function StockPage() {
                                     <td className="px-4 py-3">{stock.productName}</td>
                                     <td className="px-4 py-3">{stock.quantity}</td>
                                     <td className="px-4 py-3">{stock.reservedQuantity}</td>
-                                    <td className="px-4 py-3">{stock.price}</td>
+                                    <td className="px-4 py-3">{stock.price.toLocaleString()}</td>
                                     <td className="px-4 py-3">{stock.standardWeight}</td>
                                     <td className="px-4 py-3">
                                         <button onClick={() => handleViewDetail(stock)} className="text-blue-900 hover:underline">제품 상세</button>

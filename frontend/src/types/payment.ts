@@ -21,6 +21,7 @@ export interface PaymentResponse {
     buyerId: number;
     buyerName: string;
     amount: number;
+    currency: string;
     paymentDate: string;
     status: PaymentStatus;
     orderNumber: string;
@@ -31,6 +32,7 @@ export interface PaymentResponse {
 export interface InvoiceBalance {
     invoiceId: number;
     totalAmount: number;
+    currency: string;
     totalPaid: number;
     remaining: number;
 }

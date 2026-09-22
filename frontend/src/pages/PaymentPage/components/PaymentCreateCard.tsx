@@ -59,9 +59,9 @@ function PaymentCreateCard({ onSuccess, onCancel }: PaymentCreateCardProps) {
 
             {balance && (
                 <div className="bg-blue-50 border border-blue-200 rounded px-3 py-2 mt-3 text-xs text-gray-700">
-                    총액: <span className="font-semibold">{balance.totalAmount}</span>
+                    총액: <span className="font-semibold">{balance.totalAmount}({balance.currency})</span>
                     <br />완료: <span className="font-semibold text-green-600">{balance.totalPaid}</span>
-                    <br />잔액: <span className="font-semibold text-red-600">{balance.remaining}</span>
+                    <br />잔액: <span className="font-semibold text-red-600">{balance.remaining}({balance.currency})</span>
                 </div>
             )}
 

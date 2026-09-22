@@ -186,7 +186,7 @@ function PaymentPage() {
                                     <tr key={p.id} className="border-t border-gray-200 hover:bg-gray-50">
                                         <td className="px-4 py-3 whitespace-nowrap">{p.buyerName}</td>
                                         <td className="px-4 py-3 whitespace-nowrap">{p.invoiceNumber}</td>
-                                        <td className="px-4 py-3">{p.amount}</td>
+                                        <td className="px-4 py-3">{p.amount.toLocaleString()} ({p.currency})</td>
                                         <td className="px-4 py-3">
                                             <StatusSelect
                                                 value={p.status}

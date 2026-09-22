@@ -34,3 +34,7 @@ export const getShipmentStatusHistory = async (shipmentId: number): Promise<Ship
     const response = await api.get<ShipmentStatusHistory[]>(`/shipments/${shipmentId}/history`);
     return response.data;
 };
+
+export const deleteShipment = async (id: number): Promise<void> => {
+    await api.delete(`/shipments/${id}`);
+};

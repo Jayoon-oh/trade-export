@@ -102,9 +102,9 @@ function CompanyPage() {
                         <thead>
                             <tr className="bg-gray-100 text-left text-sm text-gray-600">
                                 <th className="px-4 py-3">회사명</th>
+                                <th className="px-4 py-3">국가</th>
                                 <th className="px-4 py-3">주소</th>
                                 <th className="px-4 py-3">역할</th>
-                                <th className="px-4 py-3">국가</th>
                                 <th className="px-4 py-3">사업자번호</th>
                                 <th className="px-4 py-3"></th>
                             </tr>
@@ -120,9 +120,9 @@ function CompanyPage() {
                                 companyList.map((company) => (
                                     <tr key={company.id} className="border-t border-gray-200 hover:bg-gray-50">
                                         <td className="px-4 py-3">{company.companyName}</td>
+                                        <td className="px-4 py-3">{company.country}</td>
                                         <td className="px-4 py-3">{company.address}</td>
                                         <td className="px-4 py-3">{roleLabels[company.role]}</td>
-                                        <td className="px-4 py-3">{company.country}</td>
                                         <td className="px-4 py-3">{company.registrationNumber}</td>
                                         <td className="px-4 py-3 flex gap-2">
                                             <button onClick={() => handleViewDatail(company.id)} className="text-blue-900 hover:underline">

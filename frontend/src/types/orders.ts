@@ -2,6 +2,7 @@ export interface Orders {
     id: number;
     buyerId: number;
     buyerName: string;
+    buyerCountry: string;
     quotationId: number;
     amount: number;
     ordersDate: string;
@@ -9,6 +10,7 @@ export interface Orders {
     createdAt: string;
     updatedAt: string;
     currency: string;
+    exchangeRate?: number;
     incoterms: string;
     orderNumber: string;
     paymentTerm: string;

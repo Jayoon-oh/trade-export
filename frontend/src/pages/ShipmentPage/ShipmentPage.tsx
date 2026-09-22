@@ -1,4 +1,4 @@
-import { getShipmentsList, getShipmentStatusHistory, updateShipmentStatus } from "../../api/shipmentApi";
+import { deleteShipment, getShipmentsList, getShipmentStatusHistory, updateShipmentStatus } from "../../api/shipmentApi";
 import { getAllCompanies } from "../../api/companyApi";
 import type { Company } from "../../types/company";
 import type { Shipment, ShipmentStatus, ShipmentStatusHistory } from "../../types/shipment";
@@ -84,10 +84,22 @@ function ShipmentPage() {
             return;
         }
         setIsCardOpen(false);
-        
+
         const data = await getShipmentStatusHistory(shipmentId);
         setStatusHistory(data);
         setExpandedHistoryId(shipmentId);
+    };
+
+    const handleDelete = async (id: number) => {
+        if (!confirm('이 선적 정보를 삭제하시겠습니까?')) return;
+        try {
+            await deleteShipment(id);
+            alert('삭제가 완료되었습니다.');
+            fetchShipments();
+        } catch (error: any) {
+            const message = error.response?.data || '삭제에 실패했습니다.';
+            alert(message);
+        }
     };
 
     return (
@@ -175,6 +187,7 @@ function ShipmentPage() {
                                         <td className="px-4 py-3">{s.shipmentDate}</td>
                                         <td className="px-4 py-3">
                                             <button onClick={() => { setEditingShipmentId(s.id); setExpandedHistoryId(null); setIsCardOpen(true); }} className="text-blue-900 hover:underline">수정</button>
+                                            <button onClick={() => handleDelete(s.id)} className="text-red-600 hover:underline ml-2">삭제</button>
                                         </td>
                                     </tr>
                                 ))
