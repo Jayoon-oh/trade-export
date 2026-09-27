@@ -2,6 +2,7 @@ package com.tradeexport.backend.packinglist;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,20 +22,30 @@ public class PackingListController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PackingListResponse>> getPackingLists(@RequestParam(required = false) Long buyerId) {
-        List<PackingListResponse> packingLists = packingListService.getPackingLists(buyerId);
+    public ResponseEntity<Page<PackingListResponseDto>> getPackingLists(
+            @RequestParam(required = false) Long buyerId,
+            @RequestParam(required = false) String orderNumber,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<PackingListResponseDto> packingLists = packingListService.getPackingLists(buyerId, orderNumber, page, size);
         return ResponseEntity.ok(packingLists);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PackingListResponse> getPackingList(@PathVariable Long id) {
+    public ResponseEntity<PackingListDetailResponseDto> getPackingList(@PathVariable Long id) {
         return ResponseEntity.ok(packingListService.getPackingList(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PackingListResponse> updatePackingList(@PathVariable Long id, @Valid @RequestBody PackingListCreateRequestDto dto) {
-        PackingListResponse packingListResponse = packingListService.updatePackingList(id, dto);
+    public ResponseEntity<PackingListResponseDto> updatePackingList(@PathVariable Long id, @Valid @RequestBody PackingListCreateRequestDto dto) {
+        PackingListResponseDto packingListResponse = packingListService.updatePackingList(id, dto);
         return ResponseEntity.ok(packingListResponse);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePackingList(@PathVariable Long id) {
+        packingListService.deletePackingList(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/pdf")
@@ -48,5 +59,10 @@ public class PackingListController {
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(pdfBytes);
+    }
+
+    @GetMapping("/available-items")
+    public ResponseEntity<List<PackingListAvailableItemDto>> getAvailableItems(@RequestParam Long shipmentId) {
+        return ResponseEntity.ok(packingListService.getAvailableItems(shipmentId));
     }
 }

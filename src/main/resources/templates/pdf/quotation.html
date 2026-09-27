@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Proforma Invoice</title>
+    <style>
+        body {
+            font-family: 'NanumGothic', sans-serif;
+            font-size: 11px;
+            color: #222;
+            margin: 40px;
+        }
+        .top-bar {
+            width: 100%;
+            margin-bottom: 12px;
+        }
+        .top-bar td {
+            vertical-align: middle;
+        }
+        .logo {
+            width: 110px;
+        }
+        .doc-title {
+            text-align: right;
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+        .divider {
+            border: none;
+            border-top: 2px solid #1e3a8a;
+            margin-bottom: 20px;
+        }
+        .party-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+        }
+        .party-table td {
+            border: 1px solid #333;
+            padding: 8px 10px;
+            width: 50%;
+            vertical-align: top;
+        }
+        .section-header {
+            background-color: #1e3a8a;
+            color: #fff;
+            font-weight: bold;
+            padding: 4px 10px;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .meta-table th {
+            background-color: #1e3a8a;
+            color: #fff;
+            padding: 6px 10px;
+            font-size: 10px;
+            text-transform: uppercase;
+            border: 1px solid #1e3a8a;
+        }
+        .meta-table td {
+            border: 1px solid #333;
+            padding: 6px 10px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .items-table th {
+            background-color: #1e3a8a;
+            color: #fff;
+            padding: 8px;
+            text-align: left;
+        }
+        .items-table td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .items-table tr:nth-child(even) td {
+            background-color: #f2f5f9;
+        }
+        .items-table .num {
+            text-align: right;
+        }
+        .total {
+            text-align: right;
+            font-weight: bold;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        .certify-note {
+            margin-top: 30px;
+            font-size: 10px;
+            color: #444;
+        }
+        .sign-box {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .sign-box td {
+            border: 1px solid #333;
+            padding: 20px 10px 8px 10px;
+            width: 33.3%;
+            vertical-align: bottom;
+        }
+        .field-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .sign-box img {
+            width: 90px;
+            display: block;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<table class="top-bar">
+    <tr>
+        <td>
+            <img th:if="${sellerLogoPath != null}" th:src="${sellerLogoPath}" class="logo"/>
+        </td>
+        <td class="doc-title">Proforma Invoice</td>
+    </tr>
+</table>
+<hr class="divider"/>
+
+<table class="party-table">
+    <tr>
+        <td style="padding: 0; border: none;">
+            <div class="section-header">Seller</div>
+            <div style="border: 1px solid #333; border-top: none; padding: 8px 10px;">
+                <span th:text="${sellerName}">회사명</span><br/>
+                <span th:text="${sellerAddress}">주소</span>
+            </div>
+        </td>
+        <td style="padding: 0; border: none;">
+            <div class="section-header">Customer</div>
+            <div style="border: 1px solid #333; border-top: none; padding: 8px 10px;">
+                <span th:text="${buyerName}">회사명</span><br/>
+                <span th:text="${buyerAddress}">주소</span>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<table class="meta-table">
+    <tr>
+        <th>PI No.</th>
+        <th>Date</th>
+        <th>Currency</th>
+    </tr>
+    <tr>
+        <td th:text="${quotationNumber}">PI-000001</td>
+        <td th:text="${quotationDate}">2026-08-19</td>
+        <td th:text="${currency}">USD</td>
+    </tr>
+</table>
+
+<table class="items-table">
+    <thead>
+    <tr>
+        <th>Item</th>
+        <th class="num">Quantity</th>
+        <th class="num">Unit Price</th>
+        <th class="num">Amount</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="item : ${items}">
+        <td th:text="${item.itemName}">품목명</td>
+        <td class="num" th:text="${item.quantity}">1</td>
+        <td class="num" th:text="${item.unitPrice}">0</td>
+        <td class="num" th:text="${item.amount}">0</td>
+    </tr>
+    </tbody>
+</table>
+
+<p class="total">
+    Total: <span th:text="${totalAmount}">0</span> <span th:text="${currency}">USD</span>
+</p>
+
+<p class="certify-note">
+    We certify that this proforma invoice is true and correct.
+</p>
+
+<table class="sign-box">
+    <tr>
+        <td>
+            <span class="field-label">Name</span>
+            <span th:text="${sellerOwnerName}"></span>
+        </td>
+        <td>
+            <span class="field-label">Signature</span>
+            <img th:if="${sellerSignaturePath != null}" th:src="${sellerSignaturePath}"/>
+        </td>
+        <td>
+            <span class="field-label">Date</span>
+            <span th:text="${quotationDate}"></span>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

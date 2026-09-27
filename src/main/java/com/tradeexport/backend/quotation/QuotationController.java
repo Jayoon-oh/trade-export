@@ -2,8 +2,8 @@ package com.tradeexport.backend.quotation;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,9 +22,11 @@ public class QuotationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<QuotationResponseDto>> getQuotations(@RequestParam(required = false) Long buyerId) {
-        List<QuotationResponseDto> quotations = quotationService.getQuotations(buyerId);
-        return ResponseEntity.ok(quotations);
+    public ResponseEntity<Page<QuotationResponseDto>> getQuotations(
+            @RequestParam(required = false) Long buyerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(quotationService.getQuotations(buyerId, page, size));
     }
 
     @GetMapping("/{id}")
@@ -44,4 +46,16 @@ public class QuotationController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> generateQuotationPdf(@PathVariable Long id) {
+        byte[] pdfBytes = quotationService.generateQuotationPdf(id);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(ContentDisposition.attachment().filename("quotation.pdf").build());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(pdfBytes);
+    }
 }

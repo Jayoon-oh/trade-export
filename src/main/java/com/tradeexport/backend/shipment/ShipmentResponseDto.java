@@ -1,6 +1,7 @@
 package com.tradeexport.backend.shipment;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record ShipmentResponseDto(
@@ -10,11 +11,12 @@ public record ShipmentResponseDto(
         String buyerName,
         Long forwarderId,
         String forwarderName,
-        BigDecimal fee,
         ShipmentStatus status,
-        LocalDateTime shipmentDate,
+        String orderNumber,
+        LocalDate shipmentDate,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        Integer shipmentSequence
 ) {
     public static ShipmentResponseDto from(Shipment shipment) {
         return new ShipmentResponseDto(
@@ -24,11 +26,12 @@ public record ShipmentResponseDto(
                 shipment.getOrders().getBuyer().getCompanyName(),
                 shipment.getForwarder().getId(),
                 shipment.getForwarder().getCompanyName(),
-                shipment.getFee(),
                 shipment.getStatus(),
+                shipment.getOrders().getOrderNumber(),
                 shipment.getShipmentDate(),
                 shipment.getCreatedAt(),
-                shipment.getUpdatedAt()
+                shipment.getUpdatedAt(),
+                shipment.getShipmentSequence()
         );
     }
 }

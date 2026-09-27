@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -22,7 +23,7 @@ public class PackingList {
     @JoinColumn(name = "shipment_id")
     private Shipment shipment;
 
-    private LocalDateTime packingDate;
+    private LocalDate packingDate;
     private BigDecimal totalAmount;
     private BigDecimal totalWeight;
     private LocalDateTime createdAt;

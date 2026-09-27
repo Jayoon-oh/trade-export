@@ -1,12 +1,13 @@
 package com.tradeexport.backend.packinglist;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public record PackingListPdfDataDto (
         String packingListNumber,
-        LocalDateTime packingListDate,
+        LocalDate packingListDate,
         BigDecimal totalAmount,
         BigDecimal totalWeight,
 

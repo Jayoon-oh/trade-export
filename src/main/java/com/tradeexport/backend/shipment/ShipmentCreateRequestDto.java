@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,8 +18,5 @@ public class ShipmentCreateRequestDto {
     @NotNull
     private Long forwarderId;
 
-    @NotNull
-    private BigDecimal fee;
-
-    private LocalDateTime shipmentDate;
+    private LocalDate shipmentDate;
 }

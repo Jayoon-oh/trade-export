@@ -39,4 +39,15 @@ public class PdfService {
 
         return outputStream.toByteArray();
     }
+
+    // for Absolute path
+    public String resolveImagePath(String relativePath) {
+        if (relativePath == null || relativePath.isBlank()) {
+            return null;
+        }
+        File file = new File("src/main/resources/static/" + relativePath);
+        String absolutePath = file.getAbsolutePath().replace("\\", "/");
+        String result = "file:/" + absolutePath;
+        return result;
+    }
 }

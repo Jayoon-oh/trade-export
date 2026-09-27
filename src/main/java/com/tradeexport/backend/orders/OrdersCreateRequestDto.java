@@ -1,13 +1,12 @@
 package com.tradeexport.backend.orders;
 
-import com.tradeexport.backend.quotation.QuotationItemRequestDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -21,7 +20,7 @@ public class OrdersCreateRequestDto {
     private BigDecimal amount;
 
     @NotNull
-    private LocalDateTime ordersDate;
+    private LocalDate ordersDate;
 
     private String comment;
 
@@ -36,4 +35,7 @@ public class OrdersCreateRequestDto {
 
     @NotNull
     private List<OrdersItemRequestDto> items;
+
+    private BigDecimal freightCost;
+    private Boolean freightCoveredByCompany;
 }

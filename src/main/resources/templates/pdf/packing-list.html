@@ -4,63 +4,200 @@
     <meta charset="UTF-8"/>
     <title>Packing List</title>
     <style>
-        body { font-family: 'NanumGothic', sans-serif; font-size: 12px; }
-        .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #333; padding: 6px 8px; text-align: left; }
-        th { background-color: #f0f0f0; }
-        .total { text-align: right; font-weight: bold; margin-top: 10px; }
-        .info-table td { border: none; padding: 2px 8px 2px 0; }
+        body {
+            font-family: 'NanumGothic', sans-serif;
+            font-size: 11px;
+            color: #222;
+            margin: 40px;
+        }
+        .top-bar {
+            width: 100%;
+            margin-bottom: 12px;
+        }
+        .top-bar td {
+            vertical-align: middle;
+        }
+        .logo {
+            width: 110px;
+        }
+        .doc-title {
+            text-align: right;
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+        .divider {
+            border: none;
+            border-top: 2px solid #1e3a8a;
+            margin-bottom: 20px;
+        }
+        .party-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+        }
+        .party-table td {
+            border: 1px solid #333;
+            padding: 8px 10px;
+            width: 50%;
+            vertical-align: top;
+        }
+        .section-header {
+            background-color: #1e3a8a;
+            color: #fff;
+            font-weight: bold;
+            padding: 4px 10px;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .meta-table th {
+            background-color: #1e3a8a;
+            color: #fff;
+            padding: 6px 10px;
+            font-size: 10px;
+            text-transform: uppercase;
+            border: 1px solid #1e3a8a;
+        }
+        .meta-table td {
+            border: 1px solid #333;
+            padding: 6px 10px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .items-table th {
+            background-color: #1e3a8a;
+            color: #fff;
+            padding: 8px;
+            text-align: left;
+        }
+        .items-table td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .items-table tr:nth-child(even) td {
+            background-color: #f2f5f9;
+        }
+        .items-table .num {
+            text-align: right;
+        }
+        .total {
+            text-align: right;
+            font-weight: bold;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        .sign-box {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 40px;
+        }
+        .sign-box td {
+            border: 1px solid #333;
+            padding: 20px 10px 8px 10px;
+            width: 33.3%;
+            vertical-align: bottom;
+        }
+        .field-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .sign-box img {
+            width: 90px;
+            display: block;
+            margin-bottom: 4px;
+        }
     </style>
 </head>
 <body>
-<h1>PACKING LIST</h1>
 
-<div class="header">
-    <div>
-        <p><strong>Ship From:</strong> <span th:text="${sellerName}">회사명</span></p>
-        <p th:text="${sellerAddress}">주소</p>
-    </div>
-    <div>
-        <p><strong>Ship To:</strong> <span th:text="${buyerName}">회사명</span></p>
-        <p th:text="${buyerAddress}">주소</p>
-    </div>
-</div>
-
-<table class="info-table">
+<table class="top-bar">
     <tr>
-        <td><strong>P/L No:</strong></td>
-        <td th:text="${packingListNumber}">PL-000001</td>
-        <td><strong>Date:</strong></td>
-        <td th:text="${packingListDate}">2026-08-19</td>
+        <td>
+            <img th:if="${sellerLogoPath != null}" th:src="${sellerLogoPath}" class="logo"/>
+        </td>
+        <td class="doc-title">Packing List</td>
     </tr>
+</table>
+<hr class="divider"/>
+
+<table class="party-table">
     <tr>
-        <td><strong>Total Weight:</strong></td>
-        <td th:text="${totalWeight}">0</td>
+        <td style="padding: 0; border: none;">
+            <div class="section-header">Ship From</div>
+            <div style="border: 1px solid #333; border-top: none; padding: 8px 10px;">
+                <span th:text="${sellerName}">회사명</span><br/>
+                <span th:text="${sellerAddress}">주소</span>
+            </div>
+        </td>
+        <td style="padding: 0; border: none;">
+            <div class="section-header">Ship To</div>
+            <div style="border: 1px solid #333; border-top: none; padding: 8px 10px;">
+                <span th:text="${buyerName}">회사명</span><br/>
+                <span th:text="${buyerAddress}">주소</span>
+            </div>
+        </td>
     </tr>
 </table>
 
-<table>
+<table class="meta-table">
+    <tr>
+        <th>P/L No.</th>
+        <th>Date</th>
+    </tr>
+    <tr>
+        <td th:text="${packingListNumber}">PL-000001</td>
+        <td th:text="${packingListDate}">2026-08-19</td>
+    </tr>
+</table>
+
+<table class="items-table">
     <thead>
     <tr>
         <th>Item</th>
-        <th>Quantity</th>
-        <th>Actual Weight</th>
-        <th>Amount</th>
+        <th class="num">Quantity</th>
+        <th class="num">Unit Weight (kg)</th>
+        <th class="num">Subtotal (kg)</th>
     </tr>
     </thead>
     <tbody>
     <tr th:each="item : ${items}">
         <td th:text="${item.itemName}">품목명</td>
-        <td th:text="${item.quantity}">1</td>
-        <td th:text="${item.actualWeight}">0</td>
-        <td th:text="${item.amount}">0</td>
+        <td class="num" th:text="${item.quantity}">1</td>
+        <td class="num" th:text="${item.actualWeight}">0</td>
+        <td class="num" th:text="${item.actualWeight * item.quantity}">0</td>
     </tr>
     </tbody>
 </table>
 
 <p class="total">
-    Total Amount: <span th:text="${totalAmount}">0</span>
+    Total Weight: <span th:text="${totalWeight}">0</span> kg
 </p>
+
+<table class="sign-box">
+    <tr>
+        <td>
+            <span class="field-label">Name</span>
+            <span th:text="${sellerOwnerName}"></span>
+        </td>
+        <td>
+            <span class="field-label">Signature</span>
+            <img th:if="${sellerSignaturePath != null}" th:src="${sellerSignaturePath}"/>
+        </td>
+        <td>
+            <span class="field-label">Date</span>
+            <span th:text="${packingListDate}"></span>
+        </td>
+    </tr>
+</table>
+
 </body>
 </html>

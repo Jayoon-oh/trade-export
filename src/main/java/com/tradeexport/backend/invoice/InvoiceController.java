@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/invoices")
 @RequiredArgsConstructor
@@ -12,11 +14,6 @@ public class InvoiceController {
 
     private final InvoiceService invoiceService;
 
-    @PostMapping("/{id}/invoices")
-    public ResponseEntity<Long> createInvoice(@PathVariable Long id, @Valid @RequestBody InvoiceCreateRequestDto dto) {
-        invoiceService.issueInvoice(id, dto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
 
     @PostMapping("/{invoiceId}/pdf")
     public ResponseEntity<byte[]> generateInvoicePdf(@PathVariable Long invoiceId) {
@@ -29,6 +26,11 @@ public class InvoiceController {
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(pdfBytes);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<InvoiceResponseDto>> getInvoicesByStatus(@RequestParam(required = false) InvoiceStatus status) {
+        return ResponseEntity.ok(invoiceService.getInvoicesByStatus(status));
     }
 
 }

@@ -1,6 +1,7 @@
 package com.tradeexport.backend.quotation;
 
 import com.tradeexport.backend.company.Company;
+import com.tradeexport.backend.user.User;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -25,9 +27,16 @@ public class Quotation {
     @JoinColumn(name = "company_id")
     private Company company;
 
-    private LocalDateTime quotationDate;
+    @ManyToOne
+    @JoinColumn(name = "created_by")
+    private User createdBy;
+
+    private LocalDate quotationDate;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private BigDecimal totalAmount;
     private String currency;
+    private BigDecimal exchangeRate;
     private String incoterms;
 
     @NotNull
@@ -35,4 +44,5 @@ public class Quotation {
 
     @Nullable
     private String comment;
+
 }

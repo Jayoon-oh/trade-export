@@ -2,6 +2,7 @@ package com.tradeexport.backend.company;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,10 +28,20 @@ public class CompanyController {
         return ResponseEntity.ok(company);
     }
 
+    // search company list with pagination
     @GetMapping
-    public ResponseEntity<List<Company>> getCompanies(@RequestParam(required = false) String role) {
-        List<Company> companies = companyService.searchCompanies(role);
-        return ResponseEntity.ok(companies);
+    public ResponseEntity<Page<CompanyResponseDto>> getCompanies(
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) String companyName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(companyService.searchCompanies(role, companyName,page, size));
+    }
+
+    // search company list without pagination
+    @GetMapping("/all")
+    public ResponseEntity<List<CompanyResponseDto>> getAllCompanies(@RequestParam(required = false) String role) {
+        return ResponseEntity.ok(companyService.getAllCompanies(role));
     }
 
     @PutMapping("/{id}")

@@ -6,9 +6,9 @@ public record OrdersDetailResponseDto(
         OrdersResponseDto orders,
         List<OrdersItemLineDto> items
 ) {
-    public static OrdersDetailResponseDto from(Orders orders, List<OrdersItems> items) {
+    public static OrdersDetailResponseDto from(Orders orders, List<OrdersItems> items, boolean hasInvoice) {
         return new OrdersDetailResponseDto(
-                OrdersResponseDto.from(orders),
+                OrdersResponseDto.from(orders, hasInvoice),
                 items.stream().map(OrdersItemLineDto::from).toList()
         );
     }

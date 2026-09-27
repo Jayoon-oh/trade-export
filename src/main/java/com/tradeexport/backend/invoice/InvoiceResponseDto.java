@@ -10,8 +10,10 @@ public record InvoiceResponseDto (
        LocalDateTime invoiceDate,
        InvoiceStatus status,
        BigDecimal totalAmount,
+       BigDecimal convertedAmount,
        BigDecimal exchangeRate,
-       String currency
+       String currency,
+       String orderNumber
 ) {
 public static InvoiceResponseDto from(Invoice invoice) {
     return new InvoiceResponseDto(
@@ -21,8 +23,10 @@ public static InvoiceResponseDto from(Invoice invoice) {
             invoice.getInvoiceDate(),
             invoice.getStatus(),
             invoice.getTotalAmount(),
+            invoice.getConvertedAmount(),
             invoice.getExchangeRate(),
-            invoice.getCurrency()
+            invoice.getCurrency(),
+            invoice.getOrders().getOrderNumber()
         );
     }
 }

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,14 +29,15 @@ public class Shipment {
     @JoinColumn(name = "forwarder_id")
     private Company forwarder;
 
-    private BigDecimal fee;
-
     @Enumerated(EnumType.STRING)
     private ShipmentStatus status;
 
-    private LocalDateTime shipmentDate;
+    private LocalDate shipmentDate;
 
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    // Split shipment
+    private Integer shipmentSequence;
 }
