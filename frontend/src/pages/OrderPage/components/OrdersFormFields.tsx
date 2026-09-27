@@ -19,7 +19,7 @@ interface OrdersFormFieldsProps {
 }
 
 function OrdersFormFields({ form, setForm, currentItem, setCurrentItem, onAddItem, onRemoveItem, companies, itemsList, disabled }: OrdersFormFieldsProps) {
-    const currencies = ['USD', 'KRW', 'EUR'];
+    const currencies = ['USD', 'KRW', 'EUR', 'JPY', 'CNY'];
     const incotermsList = ['FOB', 'CIF', 'CFR', 'EXW', 'DAP'];
     const paymentTerms = ['TT'];
 

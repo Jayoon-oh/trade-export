@@ -45,7 +45,7 @@ function InvoiceSplitModal({ ordersId, orderCurrency, orderExchangeRate, isOpen,
 
     const handleConfirm = async () => {
         const rate = orderExchangeRate ?? Number(exchangeRate);
-        if (!exchangeRate || isNaN(rate) || rate <= 0) {
+        if (!rate || isNaN(rate) || rate <= 0) {
             alert('환율을 올바르게 입력해주세요.');
             return;
         }

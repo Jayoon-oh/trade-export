@@ -39,3 +39,7 @@ export const getPaymentStatusHistory = async (paymentId: number): Promise<Paymen
     const response = await api.get<PaymentStatusHistory[]>(`/payments/${paymentId}/history`);
     return response.data;
 }
+
+export const deletePayment = async (id: number): Promise<void> => {
+    await api.delete(`/payments/${id}`);
+};

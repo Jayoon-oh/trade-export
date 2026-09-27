@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createQuotation } from '../../../api/quotationApi'; 
-import { getCompanyList } from '../../../api/companyApi'; 
+import { getAllCompanies } from '../../../api/companyApi'; 
 import { getItemsList } from '../../../api/itemsApi'; 
 import QuotationFormFields from './QuotationFormFields';
 import type { Company } from '../../../types/company';
@@ -25,8 +25,8 @@ function QuotationCreateForm({ onSuccess }: QuotationCreateFormProps) {
     }, []);
 
     const fetchCompanies = async () => {
-        const data = await getCompanyList();
-        setCompanies(data.content);
+        const data = await getAllCompanies();
+        setCompanies(data);
     };
 
     const fetchItems = async () => {

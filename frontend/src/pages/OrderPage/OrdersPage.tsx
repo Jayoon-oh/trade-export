@@ -34,7 +34,8 @@ function OrdersPage() {
     const [isSplitModalOpen, setIsSplitModalOpen] = useState(false);
     const [splitOrderId, setSplitOrderId] = useState<number | null>(null);
     const [splitOrderCurrency, setSplitOrderCurrency] = useState('');
-
+    const [splitOrderExchangeRate, setSplitOrderExchangeRate] = useState<number | undefined>(undefined);
+    
     // search by orderNumber
     const [orderNumberSearch, setOrderNumberSearch] = useState('');
 
@@ -73,9 +74,10 @@ function OrdersPage() {
         }
     };
 
-    const handleOpenSplitModal = (orderId: number, currency: string) => {
+    const handleOpenSplitModal = (orderId: number, currency: string, exchangeRate?: number) => {
         setSplitOrderId(orderId);
         setSplitOrderCurrency(currency);
+        setSplitOrderExchangeRate(exchangeRate);
         setIsSplitModalOpen(true);
     };
 
@@ -172,7 +174,7 @@ function OrdersPage() {
                                             {!orders.hasInvoice && (
                                                 <button onClick={() => handleDelete(orders.id)} className="text-red-600 hover:underline">삭제</button>
                                             )}
-                                            <button onClick={() => handleOpenSplitModal(orders.id, orders.currency)} className="text-green-700 hover:underline">인보이스 발행</button>
+                                            <button onClick={() => handleOpenSplitModal(orders.id, orders.currency, orders.exchangeRate)} className="text-green-700 hover:underline">인보이스 발행</button>
                                             <button onClick={() => handleViewHistory(orders.id)} className="text-gray-600 hover:underline">발행 이력</button>
                                         </td>
                                     </tr>
@@ -224,6 +226,7 @@ function OrdersPage() {
                 <InvoiceSplitModal
                     ordersId={splitOrderId}
                     orderCurrency={splitOrderCurrency}
+                    orderExchangeRate={splitOrderExchangeRate}
                     isOpen={isSplitModalOpen}
                     onClose={() => setIsSplitModalOpen(false)}
                     onSuccess={async (invoiceId) => {

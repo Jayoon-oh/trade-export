@@ -1,4 +1,4 @@
-import { getPaymentDetail, getPayments, getPaymentStatusHistory, updatePayment } from "../../api/paymentApi";
+import { deletePayment, getPaymentDetail, getPayments, getPaymentStatusHistory, updatePayment } from "../../api/paymentApi";
 import type { PaymentStatus, PaymentResponse, PaymentDetail, PaymentStatusHistory } from "../../types/payment";
 import { useEffect, useState } from "react";
 import type { Company } from "../../types/company";
@@ -125,6 +125,18 @@ function PaymentPage() {
         setExpandedHistoryId(paymentId);
     };
 
+    const handleDelete = async (id: number) => {
+        if (!confirm('결제 내역을 삭제하시겠습니까?')) return;
+        try {
+            await deletePayment(id);
+            alert('삭제가 완료되었습니다.');
+            fetchPaymentList();
+        } catch (error: any) {
+            const message = error.response?.data || '삭제에 실패했습니다.';
+            alert(message);
+        }
+    };
+
     return (
         <div className="max-w-6xl mx-auto p-10">
             <h1 className="text-2xl font-bold text-gray-800 mb-6">결제 관리</h1>
@@ -205,8 +217,13 @@ function PaymentPage() {
                                             <button onClick={() => handleViewDetail(p.invoiceId)} className="text-blue-900 hover:underline text-sm">
                                                 {selectedInvoiceId === p.invoiceId ? '접기' : '상세보기'}
                                             </button>
+                                            {p.status === 'PENDING' && (
+                                                <button onClick={() => handleDelete(p.id)} className="text-red-600 hover:underline text-sm ml-2">
+                                                    삭제
+                                                </button>
+                                            )}
                                         </td>
-                                    </tr>
+                                    </tr> 
                                 ))
                             )}
                         </tbody>

@@ -1,5 +1,5 @@
-import { createCompany, updateCompany, getCompanyList, getCompany } from "../../api/companyApi";
-import type { CompanyCreateRequest, Company } from "../../types/company";
+import { getCompanyList, getCompany } from "../../api/companyApi";
+import type { Company } from "../../types/company";
 import { useState, useEffect } from "react";
 import CompanyDetailModal from "./components/CompanyDetailModal";
 import CompanyCreateForm from "./components/CompanyCreateForm";
@@ -12,8 +12,8 @@ function CompanyPage() {
     const [searchRole, setSearchRole] = useState('');
     const roles = ['FORWARDER', 'BUYER', 'SELLER', 'CARRIER'];
     const roleLabels: Record<string, string> = {
-    FORWARDER: '포워더', BUYER: '바이어', SELLER: '판매자', CARRIER: '운송사'
-};
+        FORWARDER: '포워더', BUYER: '바이어', SELLER: '판매자', CARRIER: '운송사'
+    };
 
     // pagination
     const [currentPage, setCurrentPage] = useState(0);
@@ -52,9 +52,9 @@ function CompanyPage() {
     }
 
     const handleCloseModal = () => {
-    setIsDetailOpen(false);
-    setSelectedCompany(null);
-};
+        setIsDetailOpen(false);
+        setSelectedCompany(null);
+    };
 
     return (
         <div className="max-w-6xl mx-auto p-10">
@@ -64,39 +64,32 @@ function CompanyPage() {
                 <button onClick={() => setView('list')} className={view === 'list' ? 'font-semibold text-blue-900' : 'text-gray-500'}>목록</button>
                 <button onClick={() => setView('new')} className={view === 'new' ? 'font-semibold text-blue-900' : 'text-gray-500'}>신규 등록</button>
             </div>
-            {/* Search section */}
-            <div className="flex gap-2 mb-8">
-                <input
-                    value={searchName}
-                    onChange={(e) => setSearchName(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                            fetchCompanies();
-                        }
-                    }}
-                    placeholder="회사명 검색"
-                    className="border border-gray-300 rounded px-3 py-2"
-                />
-                <select
-                    value={searchRole}
-                    onChange={(e) => setSearchRole(e.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2"
-                >
-                    <option value="">전체</option>
-                    {roles.map((role) => (
-                        <option key={role} value={role}>{roleLabels[role]}</option>
-                    ))}
-                </select>
-                <button
-                    onClick={fetchCompanies}
-                    className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
-                >
-                    검색
-                </button>
-            </div>
 
             {view === 'list' && (
-                <>
+                <>        {/* Search section */}
+                    <div className="flex gap-2 mb-8">
+                        <input
+                            value={searchName}
+                            onChange={(e) => setSearchName(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') fetchCompanies(); }}
+                            placeholder="회사명 검색"
+                            className="border border-gray-300 rounded px-3 py-2"
+                        />
+                        <select
+                            value={searchRole}
+                            onChange={(e) => setSearchRole(e.target.value)}
+                            className="border border-gray-300 rounded px-3 py-2"
+                        >
+                            <option value="">전체</option>
+                            {roles.map((role) => (
+                                <option key={role} value={role}>{roleLabels[role]}</option>
+                            ))}
+                        </select>
+                        <button onClick={fetchCompanies} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+                            검색
+                        </button>
+                    </div>
+
                     {/* Table */}
                     <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
                         <thead>
@@ -123,7 +116,7 @@ function CompanyPage() {
                                         <td className="px-4 py-3">{company.country}</td>
                                         <td className="px-4 py-3">{company.address}</td>
                                         <td className="px-4 py-3">{roleLabels[company.role]}</td>
-                                        <td className="px-4 py-3">{company.registrationNumber}</td>
+                                        <td className="px-4 py-3">{company.registrationNumber || '-'}</td>
                                         <td className="px-4 py-3 flex gap-2">
                                             <button onClick={() => handleViewDatail(company.id)} className="text-blue-900 hover:underline">
                                                 상세

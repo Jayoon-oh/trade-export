@@ -15,7 +15,7 @@ function CompanyFormFields({ form, setForm }: CompanyFormFieldsProps) {
 
     const categories = ['국제운송', '국내운송'];
     const deliveryMethods = ['해상', '항공', '육상'];
-    const countries = ['대한민국', '미국', '중국', '일본', '독일', '인도', '베트남', '태국', '네덜란드'];
+    const countries = ['대한민국', '미국', '중국', '일본', '브라질', '독일', '인도', '베트남', '태국', '네덜란드'];
 
     // GoogleMap API
     const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);

@@ -16,7 +16,7 @@ import { LoadScript } from '@react-google-maps/api';
 function App() {
 
   return (
-    <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} libraries={['places']} language="ko">
+    <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} libraries={['places']}>
       <BrowserRouter>
         <div className="min-h-screen flex">
           <Header />
