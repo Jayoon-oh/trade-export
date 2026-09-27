@@ -2,6 +2,9 @@ package com.tradeexport.backend.company;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,12 +45,18 @@ public class CompanyService {
                 .orElseThrow(()->new IllegalArgumentException("거래처 없음"));
     }
 
-    // search company list
-    public List<Company> searchCompanies(String role) {
-        if (role == null) {
-            return companyRepository.findAll();
-        }
-        return companyRepository.findByRole(role);
+    // search company list with pagination
+    public Page<CompanyResponseDto> searchCompanies(String role, String companyName, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return companyRepository.findByFilters(role, companyName,pageable)
+                .map(CompanyResponseDto::from);
+    }
+
+    public List<CompanyResponseDto> getAllCompanies(String role) {
+        return companyRepository.findAllByRole(role)
+                .stream()
+                .map(CompanyResponseDto::from)
+                .toList();
     }
 
     // update company
@@ -72,4 +81,5 @@ public class CompanyService {
 
         return companyRepository.save(company);
     }
+
 }

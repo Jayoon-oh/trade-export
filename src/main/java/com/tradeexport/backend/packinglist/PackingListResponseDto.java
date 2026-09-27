@@ -1,24 +1,27 @@
 package com.tradeexport.backend.packinglist;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public record PackingListResponse(
+public record PackingListResponseDto(
         Long id,
         Long shipmentId,
         Long buyerId,
         String buyerName,
         Long forwarderId,
         String forwarderName,
-        LocalDateTime packingDate,
+        LocalDate packingDate,
         BigDecimal totalAmount,
         BigDecimal totalWeight,
+        String orderNumber,
         String comment,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        Integer shipmentSequence
 ) {
-    public static PackingListResponse from(PackingList packingList) {
-        return new PackingListResponse(
+    public static PackingListResponseDto from(PackingList packingList) {
+        return new PackingListResponseDto(
                 packingList.getId(),
                 packingList.getShipment().getId(),
                 packingList.getShipment().getOrders().getBuyer().getId(),
@@ -28,9 +31,11 @@ public record PackingListResponse(
                 packingList.getPackingDate(),
                 packingList.getTotalAmount(),
                 packingList.getTotalWeight(),
+                packingList.getShipment().getOrders().getOrderNumber(),
                 packingList.getComment(),
                 packingList.getCreatedAt(),
-                packingList.getUpdatedAt()
+                packingList.getUpdatedAt(),
+                packingList.getShipment().getShipmentSequence()
         );
     }
 }

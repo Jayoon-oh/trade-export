@@ -2,20 +2,29 @@ package com.tradeexport.backend.orders;
 
 import com.tradeexport.backend.company.Company;
 import com.tradeexport.backend.company.CompanyRepository;
-import com.tradeexport.backend.invoice.Invoice;
-import com.tradeexport.backend.invoice.InvoiceRepository;
+import com.tradeexport.backend.invoice.*;
 import com.tradeexport.backend.items.Items;
 import com.tradeexport.backend.items.ItemsRepository;
 import com.tradeexport.backend.quotation.Quotation;
 import com.tradeexport.backend.quotation.QuotationRepository;
+import com.tradeexport.backend.security.CurrentUserProvider;
+import com.tradeexport.backend.shipment.Shipment;
+import com.tradeexport.backend.shipment.ShipmentRepository;
 import com.tradeexport.backend.stock.StockService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -27,23 +36,36 @@ public class OrdersService {
     final private QuotationRepository quotationRepository;
     final private ItemsRepository itemsRepository;
     final private InvoiceRepository invoiceRepository;
+    final private ShipmentRepository shipmentRepository;
     final private StockService stockService;
+    final private CurrentUserProvider currentUserProvider;
+    final private InvoiceItemsRepository invoiceItemsRepository;
 
     public Orders registerOrder(OrdersCreateRequestDto dto) {
         Company company = companyRepository.findById(dto.getBuyerId())
                 .orElseThrow(()-> new IllegalArgumentException("바이어 없음"));
 
+        // orderNumber
+        String year = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy"));
+        String prefix = "ORD-" + year + "-";
+        long countThisYear = ordersRepository.countByOrderNumberStartingWith(prefix);
+        String seq = String.format("%04d", countThisYear + 1);
+        String orderNumber = prefix + seq;
+
         // nullable
         Quotation quotation = null;
+        BigDecimal exchangeRate = null;
         if(dto.getQuotationId() != null) {
             quotation = quotationRepository.findById(dto.getQuotationId())
                     .orElseThrow(()-> new IllegalArgumentException("견적 없음"));
+            exchangeRate = quotation.getExchangeRate();
         }
 
         Orders orders = new Orders();
 
         orders.setBuyer(company);
         orders.setQuotation(quotation);
+        orders.setExchangeRate(exchangeRate);
         orders.setOrdersDate(dto.getOrdersDate());
         orders.setComment(dto.getComment());
         orders.setCreatedAt(LocalDateTime.now());
@@ -51,6 +73,8 @@ public class OrdersService {
         orders.setCurrency(dto.getCurrency());
         orders.setIncoterms(dto.getIncoterms());
         orders.setPaymentTerm(dto.getPaymentTerm());
+        orders.setOrderNumber(orderNumber);
+        orders.setCreatedBy(currentUserProvider.getCurrentUser());
 
         ordersRepository.save(orders);
 
@@ -76,7 +100,14 @@ public class OrdersService {
             totalAmount = totalAmount.add(lineAmount);
         }
 
-        orders.setAmount(totalAmount);
+        BigDecimal finalFreightCost = (dto.getFreightCoveredByCompany() != null && dto.getFreightCoveredByCompany())
+                ? BigDecimal.ZERO
+                : (dto.getFreightCost() != null ? dto.getFreightCost() : BigDecimal.ZERO);
+
+        orders.setFreightCost(finalFreightCost);
+        orders.setFreightCoveredByCompany(dto.getFreightCoveredByCompany());
+        orders.setAmount(totalAmount.add(finalFreightCost));
+
         return ordersRepository.save(orders);
     }
 
@@ -84,13 +115,28 @@ public class OrdersService {
         Orders orders = ordersRepository.findById(id)
                 .orElseThrow(()->new IllegalArgumentException("오더 없음"));
 
-        // 1. block deletion when invoice already exists
+        // 1. block deletion when invoice is issued
         List<Invoice> existingInvoice = invoiceRepository.findByOrdersId(id);
-        if (!existingInvoice.isEmpty()) {
+        boolean hasActiveInvoice = existingInvoice.stream()
+                .anyMatch(inv -> inv.getStatus() != InvoiceStatus.CANCELLED);
+        if (hasActiveInvoice) {
             throw new IllegalStateException("이미 인보이스가 발행된 오더는 삭제할 수 없습니다. 인보이스를 취소해주세요.");
         }
 
-        // 2. release stock & delete OrdersItems
+        // 2. block deletion when shipment already exists
+        List<Shipment> existingShipment = shipmentRepository.findByOrdersId(id);
+        if (!existingShipment.isEmpty()) {
+            throw new IllegalStateException("이미 선적이 등록된 오더는 삭제할 수 없습니다.");
+        }
+
+        // 3. delete entire Invoice with InvoiceItems, if they are CANCELLED
+        for (Invoice invoice : existingInvoice) {
+            List<InvoiceItems> invoiceItems = invoiceItemsRepository.findByInvoiceId(invoice.getId());
+            invoiceItemsRepository.deleteAll(invoiceItems);
+            invoiceRepository.delete(invoice);
+        }
+
+        // 4. release stock & delete OrdersItems
         List<OrdersItems> ordersItemsList  = ordersItemsRepository.findByOrdersId(id);
 
         for(OrdersItems ordersItems : ordersItemsList ) {
@@ -102,11 +148,18 @@ public class OrdersService {
         ordersRepository.delete(orders);
     }
 
-    public List<OrdersResponseDto> getOrders(Long buyerId) {
-        return ordersRepository.findByFilters(buyerId)
+    public Page<OrdersResponseDto> getOrders(Long buyerId, int page, String orderNumber, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Orders> ordersPage = ordersRepository.findByFilters(buyerId, orderNumber, pageable);
+
+        List<Long> ordersIds = ordersPage.getContent().stream().map(Orders::getId).toList();
+        Set<Long> hasInvoiceSet = invoiceRepository.findByOrdersIdIn(ordersIds)
                 .stream()
-                .map(OrdersResponseDto::from)
-                .toList();
+                .filter(invoice -> invoice.getStatus() != InvoiceStatus.CANCELLED)
+                .map(invoice -> invoice.getOrders().getId())
+                .collect(Collectors.toSet());
+
+        return ordersPage.map(orders -> OrdersResponseDto.from(orders, hasInvoiceSet.contains(orders.getId())));
     }
 
     public OrdersDetailResponseDto getOrderDetail(Long id) {
@@ -115,16 +168,22 @@ public class OrdersService {
 
         List<OrdersItems> items = ordersItemsRepository.findByOrdersId(id);
 
-        return OrdersDetailResponseDto.from(orders, items);
+        List<Invoice> existingInvoice = invoiceRepository.findByOrdersId(id);
+        boolean hasInvoice = !existingInvoice.isEmpty();
+
+        return OrdersDetailResponseDto.from(orders, items, hasInvoice);
     }
 
     public OrdersResponseDto updateOrder(Long id, OrdersCreateRequestDto dto) {
         Orders orders = ordersRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("오더 없음"));
 
-        // 1. block deletion when invoice already exists
+        // 1. block deletion when invoice is issued
         List<Invoice> existingInvoice = invoiceRepository.findByOrdersId(id);
-        if (!existingInvoice.isEmpty()) {
+        boolean hasActiveInvoice = existingInvoice.stream()
+                .anyMatch(inv -> inv.getStatus() != InvoiceStatus.CANCELLED);
+
+        if (hasActiveInvoice) {
             throw new IllegalStateException("이미 인보이스가 발행된 오더는 수정할 수 없습니다. 인보이스를 취소해주세요.");
         }
 
@@ -178,6 +237,6 @@ public class OrdersService {
         }
 
         Orders saved = ordersRepository.save(orders);
-        return OrdersResponseDto.from(saved);
+        return OrdersResponseDto.from(saved, false);
     }
 }

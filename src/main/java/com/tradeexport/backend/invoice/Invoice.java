@@ -33,4 +33,5 @@ public class Invoice {
     private BigDecimal totalAmount;
     private BigDecimal exchangeRate;
     private String currency;
+    private BigDecimal convertedAmount;
 }

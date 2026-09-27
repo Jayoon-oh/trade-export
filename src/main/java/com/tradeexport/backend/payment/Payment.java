@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,7 +24,7 @@ public class Payment {
     private Invoice invoice;
 
     private BigDecimal amount;
-    private LocalDateTime paymentDate;
+    private LocalDate paymentDate;
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;

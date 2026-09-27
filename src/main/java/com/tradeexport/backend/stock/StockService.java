@@ -2,6 +2,9 @@ package com.tradeexport.backend.stock;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -57,15 +60,9 @@ public class StockService {
         stockRepository.save(stock);
     }
 
-    public List<StockResponseDto> searchByProductName(String productName) {
-        List<Stock> stocks;
-        if (productName == null) {
-            stocks = stockRepository.findAll();
-        } else {
-            stocks = stockRepository.findByProductNameContaining(productName);
-        }
-        return stocks.stream()
-                .map(StockResponseDto::from)
-                .toList();
+    public Page<StockResponseDto> searchByProductName(String productName, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return stockRepository.findByProductNameContaining(productName, pageable)
+                .map(StockResponseDto::from);
     }
 }

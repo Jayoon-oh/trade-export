@@ -10,6 +10,7 @@ public record InvoicePdfDataDto(
         String currency,
         BigDecimal exchangeRate,
         BigDecimal totalAmount,
+        BigDecimal freightCost,
 
         String sellerName,
         String sellerAddress,

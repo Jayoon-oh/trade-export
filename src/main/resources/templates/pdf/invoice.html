@@ -4,53 +4,176 @@
     <meta charset="UTF-8"/>
     <title>Invoice</title>
     <style>
-        body { font-family: 'NanumGothic', sans-serif; font-size: 12px; }
-        .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
-        .logo { width: 120px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #333; padding: 6px 8px; text-align: left; }
-        th { background-color: #f0f0f0; }
-        .total { text-align: right; font-weight: bold; margin-top: 10px; }
+        body {
+            font-family: 'NanumGothic', sans-serif;
+            font-size: 11px;
+            color: #222;
+            margin: 40px;
+        }
+        .top-bar {
+            width: 100%;
+            margin-bottom: 12px;
+        }
+        .top-bar td {
+            vertical-align: middle;
+        }
+        .logo {
+            width: 110px;
+        }
+        .doc-title {
+            text-align: right;
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+        .divider {
+            border: none;
+            border-top: 2px solid #1e3a8a;
+            margin-bottom: 20px;
+        }
+        .info-box {
+            width: 100%;
+            border: 1px solid #333;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .info-box td {
+            border: 1px solid #333;
+            padding: 8px 10px;
+            vertical-align: top;
+        }
+        .info-box .field-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .items-table th {
+            background-color: #1e3a8a;
+            color: #fff;
+            padding: 8px;
+            text-align: left;
+        }
+        .items-table td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .items-table tr:nth-child(even) td {
+            background-color: #f2f5f9;
+        }
+        .items-table .num {
+            text-align: right;
+        }
+        .total {
+            text-align: right;
+            font-weight: bold;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        .sign-box {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 40px;
+        }
+        .sign-box td {
+            border: 1px solid #333;
+            padding: 20px 10px 8px 10px;
+            width: 33.3%;
+            vertical-align: bottom;
+        }
+        .sign-box .field-label {
+            font-weight: bold;
+        }
+        .sign-box img {
+            width: 90px;
+            display: block;
+            margin-bottom: 4px;
+        }
     </style>
 </head>
 <body>
-<h1>COMMERCIAL INVOICE</h1>
 
-<div class="header">
-    <div>
-        <p><strong>Seller:</strong> <span th:text="${sellerName}">회사명</span></p>
-        <p th:text="${sellerAddress}">주소</p>
-    </div>
-    <div>
-        <p><strong>Buyer:</strong> <span th:text="${buyerName}">회사명</span></p>
-        <p th:text="${buyerAddress}">주소</p>
-    </div>
-</div>
+<table class="top-bar">
+    <tr>
+        <td>
+            <img th:if="${sellerLogoPath != null}" th:src="${sellerLogoPath}" class="logo"/>
+        </td>
+        <td class="doc-title">Commercial Invoice</td>
+    </tr>
+</table>
+<hr class="divider"/>
 
-<p><strong>Invoice No:</strong> <span th:text="${invoiceNumber}">INV-2026-001</span></p>
-<p><strong>Date:</strong> <span th:text="${invoiceDate}">2026-08-19</span></p>
+<table class="info-box">
+    <tr>
+        <td style="width: 50%;">
+            <span class="field-label">Seller</span>
+            <span th:text="${sellerName}">회사명</span><br/>
+            <span th:text="${sellerAddress}">주소</span>
+        </td>
+        <td style="width: 50%;">
+            <span class="field-label">Buyer</span>
+            <span th:text="${buyerName}">회사명</span><br/>
+            <span th:text="${buyerAddress}">주소</span>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <span class="field-label">Invoice No.</span>
+            <span th:text="${invoiceNumber}">INV-2026-001</span>
+        </td>
+        <td>
+            <span class="field-label">Date</span>
+            <span th:text="${invoiceDate}">2026-08-19</span>
+        </td>
+    </tr>
+</table>
 
-<table>
+<table class="items-table">
     <thead>
     <tr>
         <th>Item</th>
-        <th>Quantity</th>
-        <th>Unit Price</th>
-        <th>Amount</th>
+        <th class="num">Quantity</th>
+        <th class="num">Unit Price</th>
+        <th class="num">Amount</th>
     </tr>
     </thead>
     <tbody>
     <tr th:each="item : ${items}">
         <td th:text="${item.itemName}">품목명</td>
-        <td th:text="${item.quantity}">1</td>
-        <td th:text="${item.unitPrice}">0</td>
-        <td th:text="${item.amount}">0</td>
+        <td class="num" th:text="${item.quantity}">1</td>
+        <td class="num" th:text="${item.unitPrice}">0</td>
+        <td class="num" th:text="${item.amount}">0</td>
     </tr>
     </tbody>
 </table>
 
+<p class="freight-line" th:if="${freightCost != null and freightCost.compareTo(T(java.math.BigDecimal).ZERO) &gt; 0}" style="text-align: right; font-size: 12px; color: #555; margin-top: 8px;">
+    Freight: <span th:text="${freightCost}">0</span> <span th:text="${currency}">USD</span>
+</p>
 <p class="total">
     Total: <span th:text="${totalAmount}">0</span> <span th:text="${currency}">USD</span>
 </p>
+
+<table class="sign-box">
+    <tr>
+        <td>
+            <span class="field-label">Name</span><br/>
+            <span th:text="${sellerOwnerName}"></span>
+        </td>
+        <td>
+            <span class="field-label">Signature</span>
+            <img th:if="${sellerSignaturePath != null}" th:src="${sellerSignaturePath}"/>
+        </td>
+        <td>
+            <span class="field-label">Date</span><br/>
+            <span th:text="${invoiceDate}"></span>
+        </td>
+    </tr>
+</table>
+
 </body>
 </html>

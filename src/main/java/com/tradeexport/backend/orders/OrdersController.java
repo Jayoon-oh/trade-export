@@ -3,6 +3,7 @@ package com.tradeexport.backend.orders;
 import com.tradeexport.backend.invoice.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,8 +37,12 @@ public class OrdersController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrdersResponseDto>> getOrders(@RequestParam(required = false) Long buyerId) {
-        return ResponseEntity.ok(ordersService.getOrders(buyerId));
+    public ResponseEntity<Page<OrdersResponseDto>> getOrders(
+            @RequestParam(required = false) Long buyerId,
+            @RequestParam(required = false) String orderNumber,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(ordersService.getOrders(buyerId, page,orderNumber, size));
     }
 
     @GetMapping("/{id}")
@@ -61,6 +66,12 @@ public class OrdersController {
     public ResponseEntity<OrdersResponseDto> updateOrder(@PathVariable Long id, @Valid @RequestBody OrdersCreateRequestDto dto) {
         OrdersResponseDto updated = ordersService.updateOrder(id, dto);
         return ResponseEntity.ok(updated);
+    }
+
+    // Partial invoice
+    @GetMapping("/{id}/remaining-items")
+    public ResponseEntity<List<RemainingItemDto>> getRemainingItems(@PathVariable Long id) {
+        return ResponseEntity.ok(invoiceService.getRemainingItems(id));
     }
 
 }

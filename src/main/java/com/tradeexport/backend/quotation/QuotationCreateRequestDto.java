@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -22,7 +24,13 @@ public class QuotationCreateRequestDto {
     @NotBlank
     private String paymentTerm;
 
+    @NotNull
+    private LocalDate quotationDate;
+
     private String comment;
+
+    @NotNull
+    private BigDecimal exchangeRate;
 
     @NotNull
     private List<QuotationItemRequestDto> items;

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -18,5 +19,5 @@ public class PaymentCreateRequestDto {
     private BigDecimal amount;
 
     @NotNull
-    private LocalDateTime paymentDate;
+    private LocalDate paymentDate;
 }
