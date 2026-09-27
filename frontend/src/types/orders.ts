@@ -2,6 +2,7 @@ export interface Orders {
     id: number;
     buyerId: number;
     buyerName: string;
+    buyerCountry: string;
     quotationId: number;
     amount: number;
     ordersDate: string;
@@ -9,8 +10,19 @@ export interface Orders {
     createdAt: string;
     updatedAt: string;
     currency: string;
+    exchangeRate?: number;
     incoterms: string;
+    orderNumber: string;
     paymentTerm: string;
+    hasInvoice: boolean;
+}
+
+export interface PagedOrders {
+    content: Orders[];
+    totalPages: number;
+    totalElements: number;
+    number: number;
+    size: number;
 }
 
 export interface OrdersItemLine {
@@ -36,11 +48,15 @@ export interface OrdersCreateRequest {
     incoterms: string;
     paymentTerm: string;
     items: OrdersItemRequest[];
+    freightCost?: number;
+    freightCoveredByCompany?: boolean;
 }
 
 export interface OrdersItemRequest {
     itemsId: number;
     quantity: number;
+    price?: number;
+    itemName: string;
 }
 
 

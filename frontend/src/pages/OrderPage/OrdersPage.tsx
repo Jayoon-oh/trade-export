@@ -1,240 +1,239 @@
-import type { Orders, OrdersCreateRequest, OrdersDetailResponse, OrdersItemLine, OrdersItemRequest } from "../../types/orders";
-import { getCompanyList } from "../../api/companyApi";
-import { getItemsList } from "../../api/itemsApi";
-import { getOrdersList, deleteOrders, getOrder, registerOrders, updateOrders } from "../../api/ordersApi";
+import type { Orders } from "../../types/orders";
+import { getInvoiceList, issueInvoice, cancelInvoice, handleGenerateInvoice } from "../../api/invoiceApi";
+import { getAllCompanies } from "../../api/companyApi";
+import { getOrdersList, deleteOrders } from "../../api/ordersApi";
 import { useState, useEffect } from "react";
-import type { Items } from "../../types/items";
 import type { Company } from "../../types/company";
+import type { InvoiceResponse } from "../../types/invoice";
+import InvoiceHistoryModal from "./components/InvoiceHistoryModal";
+import EntitySelect from "../../components/EntitySelect";
+import OrdersCreateForm from "./components/OrdersCreateForm";
+import OrdersEditForm from "./components/OrdersEditForm";
+import InvoiceSplitModal from "./components/InvoiceSplitModal";
+import formatDateOnly from "../../utils/formatDateOnly";
 
 function OrdersPage() {
     const [ordersList, setOrdersList] = useState<Orders[]>([]);
     const [buyerId, setBuyerId] = useState(0);
-    const [form, setForm] = useState<OrdersCreateRequest>({
-        buyerId: 0,
-        quotationId: 0,
-        amount: 0,
-        ordersDate: '',
-        comment: '',
-        currency: '',
-        incoterms: '',
-        paymentTerm: '',
-        items: []
-    })
-    const [editingId, setEditingId] = useState<number | null>(null);
-    const [currentItem, setCurrentItem] = useState<OrdersItemRequest>({
-        itemsId: 0,
-        quantity: 0,
-    });
-    const [companies, setCompanies] = useState<Company[]>([]);
-    const [itemsList, setItemsList] = useState<Items[]>([]);
 
-    const paymentTerms = ['TT'];
-    const incotermsList = ['FOB', 'CIF', 'CFR', 'EXW', 'DAP'];
-    const currencies = ['USD', 'KRW', 'EUR', 'JPY', 'CNY'];
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [companies, setCompanies] = useState<Company[]>([]);
+
+    const [view, setView] = useState<'list' | 'new' | 'edit'>('list');
+
+    // Invoice
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+    const [invoiceHistory, setInvoiceHistory] = useState<InvoiceResponse[]>([]);
+    const [historyOrderId, setHistoryOrderId] = useState<number | null>(null);
+
+    // pagination
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+
+    // issue Invoice
+    const [isSplitModalOpen, setIsSplitModalOpen] = useState(false);
+    const [splitOrderId, setSplitOrderId] = useState<number | null>(null);
+    const [splitOrderCurrency, setSplitOrderCurrency] = useState('');
+
+    // search by orderNumber
+    const [orderNumberSearch, setOrderNumberSearch] = useState('');
+
 
     useEffect(() => {
         fetchCompanies();
-        fetchItems();
     }, []);
 
     useEffect(() => {
         fetchOrders();
-    }, [buyerId]);
+    }, [buyerId, currentPage]);
 
 
     const fetchOrders = async () => {
-        const data = await getOrdersList(buyerId || undefined);
-        setOrdersList(data);
+        const data = await getOrdersList(buyerId || undefined, orderNumberSearch || undefined, currentPage);
+        setOrdersList(data.content);
+        setTotalPages(data.totalPages);
     }
 
     const fetchCompanies = async () => {
-        const data = await getCompanyList();
+        const data = await getAllCompanies();
         setCompanies(data);
     }
 
-    const fetchItems = async () => {
-        const data = await getItemsList();
-        setItemsList(data);
+    const handleDelete = async (id: number) => {
+        try {
+            if (!id) {
+                alert('삭제할 오더를 선택해주세요');
+                return;
+            }
+            await deleteOrders(id);
+            fetchOrders();
+        } catch (error: any) {
+            const message = error.response?.data || '오더 삭제에 실패했습니다.';
+            alert(message);
+        }
     };
 
-    const handleSubmit = async () => {
-        if (editingId) {
-            await updateOrders(editingId, form);
-        } else {
-            await registerOrders(form);
-        }
-        setForm({
-            buyerId: 0,
-            quotationId: 0,
-            amount: 0,
-            ordersDate: '',
-            comment: '',
-            currency: '',
-            incoterms: '',
-            paymentTerm: '',
-            items: []
-        });
-        setEditingId(null);
-        fetchOrders();
+    const handleOpenSplitModal = (orderId: number, currency: string) => {
+        setSplitOrderId(orderId);
+        setSplitOrderCurrency(currency);
+        setIsSplitModalOpen(true);
+    };
+
+    const handleViewHistory = async (orderId: number) => {
+        const data = await getInvoiceList(orderId);
+        setInvoiceHistory(data);
+        setHistoryOrderId(orderId);
+        setIsHistoryOpen(true);
     }
 
-    const handleEdit = async (ordersId: number) => {
-        const detail = await getOrder(ordersId);
+    const handleCloseHistory = () => {
+        setIsHistoryOpen(false);
+        setInvoiceHistory([]);
+    }
 
-        setForm({
-            buyerId: detail.orders.buyerId,
-            quotationId: detail.orders.quotationId,
-            amount: detail.orders.amount,
-            ordersDate: detail.orders.ordersDate,
-            comment: detail.orders.comment,
-            currency: detail.orders.currency,
-            incoterms: detail.orders.incoterms,
-            paymentTerm: detail.orders.paymentTerm,
-            items: detail.items.map((item) => ({
-                itemsId: item.itemsId,
-                quantity: item.quantity
-            }))
-        });
-        setEditingId(ordersId);
-    };
+    const handleCancelInvoice = async (invoiceId: number) => {
+        if (!invoiceId) {
+            alert('인보이스를 선택해주세요.')
+            return;
+        }
+        if (!confirm('해당 인보이스를 취소하시겠습니까?')) return;
 
-    const handleDelete = async (id: number) => {
-        await deleteOrders(id);
-        fetchOrders();
-    };
-
-    const handleAddItem = () => {
-        setForm({ ...form, items: [...form.items, currentItem] });
-        setCurrentItem({ itemsId: 0, quantity: 0 });
-    };
-
-    const handleRemoveItem = (indexToRemove: number) => {
-        setForm({
-            ...form,
-            items: form.items.filter((_, index) => index !== indexToRemove),
-        });
-    };
+        try {
+            await cancelInvoice(invoiceId);
+            if (historyOrderId) {
+                const data = await getInvoiceList(historyOrderId);
+                setInvoiceHistory(data);
+            }
+        } catch (error) {
+            alert('이미 결제내역이 존재하는 경우 인보이스 취소가 불가능합니다.');
+        }
+    }
 
     return (
-        <div>
-            <h1>오더 조회</h1>
-            <select value={buyerId} onChange={(e) => setBuyerId(Number(e.target.value))}>
-                <option value={0}>전체</option>
-                {companies.map((c) => (
-                    <option key={c.id} value={c.id}>{c.companyName}</option>
-                ))}
-            </select>
+        <div className="max-w-6xl mx-auto p-10">
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">오더 조회</h1>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>바이어명</th>
-                        <th>금액</th>
-                        <th>통화</th>
-                        <th>주문일</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {ordersList.map((orders) => (
-                        <tr key={orders.id}>
-                            <td>{orders.id}</td>
-                            <td>{orders.buyerName}</td>
-                            <td>{orders.amount}</td>
-                            <td>{orders.currency}</td>
-                            <td>{orders.ordersDate}</td>
-                            <td>
-                                <button onClick={() => handleEdit(orders.id)}>수정</button>
-                                <button onClick={() => handleDelete(orders.id)}>삭제</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <div className="flex gap-2 mb-6 border-b border-gray-200 pb-4">
+                <button onClick={() => setView('list')} className={view === 'list' ? 'font-semibold text-blue-900' : 'text-gray-500'}>목록</button>
+                <button onClick={() => setView('new')} className={view === 'new' ? 'font-semibold text-blue-900' : 'text-gray-500'}>신규 등록</button>
+            </div>
 
-            <h2>오더 등록</h2>
-            <select
-                value={form.buyerId}
-                onChange={(e) => setForm({ ...form, buyerId: Number(e.target.value) })}
-                disabled={editingId != null}
-            >
-                <option value={0}>바이어 선택</option>
-                {companies.map((c) => (
-                    <option key={c.id} value={c.id}>{c.companyName}</option>
-                ))}
-            </select>
-            <input
-                type="date"
-                value={form.ordersDate}
-                onChange={(e) => setForm({ ...form, ordersDate: e.target.value })}
-            />
-            <select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
-                <option value="">통화 선택</option>
-                {currencies.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <select value={form.incoterms} onChange={(e) => setForm({ ...form, incoterms: e.target.value })}>
-                <option value="">인코텀즈 선택</option>
-                {incotermsList.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <select value={form.paymentTerm} onChange={(e) => setForm({ ...form, paymentTerm: e.target.value })}>
-                <option value="">결제조건 선택</option>
-                {paymentTerms.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <input
-                value={form.comment}
-                onChange={(e) => setForm({ ...form, comment: e.target.value })}
-                placeholder="코멘트"
-            />
+            {view === 'list' && (
+                <>
+                    <div className="flex gap-2 mb-8">
+                        <input
+                            value={orderNumberSearch}
+                            onChange={(e) => setOrderNumberSearch(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') fetchOrders(); }}
+                            placeholder="오더번호 검색"
+                            className="border border-gray-300 rounded px-3 py-2"
+                        />
+                        <button onClick={fetchOrders} className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+                            검색
+                        </button>
+                        <EntitySelect
+                            value={buyerId}
+                            onChange={setBuyerId}
+                            options={companies.map(c => ({ id: c.id, label: c.companyName }))}
+                            placeholder="전체"
+                        />
+                    </div>
 
-            <h3>품목 추가</h3>
-            <select
-                value={currentItem.itemsId}
-                onChange={(e) => setCurrentItem({ ...currentItem, itemsId: Number(e.target.value) })}
-            >
-                <option value={0}>품목 선택</option>
-                {itemsList.map((item) => (
-                    <option key={item.id} value={item.id}>{item.productName}</option>
-                ))}
-            </select>
-            <input
-                type="number"
-                value={currentItem.quantity || ''}
-                onChange={(e) => setCurrentItem({ ...currentItem, quantity: Number(e.target.value) })}
-                placeholder="수량"
-            />
-            <button onClick={handleAddItem}>품목 추가</button>
+                    <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
+                        <thead>
+                            <tr className="bg-gray-100 text-left text-sm text-gray-600">
+                                <th className="px-4 py-3">오더번호</th>
+                                <th className="px-4 py-3">바이어명</th>
+                                <th className="px-4 py-3">국가</th>
+                                <th className="px-4 py-3">금액(KRW)</th>
+                                <th className="px-4 py-3">주문일</th>
+                                <th className="px-4 py-3">특이사항</th>
+                                <th className="px-4 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {ordersList.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="px-4 py-8 text-center text-gray-400 text-sm">
+                                        오더 내역이 없습니다
+                                    </td>
+                                </tr>
+                            ) : (
+                                ordersList.map((orders) => (
+                                    <tr key={orders.id} className="border-t border-gray-200 hover:bg-gray-50">
+                                        <td className="px-4 py-3">{orders.orderNumber}</td>
+                                        <td className="px-4 py-3">{orders.buyerName}</td>
+                                        <td className="px-4 py-3">{orders.buyerCountry}</td>
+                                        <td className="px-4 py-3">{orders.amount.toLocaleString()}</td>
+                                        <td className="px-4 py-3">{formatDateOnly(orders.ordersDate)}</td>
+                                        <td className="px-4 py-3">{orders.comment || '-'}</td>
+                                        <td className="px-4 py-3 flex gap-2 flex-wrap">
+                                            <button onClick={() => { setEditingId(orders.id); setView('edit'); }} className="text-blue-900 hover:underline">수정</button>
+                                            {!orders.hasInvoice && (
+                                                <button onClick={() => handleDelete(orders.id)} className="text-red-600 hover:underline">삭제</button>
+                                            )}
+                                            <button onClick={() => handleOpenSplitModal(orders.id, orders.currency)} className="text-green-700 hover:underline">인보이스 발행</button>
+                                            <button onClick={() => handleViewHistory(orders.id)} className="text-gray-600 hover:underline">발행 이력</button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
 
-            <ul>
-                {form.items.map((item, index) => (
-                    <li key={index}>
-                        품목ID: {item.itemsId}, 수량: {item.quantity}
-                        <button onClick={() => handleRemoveItem(index)}>삭제</button>
-                    </li>
-                ))}
-            </ul>
-
-            <button onClick={handleSubmit}>{editingId ? '수정하기' : '등록하기'}</button>
-
-            {editingId && (
-                <button onClick={() => {
-                    setEditingId(null);
-                    setForm({
-                        buyerId: 0,
-                        quotationId: 0,
-                        amount: 0,
-                        ordersDate: '',
-                        comment: '',
-                        currency: '',
-                        incoterms: '',
-                        paymentTerm: '',
-                        items: []
-                    });
-                }}>
-                    수정 취소
-                </button>
+                    {/* Pagination */}
+                    <div className="flex justify-center gap-2 mb-8">
+                        <button
+                            onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                            disabled={currentPage === 0}
+                            className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                        >
+                            이전
+                        </button>
+                        <span className="px-3 py-1 text-sm text-gray-600">
+                            {currentPage + 1} / {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+                            disabled={currentPage >= totalPages - 1}
+                            className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                        >
+                            다음
+                        </button>
+                    </div>
+                </>
             )}
-        </div>
+
+            {view === 'new' && (
+                <OrdersCreateForm onSuccess={() => { setView('list'); fetchOrders(); }} />
+            )}
+
+            {view === 'edit' && editingId && (
+                <OrdersEditForm orderId={editingId} onSuccess={() => { setView('list'); fetchOrders(); }} />
+            )}
+
+            <InvoiceHistoryModal
+                isOpen={isHistoryOpen}
+                history={invoiceHistory}
+                onClose={handleCloseHistory}
+                onCancel={handleCancelInvoice}
+                onDownload={handleGenerateInvoice}
+            />
+
+            {splitOrderId && (
+                <InvoiceSplitModal
+                    ordersId={splitOrderId}
+                    orderCurrency={splitOrderCurrency}
+                    isOpen={isSplitModalOpen}
+                    onClose={() => setIsSplitModalOpen(false)}
+                    onSuccess={async (invoiceId) => {
+                        setIsSplitModalOpen(false);
+                        await handleGenerateInvoice(invoiceId);
+                        fetchOrders();
+                    }}
+                />
+            )}
+        </div >
     );
 }
 

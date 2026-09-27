@@ -1,216 +1,142 @@
-import { createQuotation, getQuotation, getQuotationList, updateQuotation, deleteQuotation } from "../../api/quotationApi";
+import { getQuotationList, deleteQuotation, handleGenerateQuotation } from "../../api/quotationApi";
 import { getCompanyList } from "../../api/companyApi";
-import { getItemsList } from "../../api/itemsApi";
-import type { Quotation, QuotationCreateRequest, QuotationDetailResponse, QuotationItemLine, QuotationItemRequest } from "../../types/quotation";
-import type { Items } from "../../types/items";
+import type { Quotation } from "../../types/quotation";
 import type { Company } from "../../types/company";
 import { useState, useEffect } from "react";
+import EntitySelect from "../../components/EntitySelect";
+import formatDateOnly from "../../utils/formatDateOnly";
+import QuotationCreateForm from "./components/QuotationCreateFom";
+import QuotationEditForm from "./components/QuotationEditForm";
 
 function QuotationPage() {
     const [quotationList, setQuotationList] = useState<Quotation[]>([]);
     const [buyerId, setBuyerId] = useState(0);
-    const [form, setForm] = useState<QuotationCreateRequest>({
-        companyId: 0,
-        currency: '',
-        incoterms: '',
-        paymentTerm: '',
-        comment: '',
-        items: []
-    })
-    const [editingId, setEditingId] = useState<number | null>(null);
-    const [currentItem, setCurrentItem] = useState<QuotationItemRequest>({
-        itemsId: 0,
-        quantity: 0,
-    });
     const [companies, setCompanies] = useState<Company[]>([]);
-    const [itemsList, setItemsList] = useState<Items[]>([]);
-
-    const paymentTerms = ['TT'];
-    const incotermsList = ['FOB', 'CIF', 'CFR', 'EXW', 'DAP'];
-    const currencies = ['USD', 'KRW', 'EUR', 'JPY', 'CNY'];
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [view, setView] = useState<'list' | 'new' | 'edit'>('list');
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
 
     useEffect(() => {
         fetchCompanies();
-        fetchItems();
     }, []);
 
     useEffect(() => {
         fetchQuotation();
-    }, [buyerId]);
+    }, [buyerId, currentPage]);
 
     const fetchQuotation = async () => {
-        const data = await getQuotationList(buyerId || undefined);
-        setQuotationList(data);
+        const data = await getQuotationList(buyerId || undefined, currentPage);
+        setQuotationList(data.content);
+        setTotalPages(data.totalPages);
     }
 
     const fetchCompanies = async () => {
         const data = await getCompanyList();
-        setCompanies(data);
+        setCompanies(data.content);
     }
-
-    const fetchItems = async () => {
-        const data = await getItemsList();
-        setItemsList(data);
-    };
-
-    const handleSubmit = async () => {
-        if (editingId) {
-            await updateQuotation(editingId, form);
-        } else {
-            await createQuotation(form);
-        }
-        setForm({
-            companyId: 0,
-            currency: '',
-            incoterms: '',
-            paymentTerm: '',
-            comment: '',
-            items: []
-        });
-        setEditingId(null);
-        fetchQuotation();
-    }
-
-    const handleEdit = async (quotationId: number) => {
-        const detail = await getQuotation(quotationId);
-
-        setForm({
-            companyId: detail.quotation.companyId,
-            currency: detail.quotation.currency,
-            incoterms: detail.quotation.incoterms,
-            paymentTerm: detail.quotation.paymentTerm,
-            comment: detail.quotation.comment,
-            items: detail.items.map((item) => ({
-                itemsId: item.itemsId,
-                quantity: item.quantity,
-            })),
-        });
-        setEditingId(quotationId);
-    };
 
     const handleDelete = async (id: number) => {
-        await deleteQuotation(id);
-        fetchQuotation();
-    };
-
-    const handleAddItem = () => {
-        setForm({ ...form, items: [...form.items, currentItem] });
-        setCurrentItem({ itemsId: 0, quantity: 0 });
-    };
-
-    const handleRemoveItem = (indexToRemove: number) => {
-        setForm({
-            ...form,
-            items: form.items.filter((_, index) => index !== indexToRemove),
-        });
+        try {
+            if (!id) {
+                alert('견적id를 선택해주세요.');
+            }
+            await deleteQuotation(id);
+            fetchQuotation();
+        }
+        catch (error: any) {
+            const message = error.response?.data || '견적서 삭제에 실패했습니다.';
+            alert(message);
+        }
     };
 
     return (
-        <div>
-            <h1>견적 조회</h1>
-            <select value={buyerId} onChange={(e) => setBuyerId(Number(e.target.value))}>
-                <option value={0}>전체</option>
-                {companies.map((c) => (
-                    <option key={c.id} value={c.id}>{c.companyName}</option>
-                ))}
-            </select>
+        <div className="max-w-6xl mx-auto p-10">
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">견적 조회</h1>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>바이어명</th>
-                        <th>금액</th>
-                        <th>통화</th>
-                        <th>등록일</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {quotationList.map((quotation) => (
-                        <tr key={quotation.id}>
-                            <td>{quotation.id}</td>
-                            <td>{quotation.companyName}</td>
-                            <td>{quotation.totalAmount}</td>
-                            <td>{quotation.currency}</td>
-                            <td>{quotation.quotationDate}</td>
-                            <td>
-                                <button onClick={() => handleEdit(quotation.id)}>수정</button>
-                                <button onClick={() => handleDelete(quotation.id)}>삭제</button>
+            <div className="flex gap-2 mb-6 border-b border-gray-200 pb-4">
+                <button onClick={() => setView('list')} className={view === 'list' ? 'font-semibold text-blue-900' : 'text-gray-500'}>목록</button>
+                <button onClick={() => setView('new')} className={view === 'new' ? 'font-semibold text-blue-900' : 'text-gray-500'}>신규 등록</button>
+            </div>
 
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            {view === 'list' && (
+                <>
+                    <div className="mb-8">
+                        <EntitySelect
+                            value={buyerId}
+                            onChange={setBuyerId}
+                            options={companies.map(c => ({ id: c.id, label: c.companyName }))}
+                            placeholder="전체"
+                        />
+                    </div>
 
-            <h2>견적 등록</h2>
-            <select value={form.companyId} onChange={(e) => setForm({ ...form, companyId: Number(e.target.value) })}
-                disabled={editingId != null}>
-                <option value={0}>바이어 선택</option>
-                {companies.map((c) => (
-                    <option key={c.id} value={c.id}>{c.companyName}</option>
-                ))}
-            </select>
-            <select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
-                <option value="">통화 선택</option>
-                {currencies.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <select value={form.incoterms} onChange={(e) => setForm({ ...form, incoterms: e.target.value })}>
-                <option value="">인코텀즈 선택</option>
-                {incotermsList.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <select value={form.paymentTerm} onChange={(e) => setForm({ ...form, paymentTerm: e.target.value })}>
-                <option value="">결제조건 선택</option>
-                {paymentTerms.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <input
-                value={form.comment}
-                onChange={(e) => setForm({ ...form, comment: e.target.value })}
-                placeholder="코멘트"
-            />
+                    {/* Table */}
+                    <table className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
+                        <thead>
+                            <tr className="bg-gray-100 text-left text-sm text-gray-600">
+                                <th className="px-4 py-3">바이어명</th>
+                                <th className="px-4 py-3">국가</th>
+                                <th className="px-4 py-3">금액</th>
+                                <th className="px-4 py-3">등록일</th>
+                                <th className="px-4 py-3">특이사항</th>
+                                <th className="px-4 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {quotationList.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="px-4 py-8 text-center text-gray-400 text-sm">
+                                        견적 내역이 없습니다
+                                    </td>
+                                </tr>
+                            ) : (
+                                quotationList.map((quotation) => (
+                                    <tr key={quotation.id} className="border-t border-gray-200 hover:bg-gray-50">
+                                        <td className="px-4 py-3">{quotation.companyName}</td>
+                                        <td className="px-4 py-3">{quotation.companyCountry}</td>
+                                        <td className="px-4 py-3">{quotation.totalAmount.toLocaleString()} ({quotation.currency})</td>
+                                        <td className="px-4 py-3">{formatDateOnly(quotation.quotationDate)}</td>
+                                        <td className="px-4 py-3">{quotation.comment || '-'}</td>
+                                        <td className="px-4 py-3 flex gap-2">
+                                            <button onClick={() => { setEditingId(quotation.id); setView('edit'); }} className="text-blue-900 hover:underline">수정</button>
+                                            <button onClick={() => handleDelete(quotation.id)} className="text-red-600 hover:underline">삭제</button>
+                                            <button onClick={() => handleGenerateQuotation(quotation.id)} className="text-gray-600 hover:underline">견적서 발행</button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
 
-            <h3>품목 추가</h3>
-            <select value={currentItem.itemsId} onChange={(e) => setCurrentItem({ ...currentItem, itemsId: Number(e.target.value) })}>
-                <option value={0}>품목 선택</option>
-                {itemsList.map((item) => (
-                    <option key={item.id} value={item.id}>{item.productName}</option>
-                ))}
-            </select>
-            <input
-                type="number"
-                value={currentItem.quantity}
-                onChange={(e) => setCurrentItem({ ...currentItem, quantity: Number(e.target.value) })}
-                placeholder="수량"
-            />
-            <button onClick={handleAddItem}>품목 추가</button>
+                    {/* pagination */}
+                    <div className="flex justify-center gap-2 mb-8">
+                        <button
+                            onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                            disabled={currentPage === 0}
+                            className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                        >
+                            이전
+                        </button>
+                        <span className="px-3 py-1 text-sm text-gray-600">
+                            {currentPage + 1} / {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+                            disabled={currentPage >= totalPages - 1}
+                            className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                        >
+                            다음
+                        </button>
+                    </div>
+                </>
+            )}
 
-            <ul>
-                {form.items.map((item, index) => (
-                    <li key={index}>
-                        품목ID: {item.itemsId}, 수량: {item.quantity}
-                        <button onClick={() => handleRemoveItem(index)}>삭제</button>
-                    </li>
-                ))}
-            </ul>
+            {view === 'new' && (
+                <QuotationCreateForm onSuccess={() => { setView('list'); fetchQuotation(); }} />
+            )}
 
-            <button onClick={handleSubmit}>{editingId ? '수정하기' : '등록하기'}</button>
-
-            {/* Indicate cancel button when editing mode*/}
-            {editingId && (
-                <button onClick={() => {
-                    setEditingId(null);
-                    setForm({
-                        companyId: 0,
-                        currency: '',
-                        incoterms: '',
-                        paymentTerm: '',
-                        comment: '',
-                        items: []
-                    });
-                }}>
-                    수정 취소
-                </button>
+            {view === 'edit' && editingId && (
+                <QuotationEditForm quotationId={editingId} onSuccess={() => { setView('list'); fetchQuotation(); }} />
             )}
         </div>
     )
